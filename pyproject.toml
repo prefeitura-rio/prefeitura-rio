@@ -1,23 +1,48 @@
 [tool.poetry]
-name = "python-project-template"
-version = "0.1.0"
-description = "My own template for Python projects."
+name = "prefeitura-rio"
+version = "0.1.0a1"
+description = "Pacote Python que implementa utilidades para nossos projetos!"
 authors = ["Gabriel Gazola Milan <gabriel.gazola@poli.ufrj.br>"]
 license = "GPL-3.0-only"
 readme = "README.md"
-homepage = "https://github.com/gabriel-milan/python-project-template"
-repository = "https://github.com/gabriel-milan/python-project-template"
-keywords = ["python", "template"]
+homepage = "https://github.com/prefeitura-rio/prefeitura-rio"
+repository = "https://github.com/prefeitura-rio/prefeitura-rio"
+keywords = ["python", "utilities", "government"]
 
+#
+# Required dependencies
+#
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.9,<3.11"
 
-[tool.poetry.dev-dependencies]
+#
+# Development dependencies
+#
+numpy = "^1.23.3"
+[tool.poetry.group.dev.dependencies]
 black = "^22.3.0"
 pre-commit = "^2.18.1"
 pytest-cov = "^3.0.0"
 flake8 = "^4.0.1"
 pdoc3 = "^0.10.0"
+
+#
+# Dependency group for Tensorflow
+#
+[tool.poetry.group.tensorflow]
+optional = true
+
+[tool.poetry.group.tensorflow.dependencies]
+tensorflow = "^2.10.0"
+
+#
+# Dependency group for metrics
+#
+[tool.poetry.group.metrics]
+optional = true
+
+[tool.poetry.group.metrics.dependencies]
+scikit-learn = "^1.1.2"
 
 [tool.poetry.scripts]
 docs = "scripts.docs:main"
