@@ -4,19 +4,12 @@ Framework-agnotic metrics implementations for the prefeitura_rio package.
 Most of them can usually be imported from the `sklearn.metrics` module.
 """
 import numpy as np
-
-try:
-    from sklearn.metrics import (
-        brier_score_loss,
-        confusion_matrix,
-        fbeta_score,
-        mean_squared_error,
-    )
-except ImportError:
-    raise ImportError(
-        "Unmet dependencies for the `prefeitura_rio.metrics` submodules. "
-        "Please install the prefeitura-rio[metrics] extra."
-    )
+from sklearn.metrics import (
+    brier_score_loss,
+    confusion_matrix,
+    fbeta_score,
+    mean_squared_error,
+)
 
 
 def brier(
