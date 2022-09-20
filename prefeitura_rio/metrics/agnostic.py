@@ -148,11 +148,9 @@ def nash_sutcliffe(
     Returns:
         float: The Nash-Sutcliffe score.
     """
-    warnings.warn(
-        "The `nash_sutcliffe` metric is not implemented yet. Returning zero.",
-        UserWarning,
-    )
-    return 0.0
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+    return 1 - np.sum((y_true - y_pred) ** 2) / np.sum((y_true - np.mean(y_true)) ** 2)
 
 
 def pet(y_true, y_pred, *, sample_weight=None, multioutput="uniform_average"):

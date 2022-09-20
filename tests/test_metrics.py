@@ -21,7 +21,7 @@ expected_results = {
     "Carabetta": 0,
     "F-Beta": 2 / 3,
     "MSE": 0.1775,
-    "Nash-Sutcliffe": 0,
+    "Nash-Sutcliffe": 0.29,
     "PET": np.tanh(0.1775),
     "RMSE": np.sqrt(0.1775),
     "SP": 0.7282376575609851,
