@@ -4,6 +4,8 @@ Framework-agnotic metrics implementations for the prefeitura_rio package.
 Most of them can usually be imported from the `sklearn.metrics` module.
 """
 
+import warnings
+
 import numpy as np
 from sklearn.metrics import (
     brier_score_loss,
@@ -49,7 +51,11 @@ def carabetta(y_true, y_pred):
     Returns:
         float: The Carabetta score.
     """
-    raise NotImplementedError("The Carabetta score is not implemented yet.")
+    warnings.warn(
+        "The `carabetta` metric is not implemented yet. Returning zero.",
+        UserWarning,
+    )
+    return 0.0
 
 
 def fbeta(
@@ -142,7 +148,11 @@ def nash_sutcliffe(
     Returns:
         float: The Nash-Sutcliffe score.
     """
-    raise NotImplementedError("The Nash-Sutcliffe score is not implemented yet.")
+    warnings.warn(
+        "The `nash_sutcliffe` metric is not implemented yet. Returning zero.",
+        UserWarning,
+    )
+    return 0.0
 
 
 def pet(y_true, y_pred, *, sample_weight=None, multioutput="uniform_average"):
