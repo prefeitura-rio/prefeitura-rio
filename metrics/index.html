@@ -27,8 +27,7 @@
 performance of the models. The metrics are defined as functions that take
 the true and predicted values as input and return a single value.</p>
 <p>In the <code><a title="prefeitura_rio.metrics.agnostic" href="agnostic.html">prefeitura_rio.metrics.agnostic</a></code> module, we define metrics that are agnostic to any
-framework. In the <code><a title="prefeitura_rio.metrics.tensorflow" href="tensorflow.html">prefeitura_rio.metrics.tensorflow</a></code> module, we define metrics that leverage
-TensorFlow's backend.</p>
+framework.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -42,12 +41,60 @@ performance of the models. The metrics are defined as functions that take
 the true and predicted values as input and return a single value.
 
 In the `agnostic` module, we define metrics that are agnostic to any
-framework. In the `tensorflow` module, we define metrics that leverage
-TensorFlow&#39;s backend.
+framework.
 &#34;&#34;&#34;
+from typing import Callable, Dict
 
-from .agnostic import *
-from .tensorflow import *</code></pre>
+from .agnostic import (
+    brier,
+    carabetta,
+    fbeta,
+    mse,
+    nash_sutcliffe,
+    pet,
+    rmse,
+    sp,
+)
+
+
+def evaluate(
+    y_true,
+    y_pred,
+    *,
+    metrics: Dict[str, Callable] = None,
+    beta=1,
+    threshold=0.5,
+) -&gt; Dict[str, float]:
+    &#34;&#34;&#34;
+    Evaluates the performance of a model.
+
+    Args:
+        y_true (array-like): The true values.
+        y_pred (array-like): The predicted values.
+        metrics (dict, optional): A dictionary of metrics to be evaluated.
+            Defaults to `None`.
+        beta (int, optional): The beta value for the F-beta score. Defaults to
+            `1`.
+        threshold (float, optional): The threshold for the F-beta score.
+            Defaults to `0.5`.
+
+    Returns:
+        dict: A dictionary with the results of the metrics.
+    &#34;&#34;&#34;
+    if metrics is None:
+        metrics = {
+            &#34;Brier&#34;: brier,
+            &#34;Carabetta&#34;: carabetta,
+            &#34;F-Beta&#34;: lambda y_true, y_pred: fbeta(
+                y_true, y_pred, beta=beta, threshold=threshold
+            ),
+            &#34;MSE&#34;: mse,
+            &#34;Nash-Sutcliffe&#34;: nash_sutcliffe,
+            &#34;PET&#34;: pet,
+            &#34;RMSE&#34;: rmse,
+            &#34;SP&#34;: lambda y_true, y_pred: sp(y_true, y_pred, threshold=threshold),
+        }
+    return {name: func(y_true, y_pred) for name, func in metrics.items()}</code></pre>
 </details>
 </section>
 <section>
@@ -58,15 +105,84 @@ from .tensorflow import *</code></pre>
 <div class="desc"><p>Framework-agnotic metrics implementations for the prefeitura_rio package.
 Most of them can usually be imported from the <code>sklearn.metrics</code> module.</p></div>
 </dd>
-<dt><code class="name"><a title="prefeitura_rio.metrics.tensorflow" href="tensorflow.html">prefeitura_rio.metrics.tensorflow</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
 </dl>
 </section>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="prefeitura_rio.metrics.evaluate"><code class="name flex">
+<span>def <span class="ident">evaluate</span></span>(<span>y_true, y_pred, *, metrics: Dict[str, Callable] = None, beta=1, threshold=0.5) ‑> Dict[str, float]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Evaluates the performance of a model.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>y_true</code></strong> :&ensp;<code>array-like</code></dt>
+<dd>The true values.</dd>
+<dt><strong><code>y_pred</code></strong> :&ensp;<code>array-like</code></dt>
+<dd>The predicted values.</dd>
+<dt><strong><code>metrics</code></strong> :&ensp;<code>dict</code>, optional</dt>
+<dd>A dictionary of metrics to be evaluated.
+Defaults to <code>None</code>.</dd>
+<dt><strong><code>beta</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The beta value for the F-beta score. Defaults to
+<code>1</code>.</dd>
+<dt><strong><code>threshold</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>The threshold for the F-beta score.
+Defaults to <code>0.5</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>A dictionary with the results of the metrics.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def evaluate(
+    y_true,
+    y_pred,
+    *,
+    metrics: Dict[str, Callable] = None,
+    beta=1,
+    threshold=0.5,
+) -&gt; Dict[str, float]:
+    &#34;&#34;&#34;
+    Evaluates the performance of a model.
+
+    Args:
+        y_true (array-like): The true values.
+        y_pred (array-like): The predicted values.
+        metrics (dict, optional): A dictionary of metrics to be evaluated.
+            Defaults to `None`.
+        beta (int, optional): The beta value for the F-beta score. Defaults to
+            `1`.
+        threshold (float, optional): The threshold for the F-beta score.
+            Defaults to `0.5`.
+
+    Returns:
+        dict: A dictionary with the results of the metrics.
+    &#34;&#34;&#34;
+    if metrics is None:
+        metrics = {
+            &#34;Brier&#34;: brier,
+            &#34;Carabetta&#34;: carabetta,
+            &#34;F-Beta&#34;: lambda y_true, y_pred: fbeta(
+                y_true, y_pred, beta=beta, threshold=threshold
+            ),
+            &#34;MSE&#34;: mse,
+            &#34;Nash-Sutcliffe&#34;: nash_sutcliffe,
+            &#34;PET&#34;: pet,
+            &#34;RMSE&#34;: rmse,
+            &#34;SP&#34;: lambda y_true, y_pred: sp(y_true, y_pred, threshold=threshold),
+        }
+    return {name: func(y_true, y_pred) for name, func in metrics.items()}</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -85,7 +201,11 @@ Most of them can usually be imported from the <code>sklearn.metrics</code> modul
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
 <li><code><a title="prefeitura_rio.metrics.agnostic" href="agnostic.html">prefeitura_rio.metrics.agnostic</a></code></li>
-<li><code><a title="prefeitura_rio.metrics.tensorflow" href="tensorflow.html">prefeitura_rio.metrics.tensorflow</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="prefeitura_rio.metrics.evaluate" href="#prefeitura_rio.metrics.evaluate">evaluate</a></code></li>
 </ul>
 </li>
 </ul>

@@ -34,6 +34,9 @@ Most of them can usually be imported from the <code>sklearn.metrics</code> modul
 Framework-agnotic metrics implementations for the prefeitura_rio package.
 Most of them can usually be imported from the `sklearn.metrics` module.
 &#34;&#34;&#34;
+
+import warnings
+
 import numpy as np
 from sklearn.metrics import (
     brier_score_loss,
@@ -79,7 +82,11 @@ def carabetta(y_true, y_pred):
     Returns:
         float: The Carabetta score.
     &#34;&#34;&#34;
-    raise NotImplementedError(&#34;The Carabetta score is not implemented yet.&#34;)
+    warnings.warn(
+        &#34;The `carabetta` metric is not implemented yet. Returning zero.&#34;,
+        UserWarning,
+    )
+    return 0.0
 
 
 def fbeta(
@@ -92,6 +99,7 @@ def fbeta(
     average=&#34;binary&#34;,
     sample_weight=None,
     zero_division=&#34;warn&#34;,
+    threshold=None,
 ) -&gt; float:
     &#34;&#34;&#34;
     Computes the F-beta score.
@@ -108,20 +116,33 @@ def fbeta(
             `None`.
         zero_division (str, optional): The value to return when there is a
             zero division. Defaults to `&#39;warn&#39;`.
+        threshold (float, optional): The threshold to use when converting
+            `y_pred` to binary. Defaults to `None`.
 
     Returns:
         float: The F-beta score.
     &#34;&#34;&#34;
-    return fbeta_score(
-        y_true,
-        y_pred,
-        beta=beta,
-        labels=labels,
-        pos_label=pos_label,
-        average=average,
-        sample_weight=sample_weight,
-        zero_division=zero_division,
-    )
+    if threshold:
+        y_pred = np.array(y_pred) &gt; threshold
+    try:
+        return fbeta_score(
+            y_true,
+            y_pred,
+            beta=beta,
+            labels=labels,
+            pos_label=pos_label,
+            average=average,
+            sample_weight=sample_weight,
+            zero_division=zero_division,
+        )
+    except ValueError as exc:
+        # Check for exception message
+        if &#34;mix of binary and continuous&#34; in str(exc):
+            raise ValueError(
+                &#34;`y_true` and `y_pred` must be binary. If your `y_pred` is not&#34;
+                &#34; binary, try setting the `threshold` parameter.&#34;
+            ) from exc
+        raise exc
 
 
 def mse(y_true, y_pred, *, sample_weight=None, multioutput=&#34;uniform_average&#34;):
@@ -158,7 +179,11 @@ def nash_sutcliffe(
     Returns:
         float: The Nash-Sutcliffe score.
     &#34;&#34;&#34;
-    raise NotImplementedError(&#34;The Nash-Sutcliffe score is not implemented yet.&#34;)
+    warnings.warn(
+        &#34;The `nash_sutcliffe` metric is not implemented yet. Returning zero.&#34;,
+        UserWarning,
+    )
+    return 0.0
 
 
 def pet(y_true, y_pred, *, sample_weight=None, multioutput=&#34;uniform_average&#34;):
@@ -212,6 +237,7 @@ def sp(
     labels=None,
     sample_weight=None,
     normalize=None,
+    threshold=None,
 ):
     &#34;&#34;&#34;
     Computes the SP score.
@@ -227,23 +253,38 @@ def sp(
         normalize (str, optional): Normalizes confusion matrix over the true (rows), predicted
             (columns) conditions or all the population. If None, confusion matrix will not be
             normalized.
+        threshold (float, optional): The threshold to use when converting
+            `y_pred` to binary. Defaults to `None`.
 
     Returns:
         float: The SP score.
     &#34;&#34;&#34;
-    conf_matrix = confusion_matrix(
-        y_true, y_pred, labels=labels, sample_weight=sample_weight, normalize=normalize
-    )
-    false_positive = conf_matrix.sum(axis=0) - np.diag(conf_matrix)
-    false_negative = conf_matrix.sum(axis=1) - np.diag(conf_matrix)
-    true_positive = np.diag(conf_matrix)
-    true_negative = conf_matrix.sum() - (
-        false_positive + false_negative + true_positive
-    )
-    fa = false_positive / (true_negative + false_positive + np.finfo(float).eps)
-    pd = true_positive / (true_positive + false_negative + np.finfo(float).eps)
-    sp = np.sqrt(np.sqrt(pd * (1 - fa)) * (0.5 * (pd + (1 - fa))))
-    return sp</code></pre>
+    if threshold:
+        y_pred = np.array(y_pred) &gt; threshold
+    try:
+        conf_matrix = confusion_matrix(
+            y_true,
+            y_pred,
+            labels=labels,
+            sample_weight=sample_weight,
+            normalize=normalize,
+        )
+        true_negative = conf_matrix[0][0]
+        false_negative = conf_matrix[1][0]
+        true_positive = conf_matrix[1][1]
+        false_positive = conf_matrix[0][1]
+        fa = false_positive / (true_negative + false_positive + np.finfo(float).eps)
+        pd = true_positive / (true_positive + false_negative + np.finfo(float).eps)
+        sp = np.sqrt(np.sqrt(pd * (1 - fa)) * (0.5 * (pd + (1 - fa))))
+        return sp
+    except ValueError as exc:
+        # Check for exception message
+        if &#34;mix of binary and continuous&#34; in str(exc):
+            raise ValueError(
+                &#34;`y_true` and `y_pred` must be binary. If your `y_pred` is not&#34;
+                &#34; binary, try setting the `threshold` parameter.&#34;
+            ) from exc
+        raise exc</code></pre>
 </details>
 </section>
 <section>
@@ -336,11 +377,15 @@ def sp(
     Returns:
         float: The Carabetta score.
     &#34;&#34;&#34;
-    raise NotImplementedError(&#34;The Carabetta score is not implemented yet.&#34;)</code></pre>
+    warnings.warn(
+        &#34;The `carabetta` metric is not implemented yet. Returning zero.&#34;,
+        UserWarning,
+    )
+    return 0.0</code></pre>
 </details>
 </dd>
 <dt id="prefeitura_rio.metrics.agnostic.fbeta"><code class="name flex">
-<span>def <span class="ident">fbeta</span></span>(<span>y_true, y_pred, *, beta, labels=None, pos_label=1, average='binary', sample_weight=None, zero_division='warn') ‑> float</span>
+<span>def <span class="ident">fbeta</span></span>(<span>y_true, y_pred, *, beta, labels=None, pos_label=1, average='binary', sample_weight=None, zero_division='warn', threshold=None) ‑> float</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Computes the F-beta score.</p>
@@ -365,6 +410,9 @@ labels are considered. Defaults to <code>None</code>.</dd>
 <dt><strong><code>zero_division</code></strong> :&ensp;<code>str</code>, optional</dt>
 <dd>The value to return when there is a
 zero division. Defaults to <code>'warn'</code>.</dd>
+<dt><strong><code>threshold</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>The threshold to use when converting
+<code>y_pred</code> to binary. Defaults to <code>None</code>.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -385,6 +433,7 @@ zero division. Defaults to <code>'warn'</code>.</dd>
     average=&#34;binary&#34;,
     sample_weight=None,
     zero_division=&#34;warn&#34;,
+    threshold=None,
 ) -&gt; float:
     &#34;&#34;&#34;
     Computes the F-beta score.
@@ -401,20 +450,33 @@ zero division. Defaults to <code>'warn'</code>.</dd>
             `None`.
         zero_division (str, optional): The value to return when there is a
             zero division. Defaults to `&#39;warn&#39;`.
+        threshold (float, optional): The threshold to use when converting
+            `y_pred` to binary. Defaults to `None`.
 
     Returns:
         float: The F-beta score.
     &#34;&#34;&#34;
-    return fbeta_score(
-        y_true,
-        y_pred,
-        beta=beta,
-        labels=labels,
-        pos_label=pos_label,
-        average=average,
-        sample_weight=sample_weight,
-        zero_division=zero_division,
-    )</code></pre>
+    if threshold:
+        y_pred = np.array(y_pred) &gt; threshold
+    try:
+        return fbeta_score(
+            y_true,
+            y_pred,
+            beta=beta,
+            labels=labels,
+            pos_label=pos_label,
+            average=average,
+            sample_weight=sample_weight,
+            zero_division=zero_division,
+        )
+    except ValueError as exc:
+        # Check for exception message
+        if &#34;mix of binary and continuous&#34; in str(exc):
+            raise ValueError(
+                &#34;`y_true` and `y_pred` must be binary. If your `y_pred` is not&#34;
+                &#34; binary, try setting the `threshold` parameter.&#34;
+            ) from exc
+        raise exc</code></pre>
 </details>
 </dd>
 <dt id="prefeitura_rio.metrics.agnostic.mse"><code class="name flex">
@@ -499,7 +561,11 @@ zero division. Defaults to <code>'warn'</code>.</dd>
     Returns:
         float: The Nash-Sutcliffe score.
     &#34;&#34;&#34;
-    raise NotImplementedError(&#34;The Nash-Sutcliffe score is not implemented yet.&#34;)</code></pre>
+    warnings.warn(
+        &#34;The `nash_sutcliffe` metric is not implemented yet. Returning zero.&#34;,
+        UserWarning,
+    )
+    return 0.0</code></pre>
 </details>
 </dd>
 <dt id="prefeitura_rio.metrics.agnostic.pet"><code class="name flex">
@@ -601,7 +667,7 @@ zero division. Defaults to <code>'warn'</code>.</dd>
 </details>
 </dd>
 <dt id="prefeitura_rio.metrics.agnostic.sp"><code class="name flex">
-<span>def <span class="ident">sp</span></span>(<span>y_true, y_pred, *, labels=None, sample_weight=None, normalize=None)</span>
+<span>def <span class="ident">sp</span></span>(<span>y_true, y_pred, *, labels=None, sample_weight=None, normalize=None, threshold=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Computes the SP score.</p>
@@ -622,6 +688,9 @@ once in y_true or y_pred are used in sorted order.</dd>
 <dd>Normalizes confusion matrix over the true (rows), predicted
 (columns) conditions or all the population. If None, confusion matrix will not be
 normalized.</dd>
+<dt><strong><code>threshold</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>The threshold to use when converting
+<code>y_pred</code> to binary. Defaults to <code>None</code>.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -639,6 +708,7 @@ normalized.</dd>
     labels=None,
     sample_weight=None,
     normalize=None,
+    threshold=None,
 ):
     &#34;&#34;&#34;
     Computes the SP score.
@@ -654,23 +724,38 @@ normalized.</dd>
         normalize (str, optional): Normalizes confusion matrix over the true (rows), predicted
             (columns) conditions or all the population. If None, confusion matrix will not be
             normalized.
+        threshold (float, optional): The threshold to use when converting
+            `y_pred` to binary. Defaults to `None`.
 
     Returns:
         float: The SP score.
     &#34;&#34;&#34;
-    conf_matrix = confusion_matrix(
-        y_true, y_pred, labels=labels, sample_weight=sample_weight, normalize=normalize
-    )
-    false_positive = conf_matrix.sum(axis=0) - np.diag(conf_matrix)
-    false_negative = conf_matrix.sum(axis=1) - np.diag(conf_matrix)
-    true_positive = np.diag(conf_matrix)
-    true_negative = conf_matrix.sum() - (
-        false_positive + false_negative + true_positive
-    )
-    fa = false_positive / (true_negative + false_positive + np.finfo(float).eps)
-    pd = true_positive / (true_positive + false_negative + np.finfo(float).eps)
-    sp = np.sqrt(np.sqrt(pd * (1 - fa)) * (0.5 * (pd + (1 - fa))))
-    return sp</code></pre>
+    if threshold:
+        y_pred = np.array(y_pred) &gt; threshold
+    try:
+        conf_matrix = confusion_matrix(
+            y_true,
+            y_pred,
+            labels=labels,
+            sample_weight=sample_weight,
+            normalize=normalize,
+        )
+        true_negative = conf_matrix[0][0]
+        false_negative = conf_matrix[1][0]
+        true_positive = conf_matrix[1][1]
+        false_positive = conf_matrix[0][1]
+        fa = false_positive / (true_negative + false_positive + np.finfo(float).eps)
+        pd = true_positive / (true_positive + false_negative + np.finfo(float).eps)
+        sp = np.sqrt(np.sqrt(pd * (1 - fa)) * (0.5 * (pd + (1 - fa))))
+        return sp
+    except ValueError as exc:
+        # Check for exception message
+        if &#34;mix of binary and continuous&#34; in str(exc):
+            raise ValueError(
+                &#34;`y_true` and `y_pred` must be binary. If your `y_pred` is not&#34;
+                &#34; binary, try setting the `threshold` parameter.&#34;
+            ) from exc
+        raise exc</code></pre>
 </details>
 </dd>
 </dl>
