@@ -1,3 +1,3 @@
-# Python Project Template
+# prefeitura-rio
 
-My template for a Python project.
+Um pacote Python que implementa utilidades para nossos projetos!

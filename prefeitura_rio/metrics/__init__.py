@@ -10,3 +10,6 @@ In the `agnostic` module, we define metrics that are agnostic to any
 framework. In the `tensorflow` module, we define metrics that leverage
 TensorFlow's backend.
 """
+
+from .agnostic import *
+from .tensorflow import *
