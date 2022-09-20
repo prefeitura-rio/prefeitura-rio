@@ -71,22 +71,24 @@ def brier(
     )
 
 
-def carabetta(y_true, y_pred):
+def carabetta(y_true, y_pred, alpha=5, beta=2):
     &#34;&#34;&#34;
     Computes the Carabetta score.
 
     Args:
         y_true (array-like): The true values.
         y_pred (array-like): The predicted values.
+        alpha (float, optional): The alpha coefficient, which controls the weight of false-negatives
+            in the score. Defaults to `5`.
+        beta (float, optional): The beta coefficient, which controls the weight of false-positives
+            in the score. Defaults to `2`.
 
     Returns:
         float: The Carabetta score.
     &#34;&#34;&#34;
-    warnings.warn(
-        &#34;The `carabetta` metric is not implemented yet. Returning zero.&#34;,
-        UserWarning,
-    )
-    return 0.0
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+    return np.sum(alpha * y_true * (1 - y_pred) + beta * (1 - y_true) * y_pred)
 
 
 def fbeta(
@@ -344,7 +346,7 @@ def sp(
 </details>
 </dd>
 <dt id="prefeitura_rio.metrics.agnostic.carabetta"><code class="name flex">
-<span>def <span class="ident">carabetta</span></span>(<span>y_true, y_pred)</span>
+<span>def <span class="ident">carabetta</span></span>(<span>y_true, y_pred, alpha=5, beta=2)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Computes the Carabetta score.</p>
@@ -354,6 +356,12 @@ def sp(
 <dd>The true values.</dd>
 <dt><strong><code>y_pred</code></strong> :&ensp;<code>array-like</code></dt>
 <dd>The predicted values.</dd>
+<dt><strong><code>alpha</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>The alpha coefficient, which controls the weight of false-negatives
+in the score. Defaults to <code>5</code>.</dd>
+<dt><strong><code>beta</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>The beta coefficient, which controls the weight of false-positives
+in the score. Defaults to <code>2</code>.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -364,22 +372,24 @@ def sp(
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def carabetta(y_true, y_pred):
+<pre><code class="python">def carabetta(y_true, y_pred, alpha=5, beta=2):
     &#34;&#34;&#34;
     Computes the Carabetta score.
 
     Args:
         y_true (array-like): The true values.
         y_pred (array-like): The predicted values.
+        alpha (float, optional): The alpha coefficient, which controls the weight of false-negatives
+            in the score. Defaults to `5`.
+        beta (float, optional): The beta coefficient, which controls the weight of false-positives
+            in the score. Defaults to `2`.
 
     Returns:
         float: The Carabetta score.
     &#34;&#34;&#34;
-    warnings.warn(
-        &#34;The `carabetta` metric is not implemented yet. Returning zero.&#34;,
-        UserWarning,
-    )
-    return 0.0</code></pre>
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+    return np.sum(alpha * y_true * (1 - y_pred) + beta * (1 - y_true) * y_pred)</code></pre>
 </details>
 </dd>
 <dt id="prefeitura_rio.metrics.agnostic.fbeta"><code class="name flex">
