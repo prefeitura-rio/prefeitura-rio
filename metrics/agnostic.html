@@ -179,11 +179,9 @@ def nash_sutcliffe(
     Returns:
         float: The Nash-Sutcliffe score.
     &#34;&#34;&#34;
-    warnings.warn(
-        &#34;The `nash_sutcliffe` metric is not implemented yet. Returning zero.&#34;,
-        UserWarning,
-    )
-    return 0.0
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+    return 1 - np.sum((y_true - y_pred) ** 2) / np.sum((y_true - np.mean(y_true)) ** 2)
 
 
 def pet(y_true, y_pred, *, sample_weight=None, multioutput=&#34;uniform_average&#34;):
@@ -561,11 +559,9 @@ zero division. Defaults to <code>'warn'</code>.</dd>
     Returns:
         float: The Nash-Sutcliffe score.
     &#34;&#34;&#34;
-    warnings.warn(
-        &#34;The `nash_sutcliffe` metric is not implemented yet. Returning zero.&#34;,
-        UserWarning,
-    )
-    return 0.0</code></pre>
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+    return 1 - np.sum((y_true - y_pred) ** 2) / np.sum((y_true - np.mean(y_true)) ** 2)</code></pre>
 </details>
 </dd>
 <dt id="prefeitura_rio.metrics.agnostic.pet"><code class="name flex">
