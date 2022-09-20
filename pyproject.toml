@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "python-project-template"
+version = "0.1.0"
+description = "My own template for Python projects."
+authors = ["Gabriel Gazola Milan <gabriel.gazola@poli.ufrj.br>"]
+license = "GPL-3.0-only"
+readme = "README.md"
+homepage = "https://github.com/gabriel-milan/python-project-template"
+repository = "https://github.com/gabriel-milan/python-project-template"
+keywords = ["python", "template"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+black = "^22.3.0"
+pre-commit = "^2.18.1"
+pytest-cov = "^3.0.0"
+flake8 = "^4.0.1"
+pdoc3 = "^0.10.0"
+
+[tool.poetry.scripts]
+docs = "scripts.docs:main"
+lint = "scripts.lint:main"
+test = "scripts.test:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
