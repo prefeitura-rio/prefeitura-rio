@@ -18,7 +18,7 @@ sample_y_pred = np.array([0.1, 0.4, 0.7, 0.5])
 
 expected_results = {
     "Brier": 0.1775,
-    "Carabetta": 0,
+    "Carabetta": 5.7,
     "F-Beta": 2 / 3,
     "MSE": 0.1775,
     "Nash-Sutcliffe": 0.29,

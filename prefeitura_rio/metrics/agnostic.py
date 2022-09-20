@@ -40,22 +40,24 @@ def brier(
     )
 
 
-def carabetta(y_true, y_pred):
+def carabetta(y_true, y_pred, alpha=5, beta=2):
     """
     Computes the Carabetta score.
 
     Args:
         y_true (array-like): The true values.
         y_pred (array-like): The predicted values.
+        alpha (float, optional): The alpha coefficient, which controls the weight of false-negatives
+            in the score. Defaults to `5`.
+        beta (float, optional): The beta coefficient, which controls the weight of false-positives
+            in the score. Defaults to `2`.
 
     Returns:
         float: The Carabetta score.
     """
-    warnings.warn(
-        "The `carabetta` metric is not implemented yet. Returning zero.",
-        UserWarning,
-    )
-    return 0.0
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+    return np.sum(alpha * y_true * (1 - y_pred) + beta * (1 - y_true) * y_pred)
 
 
 def fbeta(
