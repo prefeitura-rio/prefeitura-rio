@@ -12,4 +12,3 @@ TensorFlow's backend.
 """
 
 from .agnostic import *
-from .tensorflow import *

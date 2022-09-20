@@ -3,6 +3,7 @@
 Framework-agnotic metrics implementations for the prefeitura_rio package.
 Most of them can usually be imported from the `sklearn.metrics` module.
 """
+
 import numpy as np
 from sklearn.metrics import (
     brier_score_loss,
@@ -61,6 +62,7 @@ def fbeta(
     average="binary",
     sample_weight=None,
     zero_division="warn",
+    threshold=None,
 ) -> float:
     """
     Computes the F-beta score.
@@ -77,20 +79,33 @@ def fbeta(
             `None`.
         zero_division (str, optional): The value to return when there is a
             zero division. Defaults to `'warn'`.
+        threshold (float, optional): The threshold to use when converting
+            `y_pred` to binary. Defaults to `None`.
 
     Returns:
         float: The F-beta score.
     """
-    return fbeta_score(
-        y_true,
-        y_pred,
-        beta=beta,
-        labels=labels,
-        pos_label=pos_label,
-        average=average,
-        sample_weight=sample_weight,
-        zero_division=zero_division,
-    )
+    if threshold:
+        y_pred = np.array(y_pred) > threshold
+    try:
+        return fbeta_score(
+            y_true,
+            y_pred,
+            beta=beta,
+            labels=labels,
+            pos_label=pos_label,
+            average=average,
+            sample_weight=sample_weight,
+            zero_division=zero_division,
+        )
+    except ValueError as exc:
+        # Check for exception message
+        if "mix of binary and continuous" in str(exc):
+            raise ValueError(
+                "`y_true` and `y_pred` must be binary. If your `y_pred` is not"
+                " binary, try setting the `threshold` parameter."
+            ) from exc
+        raise exc
 
 
 def mse(y_true, y_pred, *, sample_weight=None, multioutput="uniform_average"):
@@ -181,6 +196,7 @@ def sp(
     labels=None,
     sample_weight=None,
     normalize=None,
+    threshold=None,
 ):
     """
     Computes the SP score.
@@ -196,20 +212,35 @@ def sp(
         normalize (str, optional): Normalizes confusion matrix over the true (rows), predicted
             (columns) conditions or all the population. If None, confusion matrix will not be
             normalized.
+        threshold (float, optional): The threshold to use when converting
+            `y_pred` to binary. Defaults to `None`.
 
     Returns:
         float: The SP score.
     """
-    conf_matrix = confusion_matrix(
-        y_true, y_pred, labels=labels, sample_weight=sample_weight, normalize=normalize
-    )
-    false_positive = conf_matrix.sum(axis=0) - np.diag(conf_matrix)
-    false_negative = conf_matrix.sum(axis=1) - np.diag(conf_matrix)
-    true_positive = np.diag(conf_matrix)
-    true_negative = conf_matrix.sum() - (
-        false_positive + false_negative + true_positive
-    )
-    fa = false_positive / (true_negative + false_positive + np.finfo(float).eps)
-    pd = true_positive / (true_positive + false_negative + np.finfo(float).eps)
-    sp = np.sqrt(np.sqrt(pd * (1 - fa)) * (0.5 * (pd + (1 - fa))))
-    return sp
+    if threshold:
+        y_pred = np.array(y_pred) > threshold
+    try:
+        conf_matrix = confusion_matrix(
+            y_true,
+            y_pred,
+            labels=labels,
+            sample_weight=sample_weight,
+            normalize=normalize,
+        )
+        true_negative = conf_matrix[0][0]
+        false_negative = conf_matrix[1][0]
+        true_positive = conf_matrix[1][1]
+        false_positive = conf_matrix[0][1]
+        fa = false_positive / (true_negative + false_positive + np.finfo(float).eps)
+        pd = true_positive / (true_positive + false_negative + np.finfo(float).eps)
+        sp = np.sqrt(np.sqrt(pd * (1 - fa)) * (0.5 * (pd + (1 - fa))))
+        return sp
+    except ValueError as exc:
+        # Check for exception message
+        if "mix of binary and continuous" in str(exc):
+            raise ValueError(
+                "`y_true` and `y_pred` must be binary. If your `y_pred` is not"
+                " binary, try setting the `threshold` parameter."
+            ) from exc
+        raise exc
