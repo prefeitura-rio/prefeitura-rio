@@ -13,6 +13,10 @@ keywords = ["python", "utilities", "government"]
 python = ">=3.9,<3.11"
 numpy = "^1.23.3"
 scikit-learn = "^1.1.2"
+loguru = "^0.7.0"
+requests = "^2.31.0"
+pendulum = "^2.1.2"
+pytz = "^2023.3"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.3.0"
