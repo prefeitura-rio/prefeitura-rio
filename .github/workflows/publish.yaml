@@ -23,7 +23,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.arch }}
       - name: Install dependencies
-        run: pip install poetry && poetry install --with tensorflow --with metrics
+        run: pip install poetry && poetry install
       - name: Run tests
         run: |
           poetry run pytest
