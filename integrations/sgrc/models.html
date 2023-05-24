@@ -1,0 +1,1165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>prefeitura_rio.integrations.sgrc.models API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>prefeitura_rio.integrations.sgrc.models</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># -*- coding: utf-8 -*-
+from typing import Any, Dict, List, Union
+
+
+class SGRCModel:
+
+    _attrs_dict = {}
+
+    def to_dict(self):
+        data = {}
+        for k, v in self._attrs_dict.items():
+            # Cast v to the type of the attribute
+            if issubclass(v[1], SGRCModel):
+                v = getattr(self, v[0]).to_dict()
+            elif issubclass(v[1], list):
+                # Get type of list elements
+                try:
+                    list_type = type(getattr(self, v[0])[0])
+                except IndexError:
+                    # Empty list
+                    list_type = type(None)
+                # Cast each element of the list to the type of the attribute
+                if issubclass(list_type, SGRCModel):
+                    v = [i.to_dict() for i in getattr(self, v[0])]
+                else:
+                    v = [list_type(i) for i in getattr(self, v[0])]
+            else:
+                v = getattr(self, v[0])
+            # Get actual key
+            k = k
+            data[k] = v
+        return data
+
+    def __str__(self):
+        class_name = self.__class__.__name__
+        attrs = &#34;, &#34;.join([f&#34;{k}={v}&#34; for k, v in self.to_dict().items()])
+        return f&#34;{class_name}({attrs})&#34;
+
+    def __repr__(self) -&gt; str:
+        return str(self)
+
+    def __getitem__(self, key):
+        actual_key = self._attrs_dict[key][0]
+        return getattr(self, actual_key)
+
+    def __setitem__(self, key, value):
+        actual_key = self._attrs_dict[key][0]
+        return setattr(self, actual_key, value)
+
+
+class SpecificAttribute(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing &#34;atributoEspecifico&#34;.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;nomeAtributoEspecifico&#34;: (&#34;name&#34;, str),
+        &#34;valorAtributoEspecifico&#34;: (&#34;value&#34;, str),
+    }
+
+    def __init__(self, name: str, value: str):
+        self.name = name
+        self.value = value
+
+
+class Address(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing &#34;Endereco&#34;.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;localidade&#34;: (&#34;locality&#34;, str),
+        &#34;codigoLogradouro&#34;: (&#34;street_code&#34;, str),
+        &#34;logradouro&#34;: (&#34;street&#34;, str),
+        &#34;numero&#34;: (&#34;number&#34;, str),
+        &#34;codigoBairro&#34;: (&#34;neighborhood_code&#34;, str),
+        &#34;bairro&#34;: (&#34;neighborhood&#34;, str),
+        &#34;complemento&#34;: (&#34;complement&#34;, str),
+        &#34;cep&#34;: (&#34;zip_code&#34;, str),
+        &#34;coordenadaX&#34;: (&#34;x_coordinate&#34;, str),
+        &#34;coordenadaY&#34;: (&#34;y_coordinate&#34;, str),
+        &#34;urlFoto&#34;: (&#34;photo_url&#34;, str),
+    }
+
+    def __init__(
+        self,
+        locality: str = None,
+        street_code: str = None,
+        street: str = None,
+        number: str = None,
+        neighborhood_code: str = None,
+        neighborhood: str = None,
+        complement: str = None,
+        zip_code: str = None,
+        x_coordinate: str = None,
+        y_coordinate: str = None,
+        photo_url: str = None,
+    ):
+        self.locality = locality or &#34;&#34;
+        self.street_code = street_code or &#34;&#34;
+        self.street = street or &#34;&#34;
+        self.number = number or &#34;&#34;
+        self.neighborhood_code = neighborhood_code or &#34;&#34;
+        self.neighborhood = neighborhood or &#34;&#34;
+        self.complement = complement or &#34;&#34;
+        self.zip_code = zip_code or &#34;&#34;
+        self.x_coordinate = x_coordinate or &#34;&#34;
+        self.y_coordinate = y_coordinate or &#34;&#34;
+        self.photo_url = photo_url or &#34;&#34;
+
+
+class Phones(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing &#34;Telefones&#34;.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;telefoneR&#34;: (&#34;mobile_phone&#34;, str),
+        &#34;telefone1&#34;: (&#34;residential_phone&#34;, str),
+        &#34;telefone2&#34;: (&#34;other_phone&#34;, str),
+    }
+
+    def __init__(
+        self,
+        mobile_phone: str = None,
+        residential_phone: str = None,
+        other_phone: str = None,
+    ):
+        self.mobile_phone = mobile_phone or &#34;&#34;
+        self.residential_phone = residential_phone or &#34;&#34;
+        self.other_phone = other_phone or &#34;&#34;
+
+
+class Classification(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing &#34;classificacao&#34;.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;codigoCategoria&#34;: (&#34;category_code&#34;, str),
+        &#34;categoria&#34;: (&#34;category&#34;, str),
+        &#34;codigoTipo&#34;: (&#34;type_code&#34;, str),
+        &#34;tipo&#34;: (&#34;type&#34;, str),
+        &#34;codigoSubtipo&#34;: (&#34;subtype_code&#34;, str),
+        &#34;subtipo&#34;: (&#34;subtype&#34;, str),
+    }
+
+    def __init__(
+        self,
+        category_code: str,
+        category: str,
+        type_code: str,
+        type: str,
+        subtype_code: str,
+        subtype: str,
+    ):
+        self.category_code = category_code
+        self.category = category
+        self.type_code = type_code
+        self.type = type
+        self.subtype_code = subtype_code
+        self.subtype = subtype
+
+
+class Progress(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing &#34;andamento&#34;.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;dataInsercao&#34;: (&#34;insertion_date&#34;, str),
+        &#34;status&#34;: (&#34;status&#34;, str),
+        &#34;motivoJustificativa&#34;: (&#34;reason&#34;, str),
+        &#34;description&#34;: (&#34;description&#34;, str),
+    }
+
+    def __init__(
+        self,
+        insertion_date: str,
+        status: str,
+        reason: str,
+        description: str,
+    ):
+        self.insertion_date = insertion_date
+        self.status = status
+        self.reason = reason
+        self.description = description
+
+
+class Reclassification(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing &#34;reclassificacao&#34;.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;dataReclassificacao&#34;: (&#34;reclassification_date&#34;, str),
+        &#34;tipoAnterior&#34;: (&#34;previous_type&#34;, str),
+        &#34;subTipoAnterior&#34;: (&#34;previous_subtype&#34;, str),
+        &#34;tipoNovo&#34;: (&#34;new_type&#34;, str),
+        &#34;subTipoNovo&#34;: (&#34;new_subtype&#34;, str),
+        &#34;justificativa&#34;: (&#34;reason&#34;, str),
+        &#34;previsaoAnteriorSLA&#34;: (&#34;previous_sla_forecast&#34;, str),
+    }
+
+    def __init__(
+        self,
+        reclassification_date: str,
+        previous_type: str,
+        previous_subtype: str,
+        new_type: str,
+        new_subtype: str,
+        reason: str,
+        previous_sla_forecast: str,
+    ):
+        self.reclassification_date = reclassification_date
+        self.previous_type = previous_type
+        self.previous_subtype = previous_subtype
+        self.new_type = new_type
+        self.new_subtype = new_subtype
+        self.reason = reason
+        self.previous_sla_forecast = previous_sla_forecast
+
+
+class Diagnosis(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing &#34;diagnostico&#34;.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;dataDiagnostico&#34;: (&#34;diagnosis_date&#34;, str),
+        &#34;previsaoAtendimento&#34;: (&#34;forecast&#34;, str),
+        &#34;status&#34;: (&#34;status&#34;, str),
+        &#34;motivoJustificativa&#34;: (&#34;reason&#34;, str),
+        &#34;descricao&#34;: (&#34;description&#34;, str),
+    }
+
+    def __init__(
+        self,
+        diagnosis_date: str,
+        forecast: str,
+        status: str,
+        reason: str,
+        description: str,
+    ):
+        self.diagnosis_date = diagnosis_date
+        self.forecast = forecast
+        self.status = status
+        self.reason = reason
+        self.description = description
+
+
+class Requester(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing &#34;solicitantePortalWeb&#34;.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;nome&#34;: (&#34;name&#34;, str),
+        &#34;email&#34;: (&#34;email&#34;, str),
+        &#34;codigoIdioma&#34;: (&#34;language_code&#34;, str),
+        &#34;codigoPaisDDI&#34;: (&#34;country_code&#34;, str),
+        &#34;cpf&#34;: (&#34;cpf&#34;, str),
+        &#34;identidade&#34;: (&#34;identity&#34;, str),
+        &#34;sexo&#34;: (&#34;gender&#34;, str),
+        &#34;dataNascimento&#34;: (&#34;birth_date&#34;, str),
+        &#34;endereco&#34;: (&#34;address&#34;, Address),
+        &#34;telefones&#34;: (&#34;phones&#34;, Phones),
+    }
+
+    def __init__(
+        self,
+        name: str = None,
+        email: str = None,
+        language_code: str = None,
+        country_code: str = None,
+        cpf: str = None,
+        identity: str = None,
+        gender: str = None,
+        birth_date: str = None,
+        address: Address = None,
+        phones: Phones = None,
+    ):
+        self.name = name or &#34;&#34;
+        self.email = email or &#34;&#34;
+        self.language_code = language_code or &#34;&#34;
+        self.country_code = country_code or &#34;&#34;
+        self.cpf = cpf or &#34;&#34;
+        self.identity = identity or &#34;&#34;
+        self.gender = gender or &#34;&#34;
+        self.birth_date = birth_date or &#34;&#34;
+        self.address = address or Address()
+        self.phones = phones or Phones()
+
+
+class NewTicket(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing the response from the &#34;new ticket&#34; endpoint.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;protocolo&#34;: (&#34;protocol_id&#34;, str),
+        &#34;codigoChamado&#34;: (&#34;ticket_id&#34;, str),
+    }
+
+    def __init__(self, protocol_id: str, ticket_id: str):
+        self.protocol_id = protocol_id
+        self.ticket_id = ticket_id
+
+
+class TicketSummary(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing the summary of a ticket.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;codigoChamado&#34;: (&#34;ticket_id&#34;, str),
+        &#34;categoria&#34;: (&#34;category&#34;, str),
+        &#34;tipo&#34;: (&#34;type&#34;, str),
+        &#34;subTipo&#34;: (&#34;subtype&#34;, str),
+        &#34;descricao&#34;: (&#34;description&#34;, str),
+        &#34;status&#34;: (&#34;status&#34;, str),
+    }
+
+    def __init__(
+        self,
+        ticket_id: str,
+        category: str,
+        type: str,
+        subtype: str,
+        description: str,
+        status: str,
+    ):
+        self.ticket_id = ticket_id
+        self.category = category
+        self.type = type
+        self.subtype = subtype
+        self.description = description
+        self.status = status
+
+
+class Ticket(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing the ticket information.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;codigoChamado&#34;: (&#34;ticket_id&#34;, str),
+        &#34;unidadeOrganizacional&#34;: (&#34;organizational_unit&#34;, str),
+        &#34;dataHora&#34;: (&#34;date_time&#34;, str),
+        &#34;classificacao&#34;: (&#34;classification&#34;, Classification),
+        &#34;endereco&#34;: (&#34;address&#34;, Address),
+        &#34;status&#34;: (&#34;status&#34;, str),
+    }
+
+    def __init__(
+        self,
+        ticket_id: str,
+        organizational_unit: str,
+        date_time: str,
+        classification: Classification,
+        address: Address,
+        status: str,
+    ):
+        self.ticket_id = ticket_id
+        self.organizational_unit = organizational_unit
+        self.date_time = date_time
+        self.classification = classification
+        self.address = address
+        self.status = status
+
+
+class TicketDetails(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing the ticket details.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;codigoChamado&#34;: (&#34;ticket_id&#34;, str),
+        &#34;unidadeOrganizacional&#34;: (&#34;organizational_unit&#34;, str),
+        &#34;dataAbertura&#34;: (&#34;opening_date&#34;, str),
+        &#34;previsaoSLA&#34;: (&#34;sla_forecast&#34;, str),
+        &#34;classificacao&#34;: (&#34;classification&#34;, Classification),
+        &#34;descricao&#34;: (&#34;description&#34;, str),
+        &#34;endereco&#34;: (&#34;address&#34;, Address),
+        &#34;status&#34;: (&#34;status&#34;, str),
+        &#34;andamentos&#34;: (&#34;progresses&#34;, list),
+        &#34;reclassificacoes&#34;: (&#34;reclassifications&#34;, list),
+        &#34;diagnosticosProgramados&#34;: (&#34;scheduled_diagnosis&#34;, list),
+    }
+
+    def __init__(
+        self,
+        ticket_id: str,
+        organizational_unit: str,
+        opening_date: str,
+        sla_forecast: str,
+        classification: Classification,
+        description: str,
+        address: Address,
+        status: str,
+        progresses: List[Progress],
+        reclassifications: List[Reclassification],
+        scheduled_diagnosis: List[Diagnosis],
+    ):
+        self.ticket_id = ticket_id
+        self.organizational_unit = organizational_unit
+        self.opening_date = opening_date
+        self.sla_forecast = sla_forecast
+        self.classification = classification
+        self.description = description
+        self.address = address
+        self.status = status
+        self.progresses = progresses
+        self.reclassifications = reclassifications
+        self.scheduled_diagnosis = scheduled_diagnosis</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="prefeitura_rio.integrations.sgrc.models.Address"><code class="flex name class">
+<span>class <span class="ident">Address</span></span>
+<span>(</span><span>locality: str = None, street_code: str = None, street: str = None, number: str = None, neighborhood_code: str = None, neighborhood: str = None, complement: str = None, zip_code: str = None, x_coordinate: str = None, y_coordinate: str = None, photo_url: str = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wrapper for implementing "Endereco".</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Address(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing &#34;Endereco&#34;.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;localidade&#34;: (&#34;locality&#34;, str),
+        &#34;codigoLogradouro&#34;: (&#34;street_code&#34;, str),
+        &#34;logradouro&#34;: (&#34;street&#34;, str),
+        &#34;numero&#34;: (&#34;number&#34;, str),
+        &#34;codigoBairro&#34;: (&#34;neighborhood_code&#34;, str),
+        &#34;bairro&#34;: (&#34;neighborhood&#34;, str),
+        &#34;complemento&#34;: (&#34;complement&#34;, str),
+        &#34;cep&#34;: (&#34;zip_code&#34;, str),
+        &#34;coordenadaX&#34;: (&#34;x_coordinate&#34;, str),
+        &#34;coordenadaY&#34;: (&#34;y_coordinate&#34;, str),
+        &#34;urlFoto&#34;: (&#34;photo_url&#34;, str),
+    }
+
+    def __init__(
+        self,
+        locality: str = None,
+        street_code: str = None,
+        street: str = None,
+        number: str = None,
+        neighborhood_code: str = None,
+        neighborhood: str = None,
+        complement: str = None,
+        zip_code: str = None,
+        x_coordinate: str = None,
+        y_coordinate: str = None,
+        photo_url: str = None,
+    ):
+        self.locality = locality or &#34;&#34;
+        self.street_code = street_code or &#34;&#34;
+        self.street = street or &#34;&#34;
+        self.number = number or &#34;&#34;
+        self.neighborhood_code = neighborhood_code or &#34;&#34;
+        self.neighborhood = neighborhood or &#34;&#34;
+        self.complement = complement or &#34;&#34;
+        self.zip_code = zip_code or &#34;&#34;
+        self.x_coordinate = x_coordinate or &#34;&#34;
+        self.y_coordinate = y_coordinate or &#34;&#34;
+        self.photo_url = photo_url or &#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="prefeitura_rio.integrations.sgrc.models.SGRCModel" href="#prefeitura_rio.integrations.sgrc.models.SGRCModel">SGRCModel</a></li>
+</ul>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.models.Classification"><code class="flex name class">
+<span>class <span class="ident">Classification</span></span>
+<span>(</span><span>category_code: str, category: str, type_code: str, type: str, subtype_code: str, subtype: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wrapper for implementing "classificacao".</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Classification(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing &#34;classificacao&#34;.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;codigoCategoria&#34;: (&#34;category_code&#34;, str),
+        &#34;categoria&#34;: (&#34;category&#34;, str),
+        &#34;codigoTipo&#34;: (&#34;type_code&#34;, str),
+        &#34;tipo&#34;: (&#34;type&#34;, str),
+        &#34;codigoSubtipo&#34;: (&#34;subtype_code&#34;, str),
+        &#34;subtipo&#34;: (&#34;subtype&#34;, str),
+    }
+
+    def __init__(
+        self,
+        category_code: str,
+        category: str,
+        type_code: str,
+        type: str,
+        subtype_code: str,
+        subtype: str,
+    ):
+        self.category_code = category_code
+        self.category = category
+        self.type_code = type_code
+        self.type = type
+        self.subtype_code = subtype_code
+        self.subtype = subtype</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="prefeitura_rio.integrations.sgrc.models.SGRCModel" href="#prefeitura_rio.integrations.sgrc.models.SGRCModel">SGRCModel</a></li>
+</ul>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.models.Diagnosis"><code class="flex name class">
+<span>class <span class="ident">Diagnosis</span></span>
+<span>(</span><span>diagnosis_date: str, forecast: str, status: str, reason: str, description: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wrapper for implementing "diagnostico".</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Diagnosis(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing &#34;diagnostico&#34;.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;dataDiagnostico&#34;: (&#34;diagnosis_date&#34;, str),
+        &#34;previsaoAtendimento&#34;: (&#34;forecast&#34;, str),
+        &#34;status&#34;: (&#34;status&#34;, str),
+        &#34;motivoJustificativa&#34;: (&#34;reason&#34;, str),
+        &#34;descricao&#34;: (&#34;description&#34;, str),
+    }
+
+    def __init__(
+        self,
+        diagnosis_date: str,
+        forecast: str,
+        status: str,
+        reason: str,
+        description: str,
+    ):
+        self.diagnosis_date = diagnosis_date
+        self.forecast = forecast
+        self.status = status
+        self.reason = reason
+        self.description = description</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="prefeitura_rio.integrations.sgrc.models.SGRCModel" href="#prefeitura_rio.integrations.sgrc.models.SGRCModel">SGRCModel</a></li>
+</ul>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.models.NewTicket"><code class="flex name class">
+<span>class <span class="ident">NewTicket</span></span>
+<span>(</span><span>protocol_id: str, ticket_id: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wrapper for implementing the response from the "new ticket" endpoint.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NewTicket(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing the response from the &#34;new ticket&#34; endpoint.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;protocolo&#34;: (&#34;protocol_id&#34;, str),
+        &#34;codigoChamado&#34;: (&#34;ticket_id&#34;, str),
+    }
+
+    def __init__(self, protocol_id: str, ticket_id: str):
+        self.protocol_id = protocol_id
+        self.ticket_id = ticket_id</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="prefeitura_rio.integrations.sgrc.models.SGRCModel" href="#prefeitura_rio.integrations.sgrc.models.SGRCModel">SGRCModel</a></li>
+</ul>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.models.Phones"><code class="flex name class">
+<span>class <span class="ident">Phones</span></span>
+<span>(</span><span>mobile_phone: str = None, residential_phone: str = None, other_phone: str = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wrapper for implementing "Telefones".</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Phones(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing &#34;Telefones&#34;.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;telefoneR&#34;: (&#34;mobile_phone&#34;, str),
+        &#34;telefone1&#34;: (&#34;residential_phone&#34;, str),
+        &#34;telefone2&#34;: (&#34;other_phone&#34;, str),
+    }
+
+    def __init__(
+        self,
+        mobile_phone: str = None,
+        residential_phone: str = None,
+        other_phone: str = None,
+    ):
+        self.mobile_phone = mobile_phone or &#34;&#34;
+        self.residential_phone = residential_phone or &#34;&#34;
+        self.other_phone = other_phone or &#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="prefeitura_rio.integrations.sgrc.models.SGRCModel" href="#prefeitura_rio.integrations.sgrc.models.SGRCModel">SGRCModel</a></li>
+</ul>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.models.Progress"><code class="flex name class">
+<span>class <span class="ident">Progress</span></span>
+<span>(</span><span>insertion_date: str, status: str, reason: str, description: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wrapper for implementing "andamento".</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Progress(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing &#34;andamento&#34;.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;dataInsercao&#34;: (&#34;insertion_date&#34;, str),
+        &#34;status&#34;: (&#34;status&#34;, str),
+        &#34;motivoJustificativa&#34;: (&#34;reason&#34;, str),
+        &#34;description&#34;: (&#34;description&#34;, str),
+    }
+
+    def __init__(
+        self,
+        insertion_date: str,
+        status: str,
+        reason: str,
+        description: str,
+    ):
+        self.insertion_date = insertion_date
+        self.status = status
+        self.reason = reason
+        self.description = description</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="prefeitura_rio.integrations.sgrc.models.SGRCModel" href="#prefeitura_rio.integrations.sgrc.models.SGRCModel">SGRCModel</a></li>
+</ul>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.models.Reclassification"><code class="flex name class">
+<span>class <span class="ident">Reclassification</span></span>
+<span>(</span><span>reclassification_date: str, previous_type: str, previous_subtype: str, new_type: str, new_subtype: str, reason: str, previous_sla_forecast: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wrapper for implementing "reclassificacao".</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Reclassification(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing &#34;reclassificacao&#34;.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;dataReclassificacao&#34;: (&#34;reclassification_date&#34;, str),
+        &#34;tipoAnterior&#34;: (&#34;previous_type&#34;, str),
+        &#34;subTipoAnterior&#34;: (&#34;previous_subtype&#34;, str),
+        &#34;tipoNovo&#34;: (&#34;new_type&#34;, str),
+        &#34;subTipoNovo&#34;: (&#34;new_subtype&#34;, str),
+        &#34;justificativa&#34;: (&#34;reason&#34;, str),
+        &#34;previsaoAnteriorSLA&#34;: (&#34;previous_sla_forecast&#34;, str),
+    }
+
+    def __init__(
+        self,
+        reclassification_date: str,
+        previous_type: str,
+        previous_subtype: str,
+        new_type: str,
+        new_subtype: str,
+        reason: str,
+        previous_sla_forecast: str,
+    ):
+        self.reclassification_date = reclassification_date
+        self.previous_type = previous_type
+        self.previous_subtype = previous_subtype
+        self.new_type = new_type
+        self.new_subtype = new_subtype
+        self.reason = reason
+        self.previous_sla_forecast = previous_sla_forecast</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="prefeitura_rio.integrations.sgrc.models.SGRCModel" href="#prefeitura_rio.integrations.sgrc.models.SGRCModel">SGRCModel</a></li>
+</ul>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.models.Requester"><code class="flex name class">
+<span>class <span class="ident">Requester</span></span>
+<span>(</span><span>name: str = None, email: str = None, language_code: str = None, country_code: str = None, cpf: str = None, identity: str = None, gender: str = None, birth_date: str = None, address: <a title="prefeitura_rio.integrations.sgrc.models.Address" href="#prefeitura_rio.integrations.sgrc.models.Address">Address</a> = None, phones: <a title="prefeitura_rio.integrations.sgrc.models.Phones" href="#prefeitura_rio.integrations.sgrc.models.Phones">Phones</a> = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wrapper for implementing "solicitantePortalWeb".</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Requester(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing &#34;solicitantePortalWeb&#34;.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;nome&#34;: (&#34;name&#34;, str),
+        &#34;email&#34;: (&#34;email&#34;, str),
+        &#34;codigoIdioma&#34;: (&#34;language_code&#34;, str),
+        &#34;codigoPaisDDI&#34;: (&#34;country_code&#34;, str),
+        &#34;cpf&#34;: (&#34;cpf&#34;, str),
+        &#34;identidade&#34;: (&#34;identity&#34;, str),
+        &#34;sexo&#34;: (&#34;gender&#34;, str),
+        &#34;dataNascimento&#34;: (&#34;birth_date&#34;, str),
+        &#34;endereco&#34;: (&#34;address&#34;, Address),
+        &#34;telefones&#34;: (&#34;phones&#34;, Phones),
+    }
+
+    def __init__(
+        self,
+        name: str = None,
+        email: str = None,
+        language_code: str = None,
+        country_code: str = None,
+        cpf: str = None,
+        identity: str = None,
+        gender: str = None,
+        birth_date: str = None,
+        address: Address = None,
+        phones: Phones = None,
+    ):
+        self.name = name or &#34;&#34;
+        self.email = email or &#34;&#34;
+        self.language_code = language_code or &#34;&#34;
+        self.country_code = country_code or &#34;&#34;
+        self.cpf = cpf or &#34;&#34;
+        self.identity = identity or &#34;&#34;
+        self.gender = gender or &#34;&#34;
+        self.birth_date = birth_date or &#34;&#34;
+        self.address = address or Address()
+        self.phones = phones or Phones()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="prefeitura_rio.integrations.sgrc.models.SGRCModel" href="#prefeitura_rio.integrations.sgrc.models.SGRCModel">SGRCModel</a></li>
+</ul>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.models.SGRCModel"><code class="flex name class">
+<span>class <span class="ident">SGRCModel</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SGRCModel:
+
+    _attrs_dict = {}
+
+    def to_dict(self):
+        data = {}
+        for k, v in self._attrs_dict.items():
+            # Cast v to the type of the attribute
+            if issubclass(v[1], SGRCModel):
+                v = getattr(self, v[0]).to_dict()
+            elif issubclass(v[1], list):
+                # Get type of list elements
+                try:
+                    list_type = type(getattr(self, v[0])[0])
+                except IndexError:
+                    # Empty list
+                    list_type = type(None)
+                # Cast each element of the list to the type of the attribute
+                if issubclass(list_type, SGRCModel):
+                    v = [i.to_dict() for i in getattr(self, v[0])]
+                else:
+                    v = [list_type(i) for i in getattr(self, v[0])]
+            else:
+                v = getattr(self, v[0])
+            # Get actual key
+            k = k
+            data[k] = v
+        return data
+
+    def __str__(self):
+        class_name = self.__class__.__name__
+        attrs = &#34;, &#34;.join([f&#34;{k}={v}&#34; for k, v in self.to_dict().items()])
+        return f&#34;{class_name}({attrs})&#34;
+
+    def __repr__(self) -&gt; str:
+        return str(self)
+
+    def __getitem__(self, key):
+        actual_key = self._attrs_dict[key][0]
+        return getattr(self, actual_key)
+
+    def __setitem__(self, key, value):
+        actual_key = self._attrs_dict[key][0]
+        return setattr(self, actual_key, value)</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="prefeitura_rio.integrations.sgrc.models.Address" href="#prefeitura_rio.integrations.sgrc.models.Address">Address</a></li>
+<li><a title="prefeitura_rio.integrations.sgrc.models.Classification" href="#prefeitura_rio.integrations.sgrc.models.Classification">Classification</a></li>
+<li><a title="prefeitura_rio.integrations.sgrc.models.Diagnosis" href="#prefeitura_rio.integrations.sgrc.models.Diagnosis">Diagnosis</a></li>
+<li><a title="prefeitura_rio.integrations.sgrc.models.NewTicket" href="#prefeitura_rio.integrations.sgrc.models.NewTicket">NewTicket</a></li>
+<li><a title="prefeitura_rio.integrations.sgrc.models.Phones" href="#prefeitura_rio.integrations.sgrc.models.Phones">Phones</a></li>
+<li><a title="prefeitura_rio.integrations.sgrc.models.Progress" href="#prefeitura_rio.integrations.sgrc.models.Progress">Progress</a></li>
+<li><a title="prefeitura_rio.integrations.sgrc.models.Reclassification" href="#prefeitura_rio.integrations.sgrc.models.Reclassification">Reclassification</a></li>
+<li><a title="prefeitura_rio.integrations.sgrc.models.Requester" href="#prefeitura_rio.integrations.sgrc.models.Requester">Requester</a></li>
+<li><a title="prefeitura_rio.integrations.sgrc.models.SpecificAttribute" href="#prefeitura_rio.integrations.sgrc.models.SpecificAttribute">SpecificAttribute</a></li>
+<li><a title="prefeitura_rio.integrations.sgrc.models.Ticket" href="#prefeitura_rio.integrations.sgrc.models.Ticket">Ticket</a></li>
+<li><a title="prefeitura_rio.integrations.sgrc.models.TicketDetails" href="#prefeitura_rio.integrations.sgrc.models.TicketDetails">TicketDetails</a></li>
+<li><a title="prefeitura_rio.integrations.sgrc.models.TicketSummary" href="#prefeitura_rio.integrations.sgrc.models.TicketSummary">TicketSummary</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="prefeitura_rio.integrations.sgrc.models.SGRCModel.to_dict"><code class="name flex">
+<span>def <span class="ident">to_dict</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_dict(self):
+    data = {}
+    for k, v in self._attrs_dict.items():
+        # Cast v to the type of the attribute
+        if issubclass(v[1], SGRCModel):
+            v = getattr(self, v[0]).to_dict()
+        elif issubclass(v[1], list):
+            # Get type of list elements
+            try:
+                list_type = type(getattr(self, v[0])[0])
+            except IndexError:
+                # Empty list
+                list_type = type(None)
+            # Cast each element of the list to the type of the attribute
+            if issubclass(list_type, SGRCModel):
+                v = [i.to_dict() for i in getattr(self, v[0])]
+            else:
+                v = [list_type(i) for i in getattr(self, v[0])]
+        else:
+            v = getattr(self, v[0])
+        # Get actual key
+        k = k
+        data[k] = v
+    return data</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.models.SpecificAttribute"><code class="flex name class">
+<span>class <span class="ident">SpecificAttribute</span></span>
+<span>(</span><span>name: str, value: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wrapper for implementing "atributoEspecifico".</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SpecificAttribute(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing &#34;atributoEspecifico&#34;.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;nomeAtributoEspecifico&#34;: (&#34;name&#34;, str),
+        &#34;valorAtributoEspecifico&#34;: (&#34;value&#34;, str),
+    }
+
+    def __init__(self, name: str, value: str):
+        self.name = name
+        self.value = value</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="prefeitura_rio.integrations.sgrc.models.SGRCModel" href="#prefeitura_rio.integrations.sgrc.models.SGRCModel">SGRCModel</a></li>
+</ul>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.models.Ticket"><code class="flex name class">
+<span>class <span class="ident">Ticket</span></span>
+<span>(</span><span>ticket_id: str, organizational_unit: str, date_time: str, classification: <a title="prefeitura_rio.integrations.sgrc.models.Classification" href="#prefeitura_rio.integrations.sgrc.models.Classification">Classification</a>, address: <a title="prefeitura_rio.integrations.sgrc.models.Address" href="#prefeitura_rio.integrations.sgrc.models.Address">Address</a>, status: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wrapper for implementing the ticket information.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Ticket(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing the ticket information.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;codigoChamado&#34;: (&#34;ticket_id&#34;, str),
+        &#34;unidadeOrganizacional&#34;: (&#34;organizational_unit&#34;, str),
+        &#34;dataHora&#34;: (&#34;date_time&#34;, str),
+        &#34;classificacao&#34;: (&#34;classification&#34;, Classification),
+        &#34;endereco&#34;: (&#34;address&#34;, Address),
+        &#34;status&#34;: (&#34;status&#34;, str),
+    }
+
+    def __init__(
+        self,
+        ticket_id: str,
+        organizational_unit: str,
+        date_time: str,
+        classification: Classification,
+        address: Address,
+        status: str,
+    ):
+        self.ticket_id = ticket_id
+        self.organizational_unit = organizational_unit
+        self.date_time = date_time
+        self.classification = classification
+        self.address = address
+        self.status = status</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="prefeitura_rio.integrations.sgrc.models.SGRCModel" href="#prefeitura_rio.integrations.sgrc.models.SGRCModel">SGRCModel</a></li>
+</ul>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.models.TicketDetails"><code class="flex name class">
+<span>class <span class="ident">TicketDetails</span></span>
+<span>(</span><span>ticket_id: str, organizational_unit: str, opening_date: str, sla_forecast: str, classification: <a title="prefeitura_rio.integrations.sgrc.models.Classification" href="#prefeitura_rio.integrations.sgrc.models.Classification">Classification</a>, description: str, address: <a title="prefeitura_rio.integrations.sgrc.models.Address" href="#prefeitura_rio.integrations.sgrc.models.Address">Address</a>, status: str, progresses: List[<a title="prefeitura_rio.integrations.sgrc.models.Progress" href="#prefeitura_rio.integrations.sgrc.models.Progress">Progress</a>], reclassifications: List[<a title="prefeitura_rio.integrations.sgrc.models.Reclassification" href="#prefeitura_rio.integrations.sgrc.models.Reclassification">Reclassification</a>], scheduled_diagnosis: List[<a title="prefeitura_rio.integrations.sgrc.models.Diagnosis" href="#prefeitura_rio.integrations.sgrc.models.Diagnosis">Diagnosis</a>])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wrapper for implementing the ticket details.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TicketDetails(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing the ticket details.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;codigoChamado&#34;: (&#34;ticket_id&#34;, str),
+        &#34;unidadeOrganizacional&#34;: (&#34;organizational_unit&#34;, str),
+        &#34;dataAbertura&#34;: (&#34;opening_date&#34;, str),
+        &#34;previsaoSLA&#34;: (&#34;sla_forecast&#34;, str),
+        &#34;classificacao&#34;: (&#34;classification&#34;, Classification),
+        &#34;descricao&#34;: (&#34;description&#34;, str),
+        &#34;endereco&#34;: (&#34;address&#34;, Address),
+        &#34;status&#34;: (&#34;status&#34;, str),
+        &#34;andamentos&#34;: (&#34;progresses&#34;, list),
+        &#34;reclassificacoes&#34;: (&#34;reclassifications&#34;, list),
+        &#34;diagnosticosProgramados&#34;: (&#34;scheduled_diagnosis&#34;, list),
+    }
+
+    def __init__(
+        self,
+        ticket_id: str,
+        organizational_unit: str,
+        opening_date: str,
+        sla_forecast: str,
+        classification: Classification,
+        description: str,
+        address: Address,
+        status: str,
+        progresses: List[Progress],
+        reclassifications: List[Reclassification],
+        scheduled_diagnosis: List[Diagnosis],
+    ):
+        self.ticket_id = ticket_id
+        self.organizational_unit = organizational_unit
+        self.opening_date = opening_date
+        self.sla_forecast = sla_forecast
+        self.classification = classification
+        self.description = description
+        self.address = address
+        self.status = status
+        self.progresses = progresses
+        self.reclassifications = reclassifications
+        self.scheduled_diagnosis = scheduled_diagnosis</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="prefeitura_rio.integrations.sgrc.models.SGRCModel" href="#prefeitura_rio.integrations.sgrc.models.SGRCModel">SGRCModel</a></li>
+</ul>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.models.TicketSummary"><code class="flex name class">
+<span>class <span class="ident">TicketSummary</span></span>
+<span>(</span><span>ticket_id: str, category: str, type: str, subtype: str, description: str, status: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Wrapper for implementing the summary of a ticket.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TicketSummary(SGRCModel):
+    &#34;&#34;&#34;
+    Wrapper for implementing the summary of a ticket.
+    &#34;&#34;&#34;
+
+    _attrs_dict = {
+        &#34;codigoChamado&#34;: (&#34;ticket_id&#34;, str),
+        &#34;categoria&#34;: (&#34;category&#34;, str),
+        &#34;tipo&#34;: (&#34;type&#34;, str),
+        &#34;subTipo&#34;: (&#34;subtype&#34;, str),
+        &#34;descricao&#34;: (&#34;description&#34;, str),
+        &#34;status&#34;: (&#34;status&#34;, str),
+    }
+
+    def __init__(
+        self,
+        ticket_id: str,
+        category: str,
+        type: str,
+        subtype: str,
+        description: str,
+        status: str,
+    ):
+        self.ticket_id = ticket_id
+        self.category = category
+        self.type = type
+        self.subtype = subtype
+        self.description = description
+        self.status = status</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="prefeitura_rio.integrations.sgrc.models.SGRCModel" href="#prefeitura_rio.integrations.sgrc.models.SGRCModel">SGRCModel</a></li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="prefeitura_rio.integrations.sgrc" href="index.html">prefeitura_rio.integrations.sgrc</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="prefeitura_rio.integrations.sgrc.models.Address" href="#prefeitura_rio.integrations.sgrc.models.Address">Address</a></code></h4>
+</li>
+<li>
+<h4><code><a title="prefeitura_rio.integrations.sgrc.models.Classification" href="#prefeitura_rio.integrations.sgrc.models.Classification">Classification</a></code></h4>
+</li>
+<li>
+<h4><code><a title="prefeitura_rio.integrations.sgrc.models.Diagnosis" href="#prefeitura_rio.integrations.sgrc.models.Diagnosis">Diagnosis</a></code></h4>
+</li>
+<li>
+<h4><code><a title="prefeitura_rio.integrations.sgrc.models.NewTicket" href="#prefeitura_rio.integrations.sgrc.models.NewTicket">NewTicket</a></code></h4>
+</li>
+<li>
+<h4><code><a title="prefeitura_rio.integrations.sgrc.models.Phones" href="#prefeitura_rio.integrations.sgrc.models.Phones">Phones</a></code></h4>
+</li>
+<li>
+<h4><code><a title="prefeitura_rio.integrations.sgrc.models.Progress" href="#prefeitura_rio.integrations.sgrc.models.Progress">Progress</a></code></h4>
+</li>
+<li>
+<h4><code><a title="prefeitura_rio.integrations.sgrc.models.Reclassification" href="#prefeitura_rio.integrations.sgrc.models.Reclassification">Reclassification</a></code></h4>
+</li>
+<li>
+<h4><code><a title="prefeitura_rio.integrations.sgrc.models.Requester" href="#prefeitura_rio.integrations.sgrc.models.Requester">Requester</a></code></h4>
+</li>
+<li>
+<h4><code><a title="prefeitura_rio.integrations.sgrc.models.SGRCModel" href="#prefeitura_rio.integrations.sgrc.models.SGRCModel">SGRCModel</a></code></h4>
+<ul class="">
+<li><code><a title="prefeitura_rio.integrations.sgrc.models.SGRCModel.to_dict" href="#prefeitura_rio.integrations.sgrc.models.SGRCModel.to_dict">to_dict</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="prefeitura_rio.integrations.sgrc.models.SpecificAttribute" href="#prefeitura_rio.integrations.sgrc.models.SpecificAttribute">SpecificAttribute</a></code></h4>
+</li>
+<li>
+<h4><code><a title="prefeitura_rio.integrations.sgrc.models.Ticket" href="#prefeitura_rio.integrations.sgrc.models.Ticket">Ticket</a></code></h4>
+</li>
+<li>
+<h4><code><a title="prefeitura_rio.integrations.sgrc.models.TicketDetails" href="#prefeitura_rio.integrations.sgrc.models.TicketDetails">TicketDetails</a></code></h4>
+</li>
+<li>
+<h4><code><a title="prefeitura_rio.integrations.sgrc.models.TicketSummary" href="#prefeitura_rio.integrations.sgrc.models.TicketSummary">TicketSummary</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
