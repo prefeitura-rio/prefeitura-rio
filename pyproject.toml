@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "prefeitura-rio"
-version = "0.1.1"
+version = "0.1.2"
 description = "Pacote Python que implementa utilidades para nossos projetos!"
 authors = ["Gabriel Gazola Milan <gabriel.gazola@poli.ufrj.br>"]
 license = "GPL-3.0-only"
@@ -24,6 +24,8 @@ pre-commit = "^2.18.1"
 pytest-cov = "^3.0.0"
 flake8 = "^4.0.1"
 pdoc3 = "^0.10.0"
+mako = "^1.2.4"
+markdown = "^3.4.3"
 
 [tool.poetry.scripts]
 docs = "scripts.docs:main"
