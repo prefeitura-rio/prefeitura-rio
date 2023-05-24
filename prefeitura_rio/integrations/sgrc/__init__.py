@@ -36,7 +36,7 @@ def new_ticket(
     address: Address,
     date_time: Union[datetime, str] = None,
     requester: Requester = None,
-    occurrence_origin_code: str = None,
+    occurrence_origin_code: str = "13",  # TODO: review this in the future.
 ) -> NewTicket:
     """
     Creates a new ticket.
@@ -52,7 +52,7 @@ def new_ticket(
         requester (Requester, optional): The requester information. Defaults to `None`, which will
             be replaced by an empty `Requester` object.
         occurrence_origin_code (str, optional): The occurrence origin code (e.g. "13" for
-            "Web App"). Defaults to `None`, which will be replaced by an empty string.
+            "Web App"). Defaults to "13".
 
     Returns:
         NewTicket: The new ticket.
