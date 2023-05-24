@@ -44,8 +44,7 @@ def new_ticket(
     Args:
         classification_code (str): The classification code.
         description (str): The description of the occurrence.
-        address (Address): The address of the occurrence. It must have both `street_code` and
-            `neighborhood_code` filled.
+        address (Address): The address of the occurrence.
         date_time (Union[datetime, str], optional): The date and time of the occurrence. When
             converted to string, it must be in the following format: "%Y-%m-%dT%H:%M:%S". Defaults
             to `None`, which will be replaced by the current date and time.
@@ -83,10 +82,6 @@ def new_ticket(
             )
     if not isinstance(address, Address):
         raise ValueError("'address' must be an Address object.")
-    if not address.street_code:
-        raise ValueError("'address' must have 'street_code' filled.")
-    if not address.neighborhood_code:
-        raise ValueError("'address' must have 'neighborhood_code' filled.")
     if date_time is None:
         date_time = pendulum.now(tz=pytz.timezone("America/Sao_Paulo")).strftime(
             "%Y-%m-%dT%H:%M:%S"
