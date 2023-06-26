@@ -64,7 +64,7 @@ def new_ticket(
     address: Address,
     date_time: Union[datetime, str] = None,
     requester: Requester = None,
-    occurrence_origin_code: str = &#34;13&#34;,  # TODO: review this in the future.
+    occurrence_origin_code: str = &#34;28&#34;,
 ) -&gt; NewTicket:
     &#34;&#34;&#34;
     Creates a new ticket.
@@ -79,7 +79,7 @@ def new_ticket(
         requester (Requester, optional): The requester information. Defaults to `None`, which will
             be replaced by an empty `Requester` object.
         occurrence_origin_code (str, optional): The occurrence origin code (e.g. &#34;13&#34; for
-            &#34;Web App&#34;). Defaults to &#34;13&#34;.
+            &#34;Web App&#34;). Defaults to &#34;28&#34;.
 
     Returns:
         NewTicket: The new ticket.
@@ -928,7 +928,7 @@ def version() -&gt; Dict[str, Any]:
 </details>
 </dd>
 <dt id="prefeitura_rio.integrations.sgrc.new_ticket"><code class="name flex">
-<span>def <span class="ident">new_ticket</span></span>(<span>classification_code: str, description: str, address: <a title="prefeitura_rio.integrations.sgrc.models.Address" href="models.html#prefeitura_rio.integrations.sgrc.models.Address">Address</a>, date_time: Union[datetime.datetime, str] = None, requester: <a title="prefeitura_rio.integrations.sgrc.models.Requester" href="models.html#prefeitura_rio.integrations.sgrc.models.Requester">Requester</a> = None, occurrence_origin_code: str = '13') ‑> <a title="prefeitura_rio.integrations.sgrc.models.NewTicket" href="models.html#prefeitura_rio.integrations.sgrc.models.NewTicket">NewTicket</a></span>
+<span>def <span class="ident">new_ticket</span></span>(<span>classification_code: str, description: str, address: <a title="prefeitura_rio.integrations.sgrc.models.Address" href="models.html#prefeitura_rio.integrations.sgrc.models.Address">Address</a>, date_time: Union[datetime.datetime, str] = None, requester: <a title="prefeitura_rio.integrations.sgrc.models.Requester" href="models.html#prefeitura_rio.integrations.sgrc.models.Requester">Requester</a> = None, occurrence_origin_code: str = '28') ‑> <a title="prefeitura_rio.integrations.sgrc.models.NewTicket" href="models.html#prefeitura_rio.integrations.sgrc.models.NewTicket">NewTicket</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Creates a new ticket.</p>
@@ -949,7 +949,7 @@ to <code>None</code>, which will be replaced by the current date and time.</dd>
 be replaced by an empty <code>Requester</code> object.</dd>
 <dt><strong><code>occurrence_origin_code</code></strong> :&ensp;<code>str</code>, optional</dt>
 <dd>The occurrence origin code (e.g. "13" for
-"Web App"). Defaults to "13".</dd>
+"Web App"). Defaults to "28".</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -985,7 +985,7 @@ be replaced by an empty <code>Requester</code> object.</dd>
     address: Address,
     date_time: Union[datetime, str] = None,
     requester: Requester = None,
-    occurrence_origin_code: str = &#34;13&#34;,  # TODO: review this in the future.
+    occurrence_origin_code: str = &#34;28&#34;,
 ) -&gt; NewTicket:
     &#34;&#34;&#34;
     Creates a new ticket.
@@ -1000,7 +1000,7 @@ be replaced by an empty <code>Requester</code> object.</dd>
         requester (Requester, optional): The requester information. Defaults to `None`, which will
             be replaced by an empty `Requester` object.
         occurrence_origin_code (str, optional): The occurrence origin code (e.g. &#34;13&#34; for
-            &#34;Web App&#34;). Defaults to &#34;13&#34;.
+            &#34;Web App&#34;). Defaults to &#34;28&#34;.
 
     Returns:
         NewTicket: The new ticket.
