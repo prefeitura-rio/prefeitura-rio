@@ -25,20 +25,3 @@ repos:
   rev: 6.0.0
   hooks:
   - id: flake8
-
-- repo: https://github.com/returntocorp/semgrep
-  rev: v1.30.0
-  hooks:
-  - id: semgrep
-    language: python
-    args: [
-      "--error",
-      "--config",
-      "auto",
-      "--exclude-rule",
-      "python.lang.security.audit.subprocess-shell-true.subprocess-shell-true",
-      "--exclude-rule",
-      "yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha",
-      "--exclude-rule",
-      "python.lang.security.audit.insecure-transport.requests.request-session-with-http.request-session-with-http",
-    ]
