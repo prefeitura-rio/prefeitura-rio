@@ -4,17 +4,21 @@ Framework-agnotic metrics implementations for the prefeitura_rio package.
 Most of them can usually be imported from the `sklearn.metrics` module.
 """
 
-import warnings
+try:
+    import numpy as np
+    from sklearn.metrics import (
+        brier_score_loss,
+        confusion_matrix,
+        fbeta_score,
+        mean_squared_error,
+    )
+except ImportError:
+    pass
 
-import numpy as np
-from sklearn.metrics import (
-    brier_score_loss,
-    confusion_matrix,
-    fbeta_score,
-    mean_squared_error,
-)
+from prefeitura_rio.utils import assert_dependencies
 
 
+@assert_dependencies(["numpy", "sklearn"], extras=["metrics"])
 def brier(
     y_true,
     y_pred,
@@ -35,11 +39,10 @@ def brier(
     Returns:
         float: The Brier score.
     """
-    return brier_score_loss(
-        y_true, y_pred, sample_weight=sample_weight, pos_label=pos_label
-    )
+    return brier_score_loss(y_true, y_pred, sample_weight=sample_weight, pos_label=pos_label)
 
 
+@assert_dependencies(["numpy", "sklearn"], extras=["metrics"])
 def carabetta(y_true, y_pred, alpha=5, beta=2):
     """
     Computes the Carabetta score.
@@ -60,6 +63,7 @@ def carabetta(y_true, y_pred, alpha=5, beta=2):
     return np.sum(alpha * y_true * (1 - y_pred) + beta * (1 - y_true) * y_pred)
 
 
+@assert_dependencies(["numpy", "sklearn"], extras=["metrics"])
 def fbeta(
     y_true,
     y_pred,
@@ -116,6 +120,7 @@ def fbeta(
         raise exc
 
 
+@assert_dependencies(["numpy", "sklearn"], extras=["metrics"])
 def mse(y_true, y_pred, *, sample_weight=None, multioutput="uniform_average"):
     """
     Computes the MSE score.
@@ -131,11 +136,10 @@ def mse(y_true, y_pred, *, sample_weight=None, multioutput="uniform_average"):
     Returns:
         float: The MSE score.
     """
-    return mean_squared_error(
-        y_true, y_pred, sample_weight=sample_weight, multioutput=multioutput
-    )
+    return mean_squared_error(y_true, y_pred, sample_weight=sample_weight, multioutput=multioutput)
 
 
+@assert_dependencies(["numpy", "sklearn"], extras=["metrics"])
 def nash_sutcliffe(
     y_true,
     y_pred,
@@ -155,6 +159,7 @@ def nash_sutcliffe(
     return 1 - np.sum((y_true - y_pred) ** 2) / np.sum((y_true - np.mean(y_true)) ** 2)
 
 
+@assert_dependencies(["numpy", "sklearn"], extras=["metrics"])
 def pet(y_true, y_pred, *, sample_weight=None, multioutput="uniform_average"):
     """
     Computes the PET score.
@@ -171,12 +176,11 @@ def pet(y_true, y_pred, *, sample_weight=None, multioutput="uniform_average"):
         float: The PET score.
     """
     return np.tanh(
-        mean_squared_error(
-            y_true, y_pred, sample_weight=sample_weight, multioutput=multioutput
-        )
+        mean_squared_error(y_true, y_pred, sample_weight=sample_weight, multioutput=multioutput)
     )
 
 
+@assert_dependencies(["numpy", "sklearn"], extras=["metrics"])
 def rmse(y_true, y_pred, *, sample_weight=None, multioutput="uniform_average"):
     """
     Computes the RMSE score.
@@ -193,12 +197,11 @@ def rmse(y_true, y_pred, *, sample_weight=None, multioutput="uniform_average"):
         float: The RMSE score.
     """
     return np.sqrt(
-        mean_squared_error(
-            y_true, y_pred, sample_weight=sample_weight, multioutput=multioutput
-        )
+        mean_squared_error(y_true, y_pred, sample_weight=sample_weight, multioutput=multioutput)
     )
 
 
+@assert_dependencies(["numpy", "sklearn"], extras=["metrics"])
 def sp(
     y_true,
     y_pred,

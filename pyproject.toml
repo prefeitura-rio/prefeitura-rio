@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "prefeitura-rio"
-version = "0.1.4"
+version = "1.0.0rc1"
 description = "Pacote Python que implementa utilidades para nossos projetos!"
 authors = ["Gabriel Gazola Milan <gabriel.gazola@poli.ufrj.br>"]
 license = "GPL-3.0-only"
@@ -11,27 +11,59 @@ keywords = ["python", "utilities", "government"]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
-numpy = "^1.23.3"
-scikit-learn = "^1.1.2"
 loguru = "^0.6.0"
-requests = "^2.31.0"
-pendulum = "^2.1.2"
-pytz = "^2023.3"
+numpy = { version = "^1.23.3", optional = true }
+pendulum = { version = "^2.1.2", optional = true }
+pytz = { version = "^2023.3", optional = true }
+requests = { version = "^2.31.0", optional = true }
+scikit-learn = { version = "^1.1.2", optional = true }
+
+[tool.poetry.extras]
+all = ["numpy", "pendulum", "pytz", "requests", "scikit-learn"]
+metrics = ["numpy", "scikit-learn"]
+sgrc = ["pendulum", "pytz", "requests"]
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.3.0"
-pre-commit = "^2.18.1"
-pytest-cov = "^3.0.0"
 flake8 = "^4.0.1"
-pdoc3 = "^0.10.0"
+isort = "^5.12.0"
 mako = "^1.2.4"
 markdown = "^3.4.3"
+pdoc3 = "^0.10.0"
+pre-commit = "^2.18.1"
+pytest-cov = "^3.0.0"
+semgrep = "^1.37.0"
+taskipy = "^1.12.0"
 
 [tool.poetry.scripts]
 docs = "scripts.docs:main"
 lint = "scripts.lint:main"
 test = "scripts.test:main"
 
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310"]
+
+[tool.isort]
+profile = "black"
+
+[tool.pytest.ini_options]
+addopts = ["--doctest-modules", "--cov=prefeitura_rio", "-r a", "-v"]
+norecursedirs = [
+    "dist",
+    "build",
+    "docs",
+    ".tox",
+    ".eggs",
+    ".venv",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".git",
+    "__pycache__",
+    "scripts",
+]
+testpaths = ["tests"]
+
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

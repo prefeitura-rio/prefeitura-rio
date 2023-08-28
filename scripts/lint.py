@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from glob import glob
 import subprocess
+from glob import glob
 
 
 def main():
