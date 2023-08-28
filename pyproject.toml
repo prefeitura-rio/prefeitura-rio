@@ -11,16 +11,42 @@ keywords = ["python", "utilities", "government"]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
-loguru = "^0.6.0"
+basedosdados = { version = "2.0.0b13", extras = ["upload"], optional = true }
+google-cloud-storage = { version = "^2.10.0", optional = true }
+infisical = { version = "^1.4.2", optional = true }
+loguru = "^0.7.0"
 numpy = { version = "^1.23.3", optional = true }
+pandas = { version = "^2.0.3", optional = true }
 pendulum = { version = "^2.1.2", optional = true }
+prefect = { version = "1.4", optional = true }
 pytz = { version = "^2023.3", optional = true }
 requests = { version = "^2.31.0", optional = true }
 scikit-learn = { version = "^1.1.2", optional = true }
+sentry-sdk = { version = "^1.29.2", optional = true }
 
 [tool.poetry.extras]
-all = ["numpy", "pendulum", "pytz", "requests", "scikit-learn"]
+all = [
+    "basedosdados",
+    "google-cloud-storage",
+    "infisical",
+    "numpy",
+    "pandas",
+    "pendulum",
+    "prefect",
+    "pytz",
+    "requests",
+    "scikit-learn",
+    "sentry-sdk",
+]
 metrics = ["numpy", "scikit-learn"]
+pipelines = [
+    "basedosdados",
+    "google-cloud-storage",
+    "infisical",
+    "pandas",
+    "prefect",
+    "sentry-sdk",
+]
 sgrc = ["pendulum", "pytz", "requests"]
 
 [tool.poetry.group.dev.dependencies]
