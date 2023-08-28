@@ -13,7 +13,7 @@ from typing import Callable, Dict
 
 from prefeitura_rio.utils import assert_dependencies
 
-from . import agnostic
+from .agnostic import brier, carabetta, fbeta, mse, nash_sutcliffe, pet, rmse, sp
 
 
 @assert_dependencies(["numpy", "sklearn"], extras=["metrics"])
@@ -43,15 +43,13 @@ def evaluate(
     """
     if metrics is None:
         metrics = {
-            "Brier": agnostic.brier,
-            "Carabetta": agnostic.carabetta,
-            "F-Beta": lambda y_true, y_pred: agnostic.fbeta(
-                y_true, y_pred, beta=beta, threshold=threshold
-            ),
-            "MSE": agnostic.mse,
-            "Nash-Sutcliffe": agnostic.nash_sutcliffe,
-            "PET": agnostic.pet,
-            "RMSE": agnostic.rmse,
-            "SP": lambda y_true, y_pred: agnostic.sp(y_true, y_pred, threshold=threshold),
+            "Brier": brier,
+            "Carabetta": carabetta,
+            "F-Beta": lambda y_true, y_pred: fbeta(y_true, y_pred, beta=beta, threshold=threshold),
+            "MSE": mse,
+            "Nash-Sutcliffe": nash_sutcliffe,
+            "PET": pet,
+            "RMSE": rmse,
+            "SP": lambda y_true, y_pred: sp(y_true, y_pred, threshold=threshold),
         }
     return {name: func(y_true, y_pred) for name, func in metrics.items()}

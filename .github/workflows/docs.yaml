@@ -28,7 +28,7 @@ jobs:
 
       - name: Generate docs
         run: |
-          poetry run docs
+          poetry run task docs
 
       - name: Deploy docs
         uses: JamesIves/github-pages-deploy-action@v4.2.3
