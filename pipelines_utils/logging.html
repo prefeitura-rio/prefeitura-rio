@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>prefeitura_rio.metrics API documentation</title>
-<meta name="description" content="Metrics implementations for the prefeitura_rio package …" />
+<title>prefeitura_rio.pipelines_utils.logging API documentation</title>
+<meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,85 +19,48 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>prefeitura_rio.metrics</code></h1>
+<h1 class="title">Module <code>prefeitura_rio.pipelines_utils.logging</code></h1>
 </header>
 <section id="section-intro">
-<p>Metrics implementations for the prefeitura_rio package.</p>
-<p>In this module, we define the metrics that will be used to evaluate the
-performance of the models. The metrics are defined as functions that take
-the true and predicted values as input and return a single value.</p>
-<p>In the <code><a title="prefeitura_rio.metrics.agnostic" href="agnostic.html">prefeitura_rio.metrics.agnostic</a></code> module, we define metrics that are agnostic to any
-framework.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
-&#34;&#34;&#34;
-Metrics implementations for the prefeitura_rio package.
+import logging
+from typing import Any
 
-In this module, we define the metrics that will be used to evaluate the
-performance of the models. The metrics are defined as functions that take
-the true and predicted values as input and return a single value.
-
-In the `agnostic` module, we define metrics that are agnostic to any
-framework.
-&#34;&#34;&#34;
-from typing import Callable, Dict
+try:
+    import prefect
+except ImportError:
+    pass
 
 from prefeitura_rio.utils import assert_dependencies
 
-from .agnostic import brier, carabetta, fbeta, mse, nash_sutcliffe, pet, rmse, sp
 
-
-@assert_dependencies([&#34;numpy&#34;, &#34;sklearn&#34;], extras=[&#34;metrics&#34;])
-def evaluate(
-    y_true,
-    y_pred,
-    *,
-    metrics: Dict[str, Callable] = None,
-    beta=1,
-    threshold=0.5,
-) -&gt; Dict[str, float]:
+@assert_dependencies([&#34;prefect&#34;], extras=[&#34;pipelines&#34;])
+def log(msg: Any, level: str = &#34;info&#34;) -&gt; None:
     &#34;&#34;&#34;
-    Evaluates the performance of a model.
-
-    Args:
-        y_true (array-like): The true values.
-        y_pred (array-like): The predicted values.
-        metrics (dict, optional): A dictionary of metrics to be evaluated.
-            Defaults to `None`.
-        beta (int, optional): The beta value for the F-beta score. Defaults to
-            `1`.
-        threshold (float, optional): The threshold for the F-beta score.
-            Defaults to `0.5`.
-
-    Returns:
-        dict: A dictionary with the results of the metrics.
+    Logs a message to prefect&#39;s logger.
     &#34;&#34;&#34;
-    if metrics is None:
-        metrics = {
-            &#34;Brier&#34;: brier,
-            &#34;Carabetta&#34;: carabetta,
-            &#34;F-Beta&#34;: lambda y_true, y_pred: fbeta(y_true, y_pred, beta=beta, threshold=threshold),
-            &#34;MSE&#34;: mse,
-            &#34;Nash-Sutcliffe&#34;: nash_sutcliffe,
-            &#34;PET&#34;: pet,
-            &#34;RMSE&#34;: rmse,
-            &#34;SP&#34;: lambda y_true, y_pred: sp(y_true, y_pred, threshold=threshold),
-        }
-    return {name: func(y_true, y_pred) for name, func in metrics.items()}</code></pre>
+    levels = {
+        &#34;debug&#34;: logging.DEBUG,
+        &#34;info&#34;: logging.INFO,
+        &#34;warning&#34;: logging.WARNING,
+        &#34;error&#34;: logging.ERROR,
+        &#34;critical&#34;: logging.CRITICAL,
+    }
+
+    blank_spaces = 8 * &#34; &#34;
+    msg = blank_spaces + &#34;----\n&#34; + str(msg)
+    msg = &#34;\n&#34;.join([blank_spaces + line for line in msg.split(&#34;\n&#34;)]) + &#34;\n\n&#34;
+
+    if level not in levels:
+        raise ValueError(f&#34;Invalid log level: {level}&#34;)
+    prefect.context.logger.log(levels[level], msg)  # pylint: disable=E1101</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
-<dl>
-<dt><code class="name"><a title="prefeitura_rio.metrics.agnostic" href="agnostic.html">prefeitura_rio.metrics.agnostic</a></code></dt>
-<dd>
-<div class="desc"><p>Framework-agnotic metrics implementations for the prefeitura_rio package.
-Most of them can usually be imported from the <code>sklearn.metrics</code> module.</p></div>
-</dd>
-</dl>
 </section>
 <section>
 </section>
@@ -114,12 +77,7 @@ Most of them can usually be imported from the <code>sklearn.metrics</code> modul
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="prefeitura_rio" href="../index.html">prefeitura_rio</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="prefeitura_rio.metrics.agnostic" href="agnostic.html">prefeitura_rio.metrics.agnostic</a></code></li>
+<li><code><a title="prefeitura_rio.pipelines_utils" href="index.html">prefeitura_rio.pipelines_utils</a></code></li>
 </ul>
 </li>
 </ul>

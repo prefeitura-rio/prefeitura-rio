@@ -33,9 +33,7 @@ from typing import Union
 from loguru import logger
 
 
-def getenv_or_action(
-    key: str, default: str = None, action: str = &#34;raise&#34;
-) -&gt; Union[str, None]:
+def getenv_or_action(key: str, default: str = None, action: str = &#34;raise&#34;) -&gt; Union[str, None]:
     &#34;&#34;&#34;
     Gets an environment variable or executes an action.
 
@@ -49,9 +47,7 @@ def getenv_or_action(
         Union[str, None]: The environment variable value or the default value.
     &#34;&#34;&#34;
     if action not in (&#34;raise&#34;, &#34;warn&#34;, &#34;ignore&#34;):
-        raise ValueError(
-            f&#34;Invalid action &#39;{action}&#39;. Must be one of &#39;raise&#39;, &#39;warn&#39; or &#39;ignore&#39;.&#34;
-        )
+        raise ValueError(f&#34;Invalid action &#39;{action}&#39;. Must be one of &#39;raise&#39;, &#39;warn&#39; or &#39;ignore&#39;.&#34;)
     value = getenv(key, default)
     if value is None:
         if action == &#34;raise&#34;:
@@ -138,9 +134,7 @@ settings = Settings()</code></pre>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def getenv_or_action(
-    key: str, default: str = None, action: str = &#34;raise&#34;
-) -&gt; Union[str, None]:
+<pre><code class="python">def getenv_or_action(key: str, default: str = None, action: str = &#34;raise&#34;) -&gt; Union[str, None]:
     &#34;&#34;&#34;
     Gets an environment variable or executes an action.
 
@@ -154,9 +148,7 @@ settings = Settings()</code></pre>
         Union[str, None]: The environment variable value or the default value.
     &#34;&#34;&#34;
     if action not in (&#34;raise&#34;, &#34;warn&#34;, &#34;ignore&#34;):
-        raise ValueError(
-            f&#34;Invalid action &#39;{action}&#39;. Must be one of &#39;raise&#39;, &#39;warn&#39; or &#39;ignore&#39;.&#34;
-        )
+        raise ValueError(f&#34;Invalid action &#39;{action}&#39;. Must be one of &#39;raise&#39;, &#39;warn&#39; or &#39;ignore&#39;.&#34;)
     value = getenv(key, default)
     if value is None:
         if action == &#34;raise&#34;:

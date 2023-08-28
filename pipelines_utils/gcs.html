@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>prefeitura_rio.integrations.sgrc.utils API documentation</title>
+<title>prefeitura_rio.pipelines_utils.gcs API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>prefeitura_rio.integrations.sgrc.utils</code></h1>
+<h1 class="title">Module <code>prefeitura_rio.pipelines_utils.gcs</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -27,83 +27,71 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
-from typing import Any, Dict, List
+from typing import List
 
 try:
-    import requests
-    from requests.adapters import HTTPAdapter, Retry
+    from google.cloud import storage
+    from google.cloud.storage.blob import Blob
 except ImportError:
-    pass
-from loguru import logger
+    from prefeitura_rio.utils import base_assert_dependencies
 
-from prefeitura_rio import settings
-from prefeitura_rio.utils import assert_dependencies
+    base_assert_dependencies([&#34;google.cloud.storage&#34;], extras=[&#34;pipelines&#34;])
+
+from prefeitura_rio.pipelines_utils.env import get_bd_credentials_from_env
+from prefeitura_rio.pipelines_utils.prefect import get_flow_run_mode
 
 
-def add_token_to_body(data: Dict[str, Any]) -&gt; Dict[str, Any]:
+def get_gcs_client(mode: str = None) -&gt; storage.Client:
     &#34;&#34;&#34;
-    Adds the token to the body.
+    Get a GCS client with the credentials from the environment.
+    Mode needs to be &#34;prod&#34; or &#34;staging&#34;
 
     Args:
-        data (Dict[str, Any]): The body.
+        mode (str): The mode to filter by (prod or staging).
 
     Returns:
-        Dict[str, Any]: The body with the token.
+        storage.Client: The GCS client.
     &#34;&#34;&#34;
-    return {**data, &#34;token&#34;: settings.SGRC_BODY_TOKEN}
+    if not mode:
+        mode = get_flow_run_mode()
+    credentials = get_bd_credentials_from_env(mode=mode)
+    return storage.Client(credentials=credentials)
 
 
-def get_headers() -&gt; Dict[str, str]:
+def list_blobs_with_prefix(bucket_name: str, prefix: str, mode: str = None) -&gt; List[Blob]:
     &#34;&#34;&#34;
-    Get the headers for each request to SGRC.
-
-    Returns:
-        Dict[str, str]: The headers.
-    &#34;&#34;&#34;
-    return {
-        &#34;Content-Type&#34;: &#34;application/json&#34;,
-        &#34;Accept&#34;: &#34;application/json&#34;,
-        &#34;Authorization&#34;: settings.SGRC_AUTHORIZATION_HEADER,
-    }
-
-
-@assert_dependencies([&#34;requests&#34;], extras=[&#34;sgrc&#34;])
-def post(
-    url: str,
-    data: Dict[str, Any],
-    add_token: bool = True,
-    retry_attempts: int = 5,
-    retry_backoff_factor: float = 1,
-    retry_status_forcelist: List[int] = [502, 503, 504],
-) -&gt; Dict[str, Any]:
-    &#34;&#34;&#34;
-    Makes a POST request to SGRC.
+    Lists all the blobs in the bucket that begin with the prefix.
+    This can be used to list all blobs in a &#34;folder&#34;, e.g. &#34;public/&#34;.
+    Mode needs to be &#34;prod&#34; or &#34;staging&#34;
 
     Args:
-        url (str): The URL.
-        data (Dict[str, Any]): The body.
-        add_token (bool, optional): Whether to add the token to the body. Defaults to `True`.
-        retry_attempts (int, optional): The number of retry attempts. Defaults to `5`.
-        retry_backoff_factor (float, optional): The backoff factor. Defaults to `1`.
-        retry_status_forcelist (List[int], optional): The status codes to retry.
+        bucket_name (str): The name of the bucket.
+        prefix (str): The prefix to filter by.
+        mode (str): The mode to filter by (prod or staging).
 
     Returns:
-        requests.Response: The response.
+        List[Blob]: The list of blobs.
     &#34;&#34;&#34;
-    session = requests.Session()
-    retries = Retry(
-        total=retry_attempts,
-        backoff_factor=retry_backoff_factor,
-        status_forcelist=retry_status_forcelist,
-    )
-    session.mount(&#34;http://&#34;, HTTPAdapter(max_retries=retries))
-    if add_token:
-        data = add_token_to_body(data)
-    headers = get_headers()
-    logger.debug(f&#34;Making POST request to {url} with data {data} and headers {headers}&#34;)
-    response = session.post(url, json=data, headers=headers)
-    response.raise_for_status()
-    return response.json()</code></pre>
+    if not mode:
+        mode = get_flow_run_mode()
+    storage_client = get_gcs_client(mode=mode)
+    blobs = storage_client.list_blobs(bucket_name, prefix=prefix)
+    return list(blobs)
+
+
+def parse_blobs_to_partition_list(blobs: List[Blob]) -&gt; List[str]:
+    &#34;&#34;&#34;
+    Extracts the partition information from the blobs.
+    &#34;&#34;&#34;
+    partitions = []
+    for blob in blobs:
+        for folder in blob.name.split(&#34;/&#34;):
+            if &#34;=&#34; in folder:
+                key = folder.split(&#34;=&#34;)[0]
+                value = folder.split(&#34;=&#34;)[1]
+                if key == &#34;data_particao&#34;:
+                    partitions.append(value)
+    return partitions</code></pre>
 </details>
 </section>
 <section>
@@ -113,64 +101,111 @@ def post(
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="prefeitura_rio.integrations.sgrc.utils.add_token_to_body"><code class="name flex">
-<span>def <span class="ident">add_token_to_body</span></span>(<span>data: Dict[str, Any]) ‑> Dict[str, Any]</span>
+<dt id="prefeitura_rio.pipelines_utils.gcs.get_gcs_client"><code class="name flex">
+<span>def <span class="ident">get_gcs_client</span></span>(<span>mode: str = None) ‑> google.cloud.storage.client.Client</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Adds the token to the body.</p>
+<div class="desc"><p>Get a GCS client with the credentials from the environment.
+Mode needs to be "prod" or "staging"</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>data</code></strong> :&ensp;<code>Dict[str, Any]</code></dt>
-<dd>The body.</dd>
+<dt><strong><code>mode</code></strong> :&ensp;<code>str</code></dt>
+<dd>The mode to filter by (prod or staging).</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Dict[str, Any]</code></dt>
-<dd>The body with the token.</dd>
+<dt><code>storage.Client</code></dt>
+<dd>The GCS client.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def add_token_to_body(data: Dict[str, Any]) -&gt; Dict[str, Any]:
+<pre><code class="python">def get_gcs_client(mode: str = None) -&gt; storage.Client:
     &#34;&#34;&#34;
-    Adds the token to the body.
+    Get a GCS client with the credentials from the environment.
+    Mode needs to be &#34;prod&#34; or &#34;staging&#34;
 
     Args:
-        data (Dict[str, Any]): The body.
+        mode (str): The mode to filter by (prod or staging).
 
     Returns:
-        Dict[str, Any]: The body with the token.
+        storage.Client: The GCS client.
     &#34;&#34;&#34;
-    return {**data, &#34;token&#34;: settings.SGRC_BODY_TOKEN}</code></pre>
+    if not mode:
+        mode = get_flow_run_mode()
+    credentials = get_bd_credentials_from_env(mode=mode)
+    return storage.Client(credentials=credentials)</code></pre>
 </details>
 </dd>
-<dt id="prefeitura_rio.integrations.sgrc.utils.get_headers"><code class="name flex">
-<span>def <span class="ident">get_headers</span></span>(<span>) ‑> Dict[str, str]</span>
+<dt id="prefeitura_rio.pipelines_utils.gcs.list_blobs_with_prefix"><code class="name flex">
+<span>def <span class="ident">list_blobs_with_prefix</span></span>(<span>bucket_name: str, prefix: str, mode: str = None) ‑> List[google.cloud.storage.blob.Blob]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get the headers for each request to SGRC.</p>
+<div class="desc"><p>Lists all the blobs in the bucket that begin with the prefix.
+This can be used to list all blobs in a "folder", e.g. "public/".
+Mode needs to be "prod" or "staging"</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>bucket_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the bucket.</dd>
+<dt><strong><code>prefix</code></strong> :&ensp;<code>str</code></dt>
+<dd>The prefix to filter by.</dd>
+<dt><strong><code>mode</code></strong> :&ensp;<code>str</code></dt>
+<dd>The mode to filter by (prod or staging).</dd>
+</dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>Dict[str, str]</code></dt>
-<dd>The headers.</dd>
+<dt><code>List[Blob]</code></dt>
+<dd>The list of blobs.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_headers() -&gt; Dict[str, str]:
+<pre><code class="python">def list_blobs_with_prefix(bucket_name: str, prefix: str, mode: str = None) -&gt; List[Blob]:
     &#34;&#34;&#34;
-    Get the headers for each request to SGRC.
+    Lists all the blobs in the bucket that begin with the prefix.
+    This can be used to list all blobs in a &#34;folder&#34;, e.g. &#34;public/&#34;.
+    Mode needs to be &#34;prod&#34; or &#34;staging&#34;
+
+    Args:
+        bucket_name (str): The name of the bucket.
+        prefix (str): The prefix to filter by.
+        mode (str): The mode to filter by (prod or staging).
 
     Returns:
-        Dict[str, str]: The headers.
+        List[Blob]: The list of blobs.
     &#34;&#34;&#34;
-    return {
-        &#34;Content-Type&#34;: &#34;application/json&#34;,
-        &#34;Accept&#34;: &#34;application/json&#34;,
-        &#34;Authorization&#34;: settings.SGRC_AUTHORIZATION_HEADER,
-    }</code></pre>
+    if not mode:
+        mode = get_flow_run_mode()
+    storage_client = get_gcs_client(mode=mode)
+    blobs = storage_client.list_blobs(bucket_name, prefix=prefix)
+    return list(blobs)</code></pre>
+</details>
+</dd>
+<dt id="prefeitura_rio.pipelines_utils.gcs.parse_blobs_to_partition_list"><code class="name flex">
+<span>def <span class="ident">parse_blobs_to_partition_list</span></span>(<span>blobs: List[google.cloud.storage.blob.Blob]) ‑> List[str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Extracts the partition information from the blobs.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def parse_blobs_to_partition_list(blobs: List[Blob]) -&gt; List[str]:
+    &#34;&#34;&#34;
+    Extracts the partition information from the blobs.
+    &#34;&#34;&#34;
+    partitions = []
+    for blob in blobs:
+        for folder in blob.name.split(&#34;/&#34;):
+            if &#34;=&#34; in folder:
+                key = folder.split(&#34;=&#34;)[0]
+                value = folder.split(&#34;=&#34;)[1]
+                if key == &#34;data_particao&#34;:
+                    partitions.append(value)
+    return partitions</code></pre>
 </details>
 </dd>
 </dl>
@@ -186,13 +221,14 @@ def post(
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="prefeitura_rio.integrations.sgrc" href="index.html">prefeitura_rio.integrations.sgrc</a></code></li>
+<li><code><a title="prefeitura_rio.pipelines_utils" href="index.html">prefeitura_rio.pipelines_utils</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="prefeitura_rio.integrations.sgrc.utils.add_token_to_body" href="#prefeitura_rio.integrations.sgrc.utils.add_token_to_body">add_token_to_body</a></code></li>
-<li><code><a title="prefeitura_rio.integrations.sgrc.utils.get_headers" href="#prefeitura_rio.integrations.sgrc.utils.get_headers">get_headers</a></code></li>
+<li><code><a title="prefeitura_rio.pipelines_utils.gcs.get_gcs_client" href="#prefeitura_rio.pipelines_utils.gcs.get_gcs_client">get_gcs_client</a></code></li>
+<li><code><a title="prefeitura_rio.pipelines_utils.gcs.list_blobs_with_prefix" href="#prefeitura_rio.pipelines_utils.gcs.list_blobs_with_prefix">list_blobs_with_prefix</a></code></li>
+<li><code><a title="prefeitura_rio.pipelines_utils.gcs.parse_blobs_to_partition_list" href="#prefeitura_rio.pipelines_utils.gcs.parse_blobs_to_partition_list">parse_blobs_to_partition_list</a></code></li>
 </ul>
 </li>
 </ul>

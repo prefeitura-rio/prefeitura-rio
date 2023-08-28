@@ -35,17 +35,21 @@ Framework-agnotic metrics implementations for the prefeitura_rio package.
 Most of them can usually be imported from the `sklearn.metrics` module.
 &#34;&#34;&#34;
 
-import warnings
+try:
+    import numpy as np
+    from sklearn.metrics import (
+        brier_score_loss,
+        confusion_matrix,
+        fbeta_score,
+        mean_squared_error,
+    )
+except ImportError:
+    pass
 
-import numpy as np
-from sklearn.metrics import (
-    brier_score_loss,
-    confusion_matrix,
-    fbeta_score,
-    mean_squared_error,
-)
+from prefeitura_rio.utils import assert_dependencies
 
 
+@assert_dependencies([&#34;numpy&#34;, &#34;sklearn&#34;], extras=[&#34;metrics&#34;])
 def brier(
     y_true,
     y_pred,
@@ -66,11 +70,10 @@ def brier(
     Returns:
         float: The Brier score.
     &#34;&#34;&#34;
-    return brier_score_loss(
-        y_true, y_pred, sample_weight=sample_weight, pos_label=pos_label
-    )
+    return brier_score_loss(y_true, y_pred, sample_weight=sample_weight, pos_label=pos_label)
 
 
+@assert_dependencies([&#34;numpy&#34;, &#34;sklearn&#34;], extras=[&#34;metrics&#34;])
 def carabetta(y_true, y_pred, alpha=5, beta=2):
     &#34;&#34;&#34;
     Computes the Carabetta score.
@@ -91,6 +94,7 @@ def carabetta(y_true, y_pred, alpha=5, beta=2):
     return np.sum(alpha * y_true * (1 - y_pred) + beta * (1 - y_true) * y_pred)
 
 
+@assert_dependencies([&#34;numpy&#34;, &#34;sklearn&#34;], extras=[&#34;metrics&#34;])
 def fbeta(
     y_true,
     y_pred,
@@ -147,6 +151,7 @@ def fbeta(
         raise exc
 
 
+@assert_dependencies([&#34;numpy&#34;, &#34;sklearn&#34;], extras=[&#34;metrics&#34;])
 def mse(y_true, y_pred, *, sample_weight=None, multioutput=&#34;uniform_average&#34;):
     &#34;&#34;&#34;
     Computes the MSE score.
@@ -162,11 +167,10 @@ def mse(y_true, y_pred, *, sample_weight=None, multioutput=&#34;uniform_average&
     Returns:
         float: The MSE score.
     &#34;&#34;&#34;
-    return mean_squared_error(
-        y_true, y_pred, sample_weight=sample_weight, multioutput=multioutput
-    )
+    return mean_squared_error(y_true, y_pred, sample_weight=sample_weight, multioutput=multioutput)
 
 
+@assert_dependencies([&#34;numpy&#34;, &#34;sklearn&#34;], extras=[&#34;metrics&#34;])
 def nash_sutcliffe(
     y_true,
     y_pred,
@@ -186,6 +190,7 @@ def nash_sutcliffe(
     return 1 - np.sum((y_true - y_pred) ** 2) / np.sum((y_true - np.mean(y_true)) ** 2)
 
 
+@assert_dependencies([&#34;numpy&#34;, &#34;sklearn&#34;], extras=[&#34;metrics&#34;])
 def pet(y_true, y_pred, *, sample_weight=None, multioutput=&#34;uniform_average&#34;):
     &#34;&#34;&#34;
     Computes the PET score.
@@ -202,12 +207,11 @@ def pet(y_true, y_pred, *, sample_weight=None, multioutput=&#34;uniform_average&
         float: The PET score.
     &#34;&#34;&#34;
     return np.tanh(
-        mean_squared_error(
-            y_true, y_pred, sample_weight=sample_weight, multioutput=multioutput
-        )
+        mean_squared_error(y_true, y_pred, sample_weight=sample_weight, multioutput=multioutput)
     )
 
 
+@assert_dependencies([&#34;numpy&#34;, &#34;sklearn&#34;], extras=[&#34;metrics&#34;])
 def rmse(y_true, y_pred, *, sample_weight=None, multioutput=&#34;uniform_average&#34;):
     &#34;&#34;&#34;
     Computes the RMSE score.
@@ -224,12 +228,11 @@ def rmse(y_true, y_pred, *, sample_weight=None, multioutput=&#34;uniform_average
         float: The RMSE score.
     &#34;&#34;&#34;
     return np.sqrt(
-        mean_squared_error(
-            y_true, y_pred, sample_weight=sample_weight, multioutput=multioutput
-        )
+        mean_squared_error(y_true, y_pred, sample_weight=sample_weight, multioutput=multioutput)
     )
 
 
+@assert_dependencies([&#34;numpy&#34;, &#34;sklearn&#34;], extras=[&#34;metrics&#34;])
 def sp(
     y_true,
     y_pred,
@@ -292,479 +295,6 @@ def sp(
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="prefeitura_rio.metrics.agnostic.brier"><code class="name flex">
-<span>def <span class="ident">brier</span></span>(<span>y_true, y_pred, *, sample_weight=None, pos_label=None)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Computes the Brier score loss.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>y_true</code></strong> :&ensp;<code>array-like</code></dt>
-<dd>The true values.</dd>
-<dt><strong><code>y_pred</code></strong> :&ensp;<code>array-like</code></dt>
-<dd>The predicted values.</dd>
-<dt><strong><code>sample_weight</code></strong> :&ensp;<code>array-like</code>, optional</dt>
-<dd>The sample weights. Defaults to
-<code>None</code>.</dd>
-<dt><strong><code>pos_label</code></strong> :&ensp;<code>int</code>, optional</dt>
-<dd>The positive label. Defaults to <code>None</code>.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>float</code></dt>
-<dd>The Brier score.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def brier(
-    y_true,
-    y_pred,
-    *,
-    sample_weight=None,
-    pos_label=None,
-):
-    &#34;&#34;&#34;
-    Computes the Brier score loss.
-
-    Args:
-        y_true (array-like): The true values.
-        y_pred (array-like): The predicted values.
-        sample_weight (array-like, optional): The sample weights. Defaults to
-            `None`.
-        pos_label (int, optional): The positive label. Defaults to `None`.
-
-    Returns:
-        float: The Brier score.
-    &#34;&#34;&#34;
-    return brier_score_loss(
-        y_true, y_pred, sample_weight=sample_weight, pos_label=pos_label
-    )</code></pre>
-</details>
-</dd>
-<dt id="prefeitura_rio.metrics.agnostic.carabetta"><code class="name flex">
-<span>def <span class="ident">carabetta</span></span>(<span>y_true, y_pred, alpha=5, beta=2)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Computes the Carabetta score.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>y_true</code></strong> :&ensp;<code>array-like</code></dt>
-<dd>The true values.</dd>
-<dt><strong><code>y_pred</code></strong> :&ensp;<code>array-like</code></dt>
-<dd>The predicted values.</dd>
-<dt><strong><code>alpha</code></strong> :&ensp;<code>float</code>, optional</dt>
-<dd>The alpha coefficient, which controls the weight of false-negatives
-in the score. Defaults to <code>5</code>.</dd>
-<dt><strong><code>beta</code></strong> :&ensp;<code>float</code>, optional</dt>
-<dd>The beta coefficient, which controls the weight of false-positives
-in the score. Defaults to <code>2</code>.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>float</code></dt>
-<dd>The Carabetta score.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def carabetta(y_true, y_pred, alpha=5, beta=2):
-    &#34;&#34;&#34;
-    Computes the Carabetta score.
-
-    Args:
-        y_true (array-like): The true values.
-        y_pred (array-like): The predicted values.
-        alpha (float, optional): The alpha coefficient, which controls the weight of false-negatives
-            in the score. Defaults to `5`.
-        beta (float, optional): The beta coefficient, which controls the weight of false-positives
-            in the score. Defaults to `2`.
-
-    Returns:
-        float: The Carabetta score.
-    &#34;&#34;&#34;
-    y_true = np.array(y_true)
-    y_pred = np.array(y_pred)
-    return np.sum(alpha * y_true * (1 - y_pred) + beta * (1 - y_true) * y_pred)</code></pre>
-</details>
-</dd>
-<dt id="prefeitura_rio.metrics.agnostic.fbeta"><code class="name flex">
-<span>def <span class="ident">fbeta</span></span>(<span>y_true, y_pred, *, beta, labels=None, pos_label=1, average='binary', sample_weight=None, zero_division='warn', threshold=None) ‑> float</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Computes the F-beta score.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>y_true</code></strong> :&ensp;<code>array-like</code></dt>
-<dd>The true values.</dd>
-<dt><strong><code>y_pred</code></strong> :&ensp;<code>array-like</code></dt>
-<dd>The predicted values.</dd>
-<dt><strong><code>beta</code></strong> :&ensp;<code>float</code></dt>
-<dd>The beta value.</dd>
-<dt><strong><code>labels</code></strong> :&ensp;<code>array-like</code>, optional</dt>
-<dd>The labels to consider. If <code>None</code>, all
-labels are considered. Defaults to <code>None</code>.</dd>
-<dt><strong><code>pos_label</code></strong> :&ensp;<code>int</code>, optional</dt>
-<dd>The positive label. Defaults to <code>1</code>.</dd>
-<dt><strong><code>average</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>The averaging method. Defaults to <code>'binary'</code>.</dd>
-<dt><strong><code>sample_weight</code></strong> :&ensp;<code>array-like</code>, optional</dt>
-<dd>The sample weights. Defaults to
-<code>None</code>.</dd>
-<dt><strong><code>zero_division</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>The value to return when there is a
-zero division. Defaults to <code>'warn'</code>.</dd>
-<dt><strong><code>threshold</code></strong> :&ensp;<code>float</code>, optional</dt>
-<dd>The threshold to use when converting
-<code>y_pred</code> to binary. Defaults to <code>None</code>.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>float</code></dt>
-<dd>The F-beta score.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def fbeta(
-    y_true,
-    y_pred,
-    *,
-    beta,
-    labels=None,
-    pos_label=1,
-    average=&#34;binary&#34;,
-    sample_weight=None,
-    zero_division=&#34;warn&#34;,
-    threshold=None,
-) -&gt; float:
-    &#34;&#34;&#34;
-    Computes the F-beta score.
-
-    Args:
-        y_true (array-like): The true values.
-        y_pred (array-like): The predicted values.
-        beta (float): The beta value.
-        labels (array-like, optional): The labels to consider. If `None`, all
-            labels are considered. Defaults to `None`.
-        pos_label (int, optional): The positive label. Defaults to `1`.
-        average (str, optional): The averaging method. Defaults to `&#39;binary&#39;`.
-        sample_weight (array-like, optional): The sample weights. Defaults to
-            `None`.
-        zero_division (str, optional): The value to return when there is a
-            zero division. Defaults to `&#39;warn&#39;`.
-        threshold (float, optional): The threshold to use when converting
-            `y_pred` to binary. Defaults to `None`.
-
-    Returns:
-        float: The F-beta score.
-    &#34;&#34;&#34;
-    if threshold:
-        y_pred = np.array(y_pred) &gt; threshold
-    try:
-        return fbeta_score(
-            y_true,
-            y_pred,
-            beta=beta,
-            labels=labels,
-            pos_label=pos_label,
-            average=average,
-            sample_weight=sample_weight,
-            zero_division=zero_division,
-        )
-    except ValueError as exc:
-        # Check for exception message
-        if &#34;mix of binary and continuous&#34; in str(exc):
-            raise ValueError(
-                &#34;`y_true` and `y_pred` must be binary. If your `y_pred` is not&#34;
-                &#34; binary, try setting the `threshold` parameter.&#34;
-            ) from exc
-        raise exc</code></pre>
-</details>
-</dd>
-<dt id="prefeitura_rio.metrics.agnostic.mse"><code class="name flex">
-<span>def <span class="ident">mse</span></span>(<span>y_true, y_pred, *, sample_weight=None, multioutput='uniform_average')</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Computes the MSE score.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>y_true</code></strong> :&ensp;<code>array-like</code></dt>
-<dd>The true values.</dd>
-<dt><strong><code>y_pred</code></strong> :&ensp;<code>array-like</code></dt>
-<dd>The predicted values.</dd>
-<dt><strong><code>sample_weight</code></strong> :&ensp;<code>array-like</code>, optional</dt>
-<dd>The sample weights. Defaults to
-<code>None</code>.</dd>
-<dt><strong><code>multioutput</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>The averaging method. Defaults to
-<code>'uniform_average'</code>.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>float</code></dt>
-<dd>The MSE score.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def mse(y_true, y_pred, *, sample_weight=None, multioutput=&#34;uniform_average&#34;):
-    &#34;&#34;&#34;
-    Computes the MSE score.
-
-    Args:
-        y_true (array-like): The true values.
-        y_pred (array-like): The predicted values.
-        sample_weight (array-like, optional): The sample weights. Defaults to
-            `None`.
-        multioutput (str, optional): The averaging method. Defaults to
-            `&#39;uniform_average&#39;`.
-
-    Returns:
-        float: The MSE score.
-    &#34;&#34;&#34;
-    return mean_squared_error(
-        y_true, y_pred, sample_weight=sample_weight, multioutput=multioutput
-    )</code></pre>
-</details>
-</dd>
-<dt id="prefeitura_rio.metrics.agnostic.nash_sutcliffe"><code class="name flex">
-<span>def <span class="ident">nash_sutcliffe</span></span>(<span>y_true, y_pred)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Computes the Nash-Sutcliffe score.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>y_true</code></strong> :&ensp;<code>array-like</code></dt>
-<dd>The true values.</dd>
-<dt><strong><code>y_pred</code></strong> :&ensp;<code>array-like</code></dt>
-<dd>The predicted values.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>float</code></dt>
-<dd>The Nash-Sutcliffe score.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def nash_sutcliffe(
-    y_true,
-    y_pred,
-):
-    &#34;&#34;&#34;
-    Computes the Nash-Sutcliffe score.
-
-    Args:
-        y_true (array-like): The true values.
-        y_pred (array-like): The predicted values.
-
-    Returns:
-        float: The Nash-Sutcliffe score.
-    &#34;&#34;&#34;
-    y_true = np.array(y_true)
-    y_pred = np.array(y_pred)
-    return 1 - np.sum((y_true - y_pred) ** 2) / np.sum((y_true - np.mean(y_true)) ** 2)</code></pre>
-</details>
-</dd>
-<dt id="prefeitura_rio.metrics.agnostic.pet"><code class="name flex">
-<span>def <span class="ident">pet</span></span>(<span>y_true, y_pred, *, sample_weight=None, multioutput='uniform_average')</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Computes the PET score.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>y_true</code></strong> :&ensp;<code>array-like</code></dt>
-<dd>The true values.</dd>
-<dt><strong><code>y_pred</code></strong> :&ensp;<code>array-like</code></dt>
-<dd>The predicted values.</dd>
-<dt><strong><code>sample_weight</code></strong> :&ensp;<code>array-like</code>, optional</dt>
-<dd>The sample weights. Defaults to
-<code>None</code>.</dd>
-<dt><strong><code>multioutput</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>The averaging method. Defaults to
-<code>'uniform_average'</code>.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>float</code></dt>
-<dd>The PET score.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def pet(y_true, y_pred, *, sample_weight=None, multioutput=&#34;uniform_average&#34;):
-    &#34;&#34;&#34;
-    Computes the PET score.
-
-    Args:
-        y_true (array-like): The true values.
-        y_pred (array-like): The predicted values.
-        sample_weight (array-like, optional): The sample weights. Defaults to
-            `None`.
-        multioutput (str, optional): The averaging method. Defaults to
-            `&#39;uniform_average&#39;`.
-
-    Returns:
-        float: The PET score.
-    &#34;&#34;&#34;
-    return np.tanh(
-        mean_squared_error(
-            y_true, y_pred, sample_weight=sample_weight, multioutput=multioutput
-        )
-    )</code></pre>
-</details>
-</dd>
-<dt id="prefeitura_rio.metrics.agnostic.rmse"><code class="name flex">
-<span>def <span class="ident">rmse</span></span>(<span>y_true, y_pred, *, sample_weight=None, multioutput='uniform_average')</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Computes the RMSE score.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>y_true</code></strong> :&ensp;<code>array-like</code></dt>
-<dd>The true values.</dd>
-<dt><strong><code>y_pred</code></strong> :&ensp;<code>array-like</code></dt>
-<dd>The predicted values.</dd>
-<dt><strong><code>sample_weight</code></strong> :&ensp;<code>array-like</code>, optional</dt>
-<dd>The sample weights. Defaults to
-<code>None</code>.</dd>
-<dt><strong><code>multioutput</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>The averaging method. Defaults to
-<code>'uniform_average'</code>.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>float</code></dt>
-<dd>The RMSE score.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def rmse(y_true, y_pred, *, sample_weight=None, multioutput=&#34;uniform_average&#34;):
-    &#34;&#34;&#34;
-    Computes the RMSE score.
-
-    Args:
-        y_true (array-like): The true values.
-        y_pred (array-like): The predicted values.
-        sample_weight (array-like, optional): The sample weights. Defaults to
-            `None`.
-        multioutput (str, optional): The averaging method. Defaults to
-            `&#39;uniform_average&#39;`.
-
-    Returns:
-        float: The RMSE score.
-    &#34;&#34;&#34;
-    return np.sqrt(
-        mean_squared_error(
-            y_true, y_pred, sample_weight=sample_weight, multioutput=multioutput
-        )
-    )</code></pre>
-</details>
-</dd>
-<dt id="prefeitura_rio.metrics.agnostic.sp"><code class="name flex">
-<span>def <span class="ident">sp</span></span>(<span>y_true, y_pred, *, labels=None, sample_weight=None, normalize=None, threshold=None)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Computes the SP score.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>y_true</code></strong> :&ensp;<code>array-like</code></dt>
-<dd>The true values.</dd>
-<dt><strong><code>y_pred</code></strong> :&ensp;<code>array-like</code></dt>
-<dd>The predicted values.</dd>
-<dt><strong><code>labels</code></strong> :&ensp;<code>array-like</code>, optional</dt>
-<dd>List of labels to index the matrix. This may be used to
-reorder or select a subset of labels. If None is given, those that appear at least
-once in y_true or y_pred are used in sorted order.</dd>
-<dt><strong><code>sample_weight</code></strong> :&ensp;<code>array-like</code>, optional</dt>
-<dd>The sample weights. Defaults to
-<code>None</code>.</dd>
-<dt><strong><code>normalize</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>Normalizes confusion matrix over the true (rows), predicted
-(columns) conditions or all the population. If None, confusion matrix will not be
-normalized.</dd>
-<dt><strong><code>threshold</code></strong> :&ensp;<code>float</code>, optional</dt>
-<dd>The threshold to use when converting
-<code>y_pred</code> to binary. Defaults to <code>None</code>.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>float</code></dt>
-<dd>The SP score.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def sp(
-    y_true,
-    y_pred,
-    *,
-    labels=None,
-    sample_weight=None,
-    normalize=None,
-    threshold=None,
-):
-    &#34;&#34;&#34;
-    Computes the SP score.
-
-    Args:
-        y_true (array-like): The true values.
-        y_pred (array-like): The predicted values.
-        labels (array-like, optional): List of labels to index the matrix. This may be used to
-            reorder or select a subset of labels. If None is given, those that appear at least
-            once in y_true or y_pred are used in sorted order.
-        sample_weight (array-like, optional): The sample weights. Defaults to
-            `None`.
-        normalize (str, optional): Normalizes confusion matrix over the true (rows), predicted
-            (columns) conditions or all the population. If None, confusion matrix will not be
-            normalized.
-        threshold (float, optional): The threshold to use when converting
-            `y_pred` to binary. Defaults to `None`.
-
-    Returns:
-        float: The SP score.
-    &#34;&#34;&#34;
-    if threshold:
-        y_pred = np.array(y_pred) &gt; threshold
-    try:
-        conf_matrix = confusion_matrix(
-            y_true,
-            y_pred,
-            labels=labels,
-            sample_weight=sample_weight,
-            normalize=normalize,
-        )
-        true_negative = conf_matrix[0][0]
-        false_negative = conf_matrix[1][0]
-        true_positive = conf_matrix[1][1]
-        false_positive = conf_matrix[0][1]
-        fa = false_positive / (true_negative + false_positive + np.finfo(float).eps)
-        pd = true_positive / (true_positive + false_negative + np.finfo(float).eps)
-        sp = np.sqrt(np.sqrt(pd * (1 - fa)) * (0.5 * (pd + (1 - fa))))
-        return sp
-    except ValueError as exc:
-        # Check for exception message
-        if &#34;mix of binary and continuous&#34; in str(exc):
-            raise ValueError(
-                &#34;`y_true` and `y_pred` must be binary. If your `y_pred` is not&#34;
-                &#34; binary, try setting the `threshold` parameter.&#34;
-            ) from exc
-        raise exc</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 <section>
 </section>
@@ -778,18 +308,6 @@ normalized.</dd>
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="prefeitura_rio.metrics" href="index.html">prefeitura_rio.metrics</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="two-column">
-<li><code><a title="prefeitura_rio.metrics.agnostic.brier" href="#prefeitura_rio.metrics.agnostic.brier">brier</a></code></li>
-<li><code><a title="prefeitura_rio.metrics.agnostic.carabetta" href="#prefeitura_rio.metrics.agnostic.carabetta">carabetta</a></code></li>
-<li><code><a title="prefeitura_rio.metrics.agnostic.fbeta" href="#prefeitura_rio.metrics.agnostic.fbeta">fbeta</a></code></li>
-<li><code><a title="prefeitura_rio.metrics.agnostic.mse" href="#prefeitura_rio.metrics.agnostic.mse">mse</a></code></li>
-<li><code><a title="prefeitura_rio.metrics.agnostic.nash_sutcliffe" href="#prefeitura_rio.metrics.agnostic.nash_sutcliffe">nash_sutcliffe</a></code></li>
-<li><code><a title="prefeitura_rio.metrics.agnostic.pet" href="#prefeitura_rio.metrics.agnostic.pet">pet</a></code></li>
-<li><code><a title="prefeitura_rio.metrics.agnostic.rmse" href="#prefeitura_rio.metrics.agnostic.rmse">rmse</a></code></li>
-<li><code><a title="prefeitura_rio.metrics.agnostic.sp" href="#prefeitura_rio.metrics.agnostic.sp">sp</a></code></li>
 </ul>
 </li>
 </ul>

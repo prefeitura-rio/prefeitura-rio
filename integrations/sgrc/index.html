@@ -30,8 +30,11 @@
 from datetime import datetime
 from typing import Any, Dict, List, Union
 
-import pendulum
-import pytz
+try:
+    import pendulum
+    import pytz
+except ImportError:
+    pass
 
 from prefeitura_rio import settings
 from prefeitura_rio.integrations.sgrc.exceptions import (
@@ -56,8 +59,10 @@ from prefeitura_rio.integrations.sgrc.models import (
     TicketSummary,
 )
 from prefeitura_rio.integrations.sgrc.utils import post
+from prefeitura_rio.utils import assert_dependencies
 
 
+@assert_dependencies([&#34;pendulum&#34;, &#34;pytz&#34;], extras=[&#34;sgrc&#34;])
 def new_ticket(
     classification_code: str,
     description: str,
@@ -137,9 +142,7 @@ def new_ticket(
     try:
         response = post(settings.SGRC_URL_NEW_TICKET, data)
     except Exception as exc:
-        raise BaseSGRCException(
-            &#34;Unexpected exception when trying to create a new ticket.&#34;
-        ) from exc
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
 
     if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
         raise BaseSGRCException(
@@ -208,9 +211,7 @@ def get_protocol_tickets(protocol_id: str) -&gt; List[TicketSummary]:
     try:
         response = post(settings.SGRC_URL_GET_PROTOCOL_TICKETS, data)
     except Exception as exc:
-        raise BaseSGRCException(
-            &#34;Unexpected exception when trying to create a new ticket.&#34;
-        ) from exc
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
 
     if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
         raise BaseSGRCException(
@@ -225,9 +226,7 @@ def get_protocol_tickets(protocol_id: str) -&gt; List[TicketSummary]:
 
     if code == 1:
         if &#34;chamados&#34; not in response:
-            raise BaseSGRCException(
-                &#34;Unexpected response from SGRC. &#39;chamados&#39; key is missing&#34;
-            )
+            raise BaseSGRCException(&#34;Unexpected response from SGRC. &#39;chamados&#39; key is missing&#34;)
         chamados: List[TicketSummary] = []
         for ticket_dict in response[&#34;chamados&#34;]:
             chamado = TicketSummary(
@@ -283,9 +282,7 @@ def get_ticket_details(ticket_id: str) -&gt; Ticket:
     try:
         response = post(settings.SGRC_URL_GET_TICKET_DETAILS, data)
     except Exception as exc:
-        raise BaseSGRCException(
-            &#34;Unexpected exception when trying to create a new ticket.&#34;
-        ) from exc
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
 
     if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
         raise BaseSGRCException(
@@ -300,9 +297,7 @@ def get_ticket_details(ticket_id: str) -&gt; Ticket:
 
     if code == 1:
         if &#34;chamado&#34; not in response:
-            raise BaseSGRCException(
-                &#34;Unexpected response from SGRC. &#39;chamado&#39; key is missing&#34;
-            )
+            raise BaseSGRCException(&#34;Unexpected response from SGRC. &#39;chamado&#39; key is missing&#34;)
         ticket_dict = response[&#34;chamado&#34;]
         classification = Classification(
             category_code=ticket_dict[&#34;classificacao&#34;][&#34;codigoCategoria&#34;],
@@ -377,9 +372,7 @@ def get_protocol_tickets_details(protocol_id: str) -&gt; List[TicketDetails]:
     try:
         response = post(settings.SGRC_URL_GET_PROTOCOL_TICKETS_DETAILS, data)
     except Exception as exc:
-        raise BaseSGRCException(
-            &#34;Unexpected exception when trying to create a new ticket.&#34;
-        ) from exc
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
 
     if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
         raise BaseSGRCException(
@@ -394,9 +387,7 @@ def get_protocol_tickets_details(protocol_id: str) -&gt; List[TicketDetails]:
 
     if code == 1:
         if &#34;chamados&#34; not in response:
-            raise BaseSGRCException(
-                &#34;Unexpected response from SGRC. &#39;chamados&#39; key is missing&#34;
-            )
+            raise BaseSGRCException(&#34;Unexpected response from SGRC. &#39;chamados&#39; key is missing&#34;)
         tickets = []
         for ticket_dict in response[&#34;chamados&#34;]:
             classification = Classification(
@@ -573,9 +564,7 @@ def version() -&gt; Dict[str, Any]:
     try:
         response = post(settings.SGRC_URL_GET_PROTOCOL_TICKETS, data)
     except Exception as exc:
-        raise BaseSGRCException(
-            &#34;Unexpected exception when trying to create a new ticket.&#34;
-        ) from exc
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
 
     if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
         raise BaseSGRCException(
@@ -590,9 +579,7 @@ def version() -&gt; Dict[str, Any]:
 
     if code == 1:
         if &#34;chamados&#34; not in response:
-            raise BaseSGRCException(
-                &#34;Unexpected response from SGRC. &#39;chamados&#39; key is missing&#34;
-            )
+            raise BaseSGRCException(&#34;Unexpected response from SGRC. &#39;chamados&#39; key is missing&#34;)
         chamados: List[TicketSummary] = []
         for ticket_dict in response[&#34;chamados&#34;]:
             chamado = TicketSummary(
@@ -682,9 +669,7 @@ def version() -&gt; Dict[str, Any]:
     try:
         response = post(settings.SGRC_URL_GET_PROTOCOL_TICKETS_DETAILS, data)
     except Exception as exc:
-        raise BaseSGRCException(
-            &#34;Unexpected exception when trying to create a new ticket.&#34;
-        ) from exc
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
 
     if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
         raise BaseSGRCException(
@@ -699,9 +684,7 @@ def version() -&gt; Dict[str, Any]:
 
     if code == 1:
         if &#34;chamados&#34; not in response:
-            raise BaseSGRCException(
-                &#34;Unexpected response from SGRC. &#39;chamados&#39; key is missing&#34;
-            )
+            raise BaseSGRCException(&#34;Unexpected response from SGRC. &#39;chamados&#39; key is missing&#34;)
         tickets = []
         for ticket_dict in response[&#34;chamados&#34;]:
             classification = Classification(
@@ -862,9 +845,7 @@ def version() -&gt; Dict[str, Any]:
     try:
         response = post(settings.SGRC_URL_GET_TICKET_DETAILS, data)
     except Exception as exc:
-        raise BaseSGRCException(
-            &#34;Unexpected exception when trying to create a new ticket.&#34;
-        ) from exc
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
 
     if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
         raise BaseSGRCException(
@@ -879,9 +860,7 @@ def version() -&gt; Dict[str, Any]:
 
     if code == 1:
         if &#34;chamado&#34; not in response:
-            raise BaseSGRCException(
-                &#34;Unexpected response from SGRC. &#39;chamado&#39; key is missing&#34;
-            )
+            raise BaseSGRCException(&#34;Unexpected response from SGRC. &#39;chamado&#39; key is missing&#34;)
         ticket_dict = response[&#34;chamado&#34;]
         classification = Classification(
             category_code=ticket_dict[&#34;classificacao&#34;][&#34;codigoCategoria&#34;],
@@ -913,175 +892,6 @@ def version() -&gt; Dict[str, Any]:
             status=ticket_dict[&#34;status&#34;],
         )
         return ticket
-    elif code == 2:
-        raise SGRCMalformedBodyException(response[&#34;descricao&#34;])
-    elif code == 3:
-        raise SGRCInvalidBodyException(response[&#34;descricao&#34;])
-    elif code == 4:
-        raise SGRCBusinessRuleException(response[&#34;descricao&#34;])
-    elif code == 5:
-        raise SGRCInternalErrorException(response[&#34;descricao&#34;])
-    elif code == 6:
-        raise SGRCEquivalentTicketException(response[&#34;descricao&#34;])
-    elif code == 7:
-        raise SGRCDuplicateTicketException(response[&#34;descricao&#34;])</code></pre>
-</details>
-</dd>
-<dt id="prefeitura_rio.integrations.sgrc.new_ticket"><code class="name flex">
-<span>def <span class="ident">new_ticket</span></span>(<span>classification_code: str, description: str, address: <a title="prefeitura_rio.integrations.sgrc.models.Address" href="models.html#prefeitura_rio.integrations.sgrc.models.Address">Address</a>, date_time: Union[datetime.datetime, str] = None, requester: <a title="prefeitura_rio.integrations.sgrc.models.Requester" href="models.html#prefeitura_rio.integrations.sgrc.models.Requester">Requester</a> = None, occurrence_origin_code: str = '28') ‑> <a title="prefeitura_rio.integrations.sgrc.models.NewTicket" href="models.html#prefeitura_rio.integrations.sgrc.models.NewTicket">NewTicket</a></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Creates a new ticket.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>classification_code</code></strong> :&ensp;<code>str</code></dt>
-<dd>The classification code.</dd>
-<dt><strong><code>description</code></strong> :&ensp;<code>str</code></dt>
-<dd>The description of the occurrence.</dd>
-<dt><strong><code>address</code></strong> :&ensp;<code>Address</code></dt>
-<dd>The address of the occurrence.</dd>
-<dt><strong><code>date_time</code></strong> :&ensp;<code>Union[datetime, str]</code>, optional</dt>
-<dd>The date and time of the occurrence. When
-converted to string, it must be in the following format: "%Y-%m-%dT%H:%M:%S". Defaults
-to <code>None</code>, which will be replaced by the current date and time.</dd>
-<dt><strong><code>requester</code></strong> :&ensp;<code>Requester</code>, optional</dt>
-<dd>The requester information. Defaults to <code>None</code>, which will
-be replaced by an empty <code>Requester</code> object.</dd>
-<dt><strong><code>occurrence_origin_code</code></strong> :&ensp;<code>str</code>, optional</dt>
-<dd>The occurrence origin code (e.g. "13" for
-"Web App"). Defaults to "28".</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>NewTicket</code></dt>
-<dd>The new ticket.</dd>
-</dl>
-<h2 id="raises">Raises</h2>
-<dl>
-<dt><code>BaseSGRCException</code></dt>
-<dd>If an unexpected exception occurs.</dd>
-<dt><code>SGRCBusinessRuleException</code></dt>
-<dd>If the request violates a business rule.</dd>
-<dt><code>SGRCDuplicateTicketException</code></dt>
-<dd>If the request tries to create a duplicate ticket.</dd>
-<dt><code>SGRCEquivalentTicketException</code></dt>
-<dd>If the request tries to create an equivalent ticket.</dd>
-<dt><code>SGRCInternalErrorException</code></dt>
-<dd>If the request causes an internal error.</dd>
-<dt><code>SGRCInvalidBodyException</code></dt>
-<dd>If the request body is invalid.</dd>
-<dt><code>SGRCMalformedBodyException</code></dt>
-<dd>If the request body is malformed.</dd>
-<dt><code>ValueError</code></dt>
-<dd>If any of the arguments is invalid.</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def new_ticket(
-    classification_code: str,
-    description: str,
-    address: Address,
-    date_time: Union[datetime, str] = None,
-    requester: Requester = None,
-    occurrence_origin_code: str = &#34;28&#34;,
-) -&gt; NewTicket:
-    &#34;&#34;&#34;
-    Creates a new ticket.
-
-    Args:
-        classification_code (str): The classification code.
-        description (str): The description of the occurrence.
-        address (Address): The address of the occurrence.
-        date_time (Union[datetime, str], optional): The date and time of the occurrence. When
-            converted to string, it must be in the following format: &#34;%Y-%m-%dT%H:%M:%S&#34;. Defaults
-            to `None`, which will be replaced by the current date and time.
-        requester (Requester, optional): The requester information. Defaults to `None`, which will
-            be replaced by an empty `Requester` object.
-        occurrence_origin_code (str, optional): The occurrence origin code (e.g. &#34;13&#34; for
-            &#34;Web App&#34;). Defaults to &#34;28&#34;.
-
-    Returns:
-        NewTicket: The new ticket.
-
-    Raises:
-        BaseSGRCException: If an unexpected exception occurs.
-        SGRCBusinessRuleException: If the request violates a business rule.
-        SGRCDuplicateTicketException: If the request tries to create a duplicate ticket.
-        SGRCEquivalentTicketException: If the request tries to create an equivalent ticket.
-        SGRCInternalErrorException: If the request causes an internal error.
-        SGRCInvalidBodyException: If the request body is invalid.
-        SGRCMalformedBodyException: If the request body is malformed.
-        ValueError: If any of the arguments is invalid.
-    &#34;&#34;&#34;
-    if not isinstance(classification_code, str):
-        try:
-            classification_code = str(classification_code)
-        except Exception:
-            raise ValueError(
-                &#34;&#39;classification_code&#39; must be a string or an object that implements the __str__ method.&#34;  # noqa
-            )
-    if not isinstance(description, str):
-        try:
-            description = str(description)
-        except Exception:
-            raise ValueError(
-                &#34;&#39;description&#39; must be a string or an object that implements the __str__ method.&#34;  # noqa
-            )
-    if not isinstance(address, Address):
-        raise ValueError(&#34;&#39;address&#39; must be an Address object.&#34;)
-    if date_time is None:
-        date_time = pendulum.now(tz=pytz.timezone(&#34;America/Sao_Paulo&#34;)).strftime(
-            &#34;%Y-%m-%dT%H:%M:%S&#34;
-        )
-    elif isinstance(date_time, datetime):
-        date_time = date_time.strftime(&#34;%Y-%m-%dT%H:%M:%S&#34;)
-    elif not isinstance(date_time, str):
-        raise ValueError(
-            &#34;&#39;date_time&#39; must be a datetime object, a string or an object that implements the __str__ method.&#34;  # noqa
-        )
-    if requester is None:
-        requester = Requester()
-    elif not isinstance(requester, Requester):
-        raise ValueError(&#34;&#39;requester&#39; must be a Requester object.&#34;)
-    if occurrence_origin_code is None:
-        occurrence_origin_code = &#34;&#34;
-    data = {
-        &#34;codigoClassificacao&#34;: classification_code,
-        &#34;dataHora&#34;: date_time,
-        &#34;descricao&#34;: description,
-        &#34;solicitantePortalWeb&#34;: requester.to_dict(),
-        &#34;endereco&#34;: address.to_dict(),
-        &#34;codigoOrigemOcorrencia&#34;: occurrence_origin_code,
-    }
-    try:
-        response = post(settings.SGRC_URL_NEW_TICKET, data)
-    except Exception as exc:
-        raise BaseSGRCException(
-            &#34;Unexpected exception when trying to create a new ticket.&#34;
-        ) from exc
-
-    if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
-        raise BaseSGRCException(
-            &#34;Unexpected response from SGRC. &#39;codigo&#39; or &#39;descricao&#39; key is missing.&#34;
-        )
-
-    code = response[&#34;codigo&#34;]
-    try:
-        code = int(code)
-    except Exception as exc:  # noqa
-        raise BaseSGRCException(f&#34;Unexpected return code &#39;{code}&#39; from SGRC.&#34;) from exc
-
-    if code == 1:
-        if &#34;protocolo&#34; not in response or &#34;codigoChamado&#34; not in response:
-            raise BaseSGRCException(
-                &#34;Unexpected response from SGRC. &#39;protocolo&#39; or &#39;codigoChamado&#39; key is missing.&#34;
-            )
-        return NewTicket(
-            protocol_id=response[&#34;protocolo&#34;],
-            ticket_id=response[&#34;codigoChamado&#34;],
-        )
     elif code == 2:
         raise SGRCMalformedBodyException(response[&#34;descricao&#34;])
     elif code == 3:
@@ -1141,7 +951,6 @@ be replaced by an empty <code>Requester</code> object.</dd>
 <li><code><a title="prefeitura_rio.integrations.sgrc.get_protocol_tickets_details" href="#prefeitura_rio.integrations.sgrc.get_protocol_tickets_details">get_protocol_tickets_details</a></code></li>
 <li><code><a title="prefeitura_rio.integrations.sgrc.get_protocols" href="#prefeitura_rio.integrations.sgrc.get_protocols">get_protocols</a></code></li>
 <li><code><a title="prefeitura_rio.integrations.sgrc.get_ticket_details" href="#prefeitura_rio.integrations.sgrc.get_ticket_details">get_ticket_details</a></code></li>
-<li><code><a title="prefeitura_rio.integrations.sgrc.new_ticket" href="#prefeitura_rio.integrations.sgrc.new_ticket">new_ticket</a></code></li>
 <li><code><a title="prefeitura_rio.integrations.sgrc.version" href="#prefeitura_rio.integrations.sgrc.version">version</a></code></li>
 </ul>
 </li>
