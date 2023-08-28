@@ -123,9 +123,7 @@ def test_sp():
     Tests the `sp` function.
     """
     expected = expected_results["SP"]
-    assert compare_results(
-        lambda y_true, y_pred: sp(y_true, y_pred, threshold=0.5), expected
-    )
+    assert compare_results(lambda y_true, y_pred: sp(y_true, y_pred, threshold=0.5), expected)
 
 
 def test_evaluate():

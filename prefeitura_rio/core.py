@@ -5,9 +5,7 @@ from typing import Union
 from loguru import logger
 
 
-def getenv_or_action(
-    key: str, default: str = None, action: str = "raise"
-) -> Union[str, None]:
+def getenv_or_action(key: str, default: str = None, action: str = "raise") -> Union[str, None]:
     """
     Gets an environment variable or executes an action.
 
@@ -21,9 +19,7 @@ def getenv_or_action(
         Union[str, None]: The environment variable value or the default value.
     """
     if action not in ("raise", "warn", "ignore"):
-        raise ValueError(
-            f"Invalid action '{action}'. Must be one of 'raise', 'warn' or 'ignore'."
-        )
+        raise ValueError(f"Invalid action '{action}'. Must be one of 'raise', 'warn' or 'ignore'.")
     value = getenv(key, default)
     if value is None:
         if action == "raise":

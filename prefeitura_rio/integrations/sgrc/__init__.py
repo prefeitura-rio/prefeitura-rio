@@ -2,8 +2,11 @@
 from datetime import datetime
 from typing import Any, Dict, List, Union
 
-import pendulum
-import pytz
+try:
+    import pendulum
+    import pytz
+except ImportError:
+    pass
 
 from prefeitura_rio import settings
 from prefeitura_rio.integrations.sgrc.exceptions import (
@@ -28,8 +31,10 @@ from prefeitura_rio.integrations.sgrc.models import (
     TicketSummary,
 )
 from prefeitura_rio.integrations.sgrc.utils import post
+from prefeitura_rio.utils import assert_dependencies
 
 
+@assert_dependencies(["pendulum", "pytz"], extras=["sgrc"])
 def new_ticket(
     classification_code: str,
     description: str,
@@ -109,9 +114,7 @@ def new_ticket(
     try:
         response = post(settings.SGRC_URL_NEW_TICKET, data)
     except Exception as exc:
-        raise BaseSGRCException(
-            "Unexpected exception when trying to create a new ticket."
-        ) from exc
+        raise BaseSGRCException("Unexpected exception when trying to create a new ticket.") from exc
 
     if "codigo" not in response or "descricao" not in response:
         raise BaseSGRCException(
@@ -180,9 +183,7 @@ def get_protocol_tickets(protocol_id: str) -> List[TicketSummary]:
     try:
         response = post(settings.SGRC_URL_GET_PROTOCOL_TICKETS, data)
     except Exception as exc:
-        raise BaseSGRCException(
-            "Unexpected exception when trying to create a new ticket."
-        ) from exc
+        raise BaseSGRCException("Unexpected exception when trying to create a new ticket.") from exc
 
     if "codigo" not in response or "descricao" not in response:
         raise BaseSGRCException(
@@ -197,9 +198,7 @@ def get_protocol_tickets(protocol_id: str) -> List[TicketSummary]:
 
     if code == 1:
         if "chamados" not in response:
-            raise BaseSGRCException(
-                "Unexpected response from SGRC. 'chamados' key is missing"
-            )
+            raise BaseSGRCException("Unexpected response from SGRC. 'chamados' key is missing")
         chamados: List[TicketSummary] = []
         for ticket_dict in response["chamados"]:
             chamado = TicketSummary(
@@ -255,9 +254,7 @@ def get_ticket_details(ticket_id: str) -> Ticket:
     try:
         response = post(settings.SGRC_URL_GET_TICKET_DETAILS, data)
     except Exception as exc:
-        raise BaseSGRCException(
-            "Unexpected exception when trying to create a new ticket."
-        ) from exc
+        raise BaseSGRCException("Unexpected exception when trying to create a new ticket.") from exc
 
     if "codigo" not in response or "descricao" not in response:
         raise BaseSGRCException(
@@ -272,9 +269,7 @@ def get_ticket_details(ticket_id: str) -> Ticket:
 
     if code == 1:
         if "chamado" not in response:
-            raise BaseSGRCException(
-                "Unexpected response from SGRC. 'chamado' key is missing"
-            )
+            raise BaseSGRCException("Unexpected response from SGRC. 'chamado' key is missing")
         ticket_dict = response["chamado"]
         classification = Classification(
             category_code=ticket_dict["classificacao"]["codigoCategoria"],
@@ -349,9 +344,7 @@ def get_protocol_tickets_details(protocol_id: str) -> List[TicketDetails]:
     try:
         response = post(settings.SGRC_URL_GET_PROTOCOL_TICKETS_DETAILS, data)
     except Exception as exc:
-        raise BaseSGRCException(
-            "Unexpected exception when trying to create a new ticket."
-        ) from exc
+        raise BaseSGRCException("Unexpected exception when trying to create a new ticket.") from exc
 
     if "codigo" not in response or "descricao" not in response:
         raise BaseSGRCException(
@@ -366,9 +359,7 @@ def get_protocol_tickets_details(protocol_id: str) -> List[TicketDetails]:
 
     if code == 1:
         if "chamados" not in response:
-            raise BaseSGRCException(
-                "Unexpected response from SGRC. 'chamados' key is missing"
-            )
+            raise BaseSGRCException("Unexpected response from SGRC. 'chamados' key is missing")
         tickets = []
         for ticket_dict in response["chamados"]:
             classification = Classification(

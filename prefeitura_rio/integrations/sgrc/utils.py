@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 from typing import Any, Dict, List
 
+try:
+    import requests
+    from requests.adapters import HTTPAdapter, Retry
+except ImportError:
+    pass
 from loguru import logger
-import requests
-from requests.adapters import HTTPAdapter, Retry
 
 from prefeitura_rio import settings
+from prefeitura_rio.utils import assert_dependencies
 
 
 def add_token_to_body(data: Dict[str, Any]) -> Dict[str, Any]:
@@ -35,6 +39,7 @@ def get_headers() -> Dict[str, str]:
     }
 
 
+@assert_dependencies(["requests"], extras=["sgrc"])
 def post(
     url: str,
     data: Dict[str, Any],

@@ -11,18 +11,12 @@ framework.
 """
 from typing import Callable, Dict
 
-from .agnostic import (
-    brier,
-    carabetta,
-    fbeta,
-    mse,
-    nash_sutcliffe,
-    pet,
-    rmse,
-    sp,
-)
+from prefeitura_rio.utils import assert_dependencies
+
+from .agnostic import brier, carabetta, fbeta, mse, nash_sutcliffe, pet, rmse, sp
 
 
+@assert_dependencies(["numpy", "sklearn"], extras=["metrics"])
 def evaluate(
     y_true,
     y_pred,
@@ -51,9 +45,7 @@ def evaluate(
         metrics = {
             "Brier": brier,
             "Carabetta": carabetta,
-            "F-Beta": lambda y_true, y_pred: fbeta(
-                y_true, y_pred, beta=beta, threshold=threshold
-            ),
+            "F-Beta": lambda y_true, y_pred: fbeta(y_true, y_pred, beta=beta, threshold=threshold),
             "MSE": mse,
             "Nash-Sutcliffe": nash_sutcliffe,
             "PET": pet,
