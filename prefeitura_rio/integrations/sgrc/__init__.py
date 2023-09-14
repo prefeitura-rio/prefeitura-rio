@@ -42,6 +42,7 @@ def new_ticket(
     date_time: Union[datetime, str] = None,
     requester: Requester = None,
     occurrence_origin_code: str = "28",
+    specific_attributes: Dict[str, Any] = None,
 ) -> NewTicket:
     """
     Creates a new ticket.
@@ -111,6 +112,16 @@ def new_ticket(
         "endereco": address.to_dict(),
         "codigoOrigemOcorrencia": occurrence_origin_code,
     }
+    if specific_attributes is not None:
+        parsed_specific_attributes = []
+        for key, value in specific_attributes.items():
+            parsed_specific_attributes.append(
+                {
+                    "nomeAtributoEspecifico": key,
+                    "valorAtributoEspecifico": value,
+                }
+            )
+        data["atributosEspecificos"] = parsed_specific_attributes
     try:
         response = post(settings.SGRC_URL_NEW_TICKET, data)
     except Exception as exc:
