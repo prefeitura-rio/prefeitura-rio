@@ -38,7 +38,7 @@ from prefeitura_rio.utils import assert_dependencies
 def new_ticket(
     classification_code: str,
     description: str,
-    address: Address,
+    address: Address = None,
     date_time: Union[datetime, str] = None,
     requester: Requester = None,
     occurrence_origin_code: str = "28",
@@ -50,7 +50,7 @@ def new_ticket(
     Args:
         classification_code (str): The classification code.
         description (str): The description of the occurrence.
-        address (Address): The address of the occurrence.
+        address (Address, optional): The address of the occurrence.
         date_time (Union[datetime, str], optional): The date and time of the occurrence. When
             converted to string, it must be in the following format: "%Y-%m-%dT%H:%M:%S". Defaults
             to `None`, which will be replaced by the current date and time.
@@ -86,7 +86,7 @@ def new_ticket(
             raise ValueError(
                 "'description' must be a string or an object that implements the __str__ method."  # noqa
             )
-    if not isinstance(address, Address):
+    if address and not isinstance(address, Address):
         raise ValueError("'address' must be an Address object.")
     if date_time is None:
         date_time = pendulum.now(tz=pytz.timezone("America/Sao_Paulo")).strftime(
@@ -109,9 +109,10 @@ def new_ticket(
         "dataHora": date_time,
         "descricao": description,
         "solicitantePortalWeb": requester.to_dict(),
-        "endereco": address.to_dict(),
         "codigoOrigemOcorrencia": occurrence_origin_code,
     }
+    if address:
+        data["endereco"] = address.to_dict()
     if specific_attributes is not None:
         parsed_specific_attributes = []
         for key, value in specific_attributes.items():
