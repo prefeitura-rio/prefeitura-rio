@@ -58,12 +58,11 @@ from prefeitura_rio.integrations.sgrc.models import (
     TicketDetails,
     TicketSummary,
 )
-from prefeitura_rio.integrations.sgrc.utils import post
+from prefeitura_rio.integrations.sgrc.utils import apost, post
 from prefeitura_rio.utils import assert_dependencies
 
 
-@assert_dependencies([&#34;pendulum&#34;, &#34;pytz&#34;], extras=[&#34;sgrc&#34;])
-def new_ticket(
+def pre_new_ticket(
     classification_code: str,
     description: str,
     address: Address = None,
@@ -71,35 +70,7 @@ def new_ticket(
     requester: Requester = None,
     occurrence_origin_code: str = &#34;28&#34;,
     specific_attributes: Dict[str, Any] = None,
-) -&gt; NewTicket:
-    &#34;&#34;&#34;
-    Creates a new ticket.
-
-    Args:
-        classification_code (str): The classification code.
-        description (str): The description of the occurrence.
-        address (Address, optional): The address of the occurrence.
-        date_time (Union[datetime, str], optional): The date and time of the occurrence. When
-            converted to string, it must be in the following format: &#34;%Y-%m-%dT%H:%M:%S&#34;. Defaults
-            to `None`, which will be replaced by the current date and time.
-        requester (Requester, optional): The requester information. Defaults to `None`, which will
-            be replaced by an empty `Requester` object.
-        occurrence_origin_code (str, optional): The occurrence origin code (e.g. &#34;13&#34; for
-            &#34;Web App&#34;). Defaults to &#34;28&#34;.
-
-    Returns:
-        NewTicket: The new ticket.
-
-    Raises:
-        BaseSGRCException: If an unexpected exception occurs.
-        SGRCBusinessRuleException: If the request violates a business rule.
-        SGRCDuplicateTicketException: If the request tries to create a duplicate ticket.
-        SGRCEquivalentTicketException: If the request tries to create an equivalent ticket.
-        SGRCInternalErrorException: If the request causes an internal error.
-        SGRCInvalidBodyException: If the request body is invalid.
-        SGRCMalformedBodyException: If the request body is malformed.
-        ValueError: If any of the arguments is invalid.
-    &#34;&#34;&#34;
+) -&gt; dict:
     if not isinstance(classification_code, str):
         try:
             classification_code = str(classification_code)
@@ -151,11 +122,10 @@ def new_ticket(
                 }
             )
         data[&#34;atributosEspecificos&#34;] = parsed_specific_attributes
-    try:
-        response = post(settings.SGRC_URL_NEW_TICKET, data)
-    except Exception as exc:
-        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return data
 
+
+def after_new_ticket(response: Dict[str, Any]) -&gt; NewTicket:
     if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
         raise BaseSGRCException(
             &#34;Unexpected response from SGRC. &#39;codigo&#39; or &#39;descricao&#39; key is missing.&#34;
@@ -190,28 +160,95 @@ def new_ticket(
         raise SGRCDuplicateTicketException(response[&#34;descricao&#34;])
 
 
-def get_protocols() -&gt; List[str]:
-    raise NotImplementedError()
-
-
-def get_protocol_tickets(protocol_id: str) -&gt; List[TicketSummary]:
+@assert_dependencies([&#34;pendulum&#34;, &#34;pytz&#34;], extras=[&#34;sgrc&#34;])
+def new_ticket(
+    classification_code: str,
+    description: str,
+    address: Address = None,
+    date_time: Union[datetime, str] = None,
+    requester: Requester = None,
+    occurrence_origin_code: str = &#34;28&#34;,
+    specific_attributes: Dict[str, Any] = None,
+) -&gt; NewTicket:
     &#34;&#34;&#34;
-    Get the tickets of a protocol.
+    Creates a new ticket.
 
     Args:
-        protocol_id (str): The protocol ID.
+        classification_code (str): The classification code.
+        description (str): The description of the occurrence.
+        address (Address, optional): The address of the occurrence.
+        date_time (Union[datetime, str], optional): The date and time of the occurrence. When
+            converted to string, it must be in the following format: &#34;%Y-%m-%dT%H:%M:%S&#34;. Defaults
+            to `None`, which will be replaced by the current date and time.
+        requester (Requester, optional): The requester information. Defaults to `None`, which will
+            be replaced by an empty `Requester` object.
+        occurrence_origin_code (str, optional): The occurrence origin code (e.g. &#34;13&#34; for
+            &#34;Web App&#34;). Defaults to &#34;28&#34;.
 
     Returns:
-        List[TicketSummary]: The tickets of the protocol.
+        NewTicket: The new ticket.
 
     Raises:
         BaseSGRCException: If an unexpected exception occurs.
         SGRCBusinessRuleException: If the request violates a business rule.
+        SGRCDuplicateTicketException: If the request tries to create a duplicate ticket.
+        SGRCEquivalentTicketException: If the request tries to create an equivalent ticket.
         SGRCInternalErrorException: If the request causes an internal error.
         SGRCInvalidBodyException: If the request body is invalid.
         SGRCMalformedBodyException: If the request body is malformed.
         ValueError: If any of the arguments is invalid.
     &#34;&#34;&#34;
+    data = pre_new_ticket(
+        classification_code=classification_code,
+        description=description,
+        address=address,
+        date_time=date_time,
+        requester=requester,
+        occurrence_origin_code=occurrence_origin_code,
+        specific_attributes=specific_attributes,
+    )
+    try:
+        response = post(settings.SGRC_URL_NEW_TICKET, data)
+    except Exception as exc:
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return after_new_ticket(response)
+
+
+@assert_dependencies([&#34;pendulum&#34;, &#34;pytz&#34;], extras=[&#34;sgrc&#34;])
+async def async_new_ticket(
+    classification_code: str,
+    description: str,
+    address: Address = None,
+    date_time: Union[datetime, str] = None,
+    requester: Requester = None,
+    occurrence_origin_code: str = &#34;28&#34;,
+    specific_attributes: Dict[str, Any] = None,
+) -&gt; NewTicket:
+    data = pre_new_ticket(
+        classification_code=classification_code,
+        description=description,
+        address=address,
+        date_time=date_time,
+        requester=requester,
+        occurrence_origin_code=occurrence_origin_code,
+        specific_attributes=specific_attributes,
+    )
+    try:
+        response = await apost(settings.SGRC_URL_NEW_TICKET, data)
+    except Exception as exc:
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return after_new_ticket(response)
+
+
+def get_protocols() -&gt; List[str]:
+    raise NotImplementedError()
+
+
+async def async_get_protocols() -&gt; List[str]:
+    raise NotImplementedError()
+
+
+def pre_get_protocol_tickets(protocol_id: str) -&gt; dict:
     if not isinstance(protocol_id, str):
         try:
             protocol_id = str(protocol_id)
@@ -220,11 +257,10 @@ def get_protocol_tickets(protocol_id: str) -&gt; List[TicketSummary]:
                 &#34;&#39;protocol_id&#39; must be a string or an object that implements the __str__ method.&#34;
             )
     data = {&#34;codigo&#34;: protocol_id}
-    try:
-        response = post(settings.SGRC_URL_GET_PROTOCOL_TICKETS, data)
-    except Exception as exc:
-        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return data
 
+
+def after_get_protocol_tickets(response: Dict[str, Any]) -&gt; List[TicketSummary]:
     if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
         raise BaseSGRCException(
             &#34;Unexpected response from SGRC. &#39;codigo&#39; or &#39;descricao&#39; key is missing.&#34;
@@ -265,15 +301,15 @@ def get_protocol_tickets(protocol_id: str) -&gt; List[TicketSummary]:
         raise SGRCDuplicateTicketException(response[&#34;descricao&#34;])
 
 
-def get_ticket_details(ticket_id: str) -&gt; Ticket:
+def get_protocol_tickets(protocol_id: str) -&gt; List[TicketSummary]:
     &#34;&#34;&#34;
-    Gets the details of a ticket.
+    Get the tickets of a protocol.
 
     Args:
-        ticket_id (str): The ticket ID.
+        protocol_id (str): The protocol ID.
 
     Returns:
-        Ticket: The ticket details.
+        List[TicketSummary]: The tickets of the protocol.
 
     Raises:
         BaseSGRCException: If an unexpected exception occurs.
@@ -283,6 +319,41 @@ def get_ticket_details(ticket_id: str) -&gt; Ticket:
         SGRCMalformedBodyException: If the request body is malformed.
         ValueError: If any of the arguments is invalid.
     &#34;&#34;&#34;
+    data = pre_get_protocol_tickets(protocol_id)
+    try:
+        response = post(settings.SGRC_URL_GET_PROTOCOL_TICKETS, data)
+    except Exception as exc:
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return after_get_protocol_tickets(response)
+
+
+async def async_get_protocol_tickets(protocol_id: str) -&gt; List[TicketSummary]:
+    &#34;&#34;&#34;
+    Get the tickets of a protocol.
+
+    Args:
+        protocol_id (str): The protocol ID.
+
+    Returns:
+        List[TicketSummary]: The tickets of the protocol.
+
+    Raises:
+        BaseSGRCException: If an unexpected exception occurs.
+        SGRCBusinessRuleException: If the request violates a business rule.
+        SGRCInternalErrorException: If the request causes an internal error.
+        SGRCInvalidBodyException: If the request body is invalid.
+        SGRCMalformedBodyException: If the request body is malformed.
+        ValueError: If any of the arguments is invalid.
+    &#34;&#34;&#34;
+    data = pre_get_protocol_tickets(protocol_id)
+    try:
+        response = await apost(settings.SGRC_URL_GET_PROTOCOL_TICKETS, data)
+    except Exception as exc:
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return after_get_protocol_tickets(response)
+
+
+def pre_get_ticket_details(ticket_id: str) -&gt; dict:
     if not isinstance(ticket_id, str):
         try:
             ticket_id = str(ticket_id)
@@ -291,11 +362,10 @@ def get_ticket_details(ticket_id: str) -&gt; Ticket:
                 &#34;&#39;ticket_id&#39; must be a string or an object that implements the __str__ method.&#34;
             )
     data = {&#34;codigo&#34;: ticket_id}
-    try:
-        response = post(settings.SGRC_URL_GET_TICKET_DETAILS, data)
-    except Exception as exc:
-        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return data
 
+
+def after_get_ticket_details(response: Dict[str, Any]) -&gt; Ticket:
     if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
         raise BaseSGRCException(
             &#34;Unexpected response from SGRC. &#39;codigo&#39; or &#39;descricao&#39; key is missing.&#34;
@@ -355,15 +425,15 @@ def get_ticket_details(ticket_id: str) -&gt; Ticket:
         raise SGRCDuplicateTicketException(response[&#34;descricao&#34;])
 
 
-def get_protocol_tickets_details(protocol_id: str) -&gt; List[TicketDetails]:
+def get_ticket_details(ticket_id: str) -&gt; Ticket:
     &#34;&#34;&#34;
-    Gets the details of the tickets of a protocol.
+    Gets the details of a ticket.
 
     Args:
-        protocol_id (str): The protocol ID.
+        ticket_id (str): The ticket ID.
 
     Returns:
-        List[TicketDetails]: The details of the tickets of the protocol.
+        Ticket: The ticket details.
 
     Raises:
         BaseSGRCException: If an unexpected exception occurs.
@@ -373,6 +443,41 @@ def get_protocol_tickets_details(protocol_id: str) -&gt; List[TicketDetails]:
         SGRCMalformedBodyException: If the request body is malformed.
         ValueError: If any of the arguments is invalid.
     &#34;&#34;&#34;
+    data = pre_get_ticket_details(ticket_id)
+    try:
+        response = post(settings.SGRC_URL_GET_TICKET_DETAILS, data)
+    except Exception as exc:
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return after_get_ticket_details(response)
+
+
+async def async_get_ticket_details(ticket_id: str) -&gt; Ticket:
+    &#34;&#34;&#34;
+    Gets the details of a ticket.
+
+    Args:
+        ticket_id (str): The ticket ID.
+
+    Returns:
+        Ticket: The ticket details.
+
+    Raises:
+        BaseSGRCException: If an unexpected exception occurs.
+        SGRCBusinessRuleException: If the request violates a business rule.
+        SGRCInternalErrorException: If the request causes an internal error.
+        SGRCInvalidBodyException: If the request body is invalid.
+        SGRCMalformedBodyException: If the request body is malformed.
+        ValueError: If any of the arguments is invalid.
+    &#34;&#34;&#34;
+    data = pre_get_ticket_details(ticket_id)
+    try:
+        response = await apost(settings.SGRC_URL_GET_TICKET_DETAILS, data)
+    except Exception as exc:
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return after_get_ticket_details(response)
+
+
+def pre_get_protocol_tickets_details(protocol_id: str) -&gt; dict:
     if not isinstance(protocol_id, str):
         try:
             protocol_id = str(protocol_id)
@@ -381,11 +486,10 @@ def get_protocol_tickets_details(protocol_id: str) -&gt; List[TicketDetails]:
                 &#34;&#39;protocol_id&#39; must be a string or an object that implements the __str__ method.&#34;
             )
     data = {&#34;codigo&#34;: protocol_id}
-    try:
-        response = post(settings.SGRC_URL_GET_PROTOCOL_TICKETS_DETAILS, data)
-    except Exception as exc:
-        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return data
 
+
+def after_get_protocol_tickets_details(response: Dict[str, Any]) -&gt; List[TicketDetails]:
     if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
         raise BaseSGRCException(
             &#34;Unexpected response from SGRC. &#39;codigo&#39; or &#39;descricao&#39; key is missing.&#34;
@@ -484,11 +588,70 @@ def get_protocol_tickets_details(protocol_id: str) -&gt; List[TicketDetails]:
         raise SGRCDuplicateTicketException(response[&#34;descricao&#34;])
 
 
+def get_protocol_tickets_details(protocol_id: str) -&gt; List[TicketDetails]:
+    &#34;&#34;&#34;
+    Gets the details of the tickets of a protocol.
+
+    Args:
+        protocol_id (str): The protocol ID.
+
+    Returns:
+        List[TicketDetails]: The details of the tickets of the protocol.
+
+    Raises:
+        BaseSGRCException: If an unexpected exception occurs.
+        SGRCBusinessRuleException: If the request violates a business rule.
+        SGRCInternalErrorException: If the request causes an internal error.
+        SGRCInvalidBodyException: If the request body is invalid.
+        SGRCMalformedBodyException: If the request body is malformed.
+        ValueError: If any of the arguments is invalid.
+    &#34;&#34;&#34;
+    data = pre_get_protocol_tickets_details(protocol_id)
+    try:
+        response = post(settings.SGRC_URL_GET_PROTOCOL_TICKETS_DETAILS, data)
+    except Exception as exc:
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return after_get_protocol_tickets_details(response)
+
+
+async def async_get_protocol_tickets_details(protocol_id: str) -&gt; List[TicketDetails]:
+    &#34;&#34;&#34;
+    Gets the details of the tickets of a protocol.
+
+    Args:
+        protocol_id (str): The protocol ID.
+
+    Returns:
+        List[TicketDetails]: The details of the tickets of the protocol.
+
+    Raises:
+        BaseSGRCException: If an unexpected exception occurs.
+        SGRCBusinessRuleException: If the request violates a business rule.
+        SGRCInternalErrorException: If the request causes an internal error.
+        SGRCInvalidBodyException: If the request body is invalid.
+        SGRCMalformedBodyException: If the request body is malformed.
+        ValueError: If any of the arguments is invalid.
+    &#34;&#34;&#34;
+    data = pre_get_protocol_tickets_details(protocol_id)
+    try:
+        response = await apost(settings.SGRC_URL_GET_PROTOCOL_TICKETS_DETAILS, data)
+    except Exception as exc:
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return after_get_protocol_tickets_details(response)
+
+
 def version() -&gt; Dict[str, Any]:
     &#34;&#34;&#34;
     Gets the version of the SGRC API.
     &#34;&#34;&#34;
-    return post(settings.SGRC_URL_VERSION, {}, add_token=False)</code></pre>
+    return post(settings.SGRC_URL_VERSION, {}, add_token=False)
+
+
+async def async_version() -&gt; Dict[str, Any]:
+    &#34;&#34;&#34;
+    Gets the version of the SGRC API.
+    &#34;&#34;&#34;
+    return await apost(settings.SGRC_URL_VERSION, {}, add_token=False)</code></pre>
 </details>
 </section>
 <section>
@@ -513,71 +676,16 @@ def version() -&gt; Dict[str, Any]:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="prefeitura_rio.integrations.sgrc.get_protocol_tickets"><code class="name flex">
-<span>def <span class="ident">get_protocol_tickets</span></span>(<span>protocol_id: str) ‑> List[<a title="prefeitura_rio.integrations.sgrc.models.TicketSummary" href="models.html#prefeitura_rio.integrations.sgrc.models.TicketSummary">TicketSummary</a>]</span>
+<dt id="prefeitura_rio.integrations.sgrc.after_get_protocol_tickets"><code class="name flex">
+<span>def <span class="ident">after_get_protocol_tickets</span></span>(<span>response: Dict[str, Any]) ‑> List[<a title="prefeitura_rio.integrations.sgrc.models.TicketSummary" href="models.html#prefeitura_rio.integrations.sgrc.models.TicketSummary">TicketSummary</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get the tickets of a protocol.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>protocol_id</code></strong> :&ensp;<code>str</code></dt>
-<dd>The protocol ID.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>List[TicketSummary]</code></dt>
-<dd>The tickets of the protocol.</dd>
-</dl>
-<h2 id="raises">Raises</h2>
-<dl>
-<dt><code>BaseSGRCException</code></dt>
-<dd>If an unexpected exception occurs.</dd>
-<dt><code>SGRCBusinessRuleException</code></dt>
-<dd>If the request violates a business rule.</dd>
-<dt><code>SGRCInternalErrorException</code></dt>
-<dd>If the request causes an internal error.</dd>
-<dt><code>SGRCInvalidBodyException</code></dt>
-<dd>If the request body is invalid.</dd>
-<dt><code>SGRCMalformedBodyException</code></dt>
-<dd>If the request body is malformed.</dd>
-<dt><code>ValueError</code></dt>
-<dd>If any of the arguments is invalid.</dd>
-</dl></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_protocol_tickets(protocol_id: str) -&gt; List[TicketSummary]:
-    &#34;&#34;&#34;
-    Get the tickets of a protocol.
-
-    Args:
-        protocol_id (str): The protocol ID.
-
-    Returns:
-        List[TicketSummary]: The tickets of the protocol.
-
-    Raises:
-        BaseSGRCException: If an unexpected exception occurs.
-        SGRCBusinessRuleException: If the request violates a business rule.
-        SGRCInternalErrorException: If the request causes an internal error.
-        SGRCInvalidBodyException: If the request body is invalid.
-        SGRCMalformedBodyException: If the request body is malformed.
-        ValueError: If any of the arguments is invalid.
-    &#34;&#34;&#34;
-    if not isinstance(protocol_id, str):
-        try:
-            protocol_id = str(protocol_id)
-        except Exception:
-            raise ValueError(
-                &#34;&#39;protocol_id&#39; must be a string or an object that implements the __str__ method.&#34;
-            )
-    data = {&#34;codigo&#34;: protocol_id}
-    try:
-        response = post(settings.SGRC_URL_GET_PROTOCOL_TICKETS, data)
-    except Exception as exc:
-        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
-
+<pre><code class="python">def after_get_protocol_tickets(response: Dict[str, Any]) -&gt; List[TicketSummary]:
     if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
         raise BaseSGRCException(
             &#34;Unexpected response from SGRC. &#39;codigo&#39; or &#39;descricao&#39; key is missing.&#34;
@@ -618,71 +726,16 @@ def version() -&gt; Dict[str, Any]:
         raise SGRCDuplicateTicketException(response[&#34;descricao&#34;])</code></pre>
 </details>
 </dd>
-<dt id="prefeitura_rio.integrations.sgrc.get_protocol_tickets_details"><code class="name flex">
-<span>def <span class="ident">get_protocol_tickets_details</span></span>(<span>protocol_id: str) ‑> List[<a title="prefeitura_rio.integrations.sgrc.models.TicketDetails" href="models.html#prefeitura_rio.integrations.sgrc.models.TicketDetails">TicketDetails</a>]</span>
+<dt id="prefeitura_rio.integrations.sgrc.after_get_protocol_tickets_details"><code class="name flex">
+<span>def <span class="ident">after_get_protocol_tickets_details</span></span>(<span>response: Dict[str, Any]) ‑> List[<a title="prefeitura_rio.integrations.sgrc.models.TicketDetails" href="models.html#prefeitura_rio.integrations.sgrc.models.TicketDetails">TicketDetails</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Gets the details of the tickets of a protocol.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>protocol_id</code></strong> :&ensp;<code>str</code></dt>
-<dd>The protocol ID.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>List[TicketDetails]</code></dt>
-<dd>The details of the tickets of the protocol.</dd>
-</dl>
-<h2 id="raises">Raises</h2>
-<dl>
-<dt><code>BaseSGRCException</code></dt>
-<dd>If an unexpected exception occurs.</dd>
-<dt><code>SGRCBusinessRuleException</code></dt>
-<dd>If the request violates a business rule.</dd>
-<dt><code>SGRCInternalErrorException</code></dt>
-<dd>If the request causes an internal error.</dd>
-<dt><code>SGRCInvalidBodyException</code></dt>
-<dd>If the request body is invalid.</dd>
-<dt><code>SGRCMalformedBodyException</code></dt>
-<dd>If the request body is malformed.</dd>
-<dt><code>ValueError</code></dt>
-<dd>If any of the arguments is invalid.</dd>
-</dl></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_protocol_tickets_details(protocol_id: str) -&gt; List[TicketDetails]:
-    &#34;&#34;&#34;
-    Gets the details of the tickets of a protocol.
-
-    Args:
-        protocol_id (str): The protocol ID.
-
-    Returns:
-        List[TicketDetails]: The details of the tickets of the protocol.
-
-    Raises:
-        BaseSGRCException: If an unexpected exception occurs.
-        SGRCBusinessRuleException: If the request violates a business rule.
-        SGRCInternalErrorException: If the request causes an internal error.
-        SGRCInvalidBodyException: If the request body is invalid.
-        SGRCMalformedBodyException: If the request body is malformed.
-        ValueError: If any of the arguments is invalid.
-    &#34;&#34;&#34;
-    if not isinstance(protocol_id, str):
-        try:
-            protocol_id = str(protocol_id)
-        except Exception:
-            raise ValueError(
-                &#34;&#39;protocol_id&#39; must be a string or an object that implements the __str__ method.&#34;
-            )
-    data = {&#34;codigo&#34;: protocol_id}
-    try:
-        response = post(settings.SGRC_URL_GET_PROTOCOL_TICKETS_DETAILS, data)
-    except Exception as exc:
-        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
-
+<pre><code class="python">def after_get_protocol_tickets_details(response: Dict[str, Any]) -&gt; List[TicketDetails]:
     if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
         raise BaseSGRCException(
             &#34;Unexpected response from SGRC. &#39;codigo&#39; or &#39;descricao&#39; key is missing.&#34;
@@ -779,6 +832,448 @@ def version() -&gt; Dict[str, Any]:
         raise SGRCEquivalentTicketException(response[&#34;descricao&#34;])
     elif code == 7:
         raise SGRCDuplicateTicketException(response[&#34;descricao&#34;])</code></pre>
+</details>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.after_get_ticket_details"><code class="name flex">
+<span>def <span class="ident">after_get_ticket_details</span></span>(<span>response: Dict[str, Any]) ‑> <a title="prefeitura_rio.integrations.sgrc.models.Ticket" href="models.html#prefeitura_rio.integrations.sgrc.models.Ticket">Ticket</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def after_get_ticket_details(response: Dict[str, Any]) -&gt; Ticket:
+    if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
+        raise BaseSGRCException(
+            &#34;Unexpected response from SGRC. &#39;codigo&#39; or &#39;descricao&#39; key is missing.&#34;
+        )
+
+    code = response[&#34;codigo&#34;]
+    try:
+        code = int(code)
+    except Exception as exc:  # noqa
+        raise BaseSGRCException(f&#34;Unexpected return code &#39;{code}&#39; from SGRC.&#34;) from exc
+
+    if code == 1:
+        if &#34;chamado&#34; not in response:
+            raise BaseSGRCException(&#34;Unexpected response from SGRC. &#39;chamado&#39; key is missing&#34;)
+        ticket_dict = response[&#34;chamado&#34;]
+        classification = Classification(
+            category_code=ticket_dict[&#34;classificacao&#34;][&#34;codigoCategoria&#34;],
+            category=ticket_dict[&#34;classificacao&#34;][&#34;categoria&#34;],
+            type_code=ticket_dict[&#34;classificacao&#34;][&#34;codigoTipo&#34;],
+            type=ticket_dict[&#34;classificacao&#34;][&#34;tipo&#34;],
+            subtype_code=ticket_dict[&#34;classificacao&#34;][&#34;codigoSubtipo&#34;],
+            subtype=ticket_dict[&#34;classificacao&#34;][&#34;subtipo&#34;],
+        )
+        address = Address(
+            locality=ticket_dict[&#34;endereco&#34;][&#34;localidade&#34;],
+            street_code=ticket_dict[&#34;endereco&#34;][&#34;codigoLogradouro&#34;],
+            street=ticket_dict[&#34;endereco&#34;][&#34;logradouro&#34;],
+            number=ticket_dict[&#34;endereco&#34;][&#34;numero&#34;],
+            neighborhood_code=ticket_dict[&#34;endereco&#34;][&#34;codigoBairro&#34;],
+            neighborhood=ticket_dict[&#34;endereco&#34;][&#34;bairro&#34;],
+            complement=ticket_dict[&#34;endereco&#34;][&#34;complemento&#34;],
+            zip_code=ticket_dict[&#34;endereco&#34;][&#34;cep&#34;],
+            x_coordinate=ticket_dict[&#34;endereco&#34;][&#34;coordenadaX&#34;],
+            y_coordinate=ticket_dict[&#34;endereco&#34;][&#34;coordenadaY&#34;],
+            photo_url=ticket_dict[&#34;endereco&#34;][&#34;urlFoto&#34;],
+        )
+        ticket = Ticket(
+            ticket_id=ticket_dict[&#34;codigoChamado&#34;],
+            organizational_unit=ticket_dict[&#34;unidadeOrganizacional&#34;],
+            date_time=ticket_dict[&#34;dataHora&#34;],
+            classification=classification,
+            address=address,
+            status=ticket_dict[&#34;status&#34;],
+        )
+        return ticket
+    elif code == 2:
+        raise SGRCMalformedBodyException(response[&#34;descricao&#34;])
+    elif code == 3:
+        raise SGRCInvalidBodyException(response[&#34;descricao&#34;])
+    elif code == 4:
+        raise SGRCBusinessRuleException(response[&#34;descricao&#34;])
+    elif code == 5:
+        raise SGRCInternalErrorException(response[&#34;descricao&#34;])
+    elif code == 6:
+        raise SGRCEquivalentTicketException(response[&#34;descricao&#34;])
+    elif code == 7:
+        raise SGRCDuplicateTicketException(response[&#34;descricao&#34;])</code></pre>
+</details>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.after_new_ticket"><code class="name flex">
+<span>def <span class="ident">after_new_ticket</span></span>(<span>response: Dict[str, Any]) ‑> <a title="prefeitura_rio.integrations.sgrc.models.NewTicket" href="models.html#prefeitura_rio.integrations.sgrc.models.NewTicket">NewTicket</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def after_new_ticket(response: Dict[str, Any]) -&gt; NewTicket:
+    if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
+        raise BaseSGRCException(
+            &#34;Unexpected response from SGRC. &#39;codigo&#39; or &#39;descricao&#39; key is missing.&#34;
+        )
+
+    code = response[&#34;codigo&#34;]
+    try:
+        code = int(code)
+    except Exception as exc:  # noqa
+        raise BaseSGRCException(f&#34;Unexpected return code &#39;{code}&#39; from SGRC.&#34;) from exc
+
+    if code == 1:
+        if &#34;protocolo&#34; not in response or &#34;codigoChamado&#34; not in response:
+            raise BaseSGRCException(
+                &#34;Unexpected response from SGRC. &#39;protocolo&#39; or &#39;codigoChamado&#39; key is missing.&#34;
+            )
+        return NewTicket(
+            protocol_id=response[&#34;protocolo&#34;],
+            ticket_id=response[&#34;codigoChamado&#34;],
+        )
+    elif code == 2:
+        raise SGRCMalformedBodyException(response[&#34;descricao&#34;])
+    elif code == 3:
+        raise SGRCInvalidBodyException(response[&#34;descricao&#34;])
+    elif code == 4:
+        raise SGRCBusinessRuleException(response[&#34;descricao&#34;])
+    elif code == 5:
+        raise SGRCInternalErrorException(response[&#34;descricao&#34;])
+    elif code == 6:
+        raise SGRCEquivalentTicketException(response[&#34;descricao&#34;])
+    elif code == 7:
+        raise SGRCDuplicateTicketException(response[&#34;descricao&#34;])</code></pre>
+</details>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.async_get_protocol_tickets"><code class="name flex">
+<span>async def <span class="ident">async_get_protocol_tickets</span></span>(<span>protocol_id: str) ‑> List[<a title="prefeitura_rio.integrations.sgrc.models.TicketSummary" href="models.html#prefeitura_rio.integrations.sgrc.models.TicketSummary">TicketSummary</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the tickets of a protocol.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>protocol_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The protocol ID.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[TicketSummary]</code></dt>
+<dd>The tickets of the protocol.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>BaseSGRCException</code></dt>
+<dd>If an unexpected exception occurs.</dd>
+<dt><code>SGRCBusinessRuleException</code></dt>
+<dd>If the request violates a business rule.</dd>
+<dt><code>SGRCInternalErrorException</code></dt>
+<dd>If the request causes an internal error.</dd>
+<dt><code>SGRCInvalidBodyException</code></dt>
+<dd>If the request body is invalid.</dd>
+<dt><code>SGRCMalformedBodyException</code></dt>
+<dd>If the request body is malformed.</dd>
+<dt><code>ValueError</code></dt>
+<dd>If any of the arguments is invalid.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def async_get_protocol_tickets(protocol_id: str) -&gt; List[TicketSummary]:
+    &#34;&#34;&#34;
+    Get the tickets of a protocol.
+
+    Args:
+        protocol_id (str): The protocol ID.
+
+    Returns:
+        List[TicketSummary]: The tickets of the protocol.
+
+    Raises:
+        BaseSGRCException: If an unexpected exception occurs.
+        SGRCBusinessRuleException: If the request violates a business rule.
+        SGRCInternalErrorException: If the request causes an internal error.
+        SGRCInvalidBodyException: If the request body is invalid.
+        SGRCMalformedBodyException: If the request body is malformed.
+        ValueError: If any of the arguments is invalid.
+    &#34;&#34;&#34;
+    data = pre_get_protocol_tickets(protocol_id)
+    try:
+        response = await apost(settings.SGRC_URL_GET_PROTOCOL_TICKETS, data)
+    except Exception as exc:
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return after_get_protocol_tickets(response)</code></pre>
+</details>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.async_get_protocol_tickets_details"><code class="name flex">
+<span>async def <span class="ident">async_get_protocol_tickets_details</span></span>(<span>protocol_id: str) ‑> List[<a title="prefeitura_rio.integrations.sgrc.models.TicketDetails" href="models.html#prefeitura_rio.integrations.sgrc.models.TicketDetails">TicketDetails</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Gets the details of the tickets of a protocol.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>protocol_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The protocol ID.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[TicketDetails]</code></dt>
+<dd>The details of the tickets of the protocol.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>BaseSGRCException</code></dt>
+<dd>If an unexpected exception occurs.</dd>
+<dt><code>SGRCBusinessRuleException</code></dt>
+<dd>If the request violates a business rule.</dd>
+<dt><code>SGRCInternalErrorException</code></dt>
+<dd>If the request causes an internal error.</dd>
+<dt><code>SGRCInvalidBodyException</code></dt>
+<dd>If the request body is invalid.</dd>
+<dt><code>SGRCMalformedBodyException</code></dt>
+<dd>If the request body is malformed.</dd>
+<dt><code>ValueError</code></dt>
+<dd>If any of the arguments is invalid.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def async_get_protocol_tickets_details(protocol_id: str) -&gt; List[TicketDetails]:
+    &#34;&#34;&#34;
+    Gets the details of the tickets of a protocol.
+
+    Args:
+        protocol_id (str): The protocol ID.
+
+    Returns:
+        List[TicketDetails]: The details of the tickets of the protocol.
+
+    Raises:
+        BaseSGRCException: If an unexpected exception occurs.
+        SGRCBusinessRuleException: If the request violates a business rule.
+        SGRCInternalErrorException: If the request causes an internal error.
+        SGRCInvalidBodyException: If the request body is invalid.
+        SGRCMalformedBodyException: If the request body is malformed.
+        ValueError: If any of the arguments is invalid.
+    &#34;&#34;&#34;
+    data = pre_get_protocol_tickets_details(protocol_id)
+    try:
+        response = await apost(settings.SGRC_URL_GET_PROTOCOL_TICKETS_DETAILS, data)
+    except Exception as exc:
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return after_get_protocol_tickets_details(response)</code></pre>
+</details>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.async_get_protocols"><code class="name flex">
+<span>async def <span class="ident">async_get_protocols</span></span>(<span>) ‑> List[str]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def async_get_protocols() -&gt; List[str]:
+    raise NotImplementedError()</code></pre>
+</details>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.async_get_ticket_details"><code class="name flex">
+<span>async def <span class="ident">async_get_ticket_details</span></span>(<span>ticket_id: str) ‑> <a title="prefeitura_rio.integrations.sgrc.models.Ticket" href="models.html#prefeitura_rio.integrations.sgrc.models.Ticket">Ticket</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Gets the details of a ticket.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>ticket_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The ticket ID.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Ticket</code></dt>
+<dd>The ticket details.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>BaseSGRCException</code></dt>
+<dd>If an unexpected exception occurs.</dd>
+<dt><code>SGRCBusinessRuleException</code></dt>
+<dd>If the request violates a business rule.</dd>
+<dt><code>SGRCInternalErrorException</code></dt>
+<dd>If the request causes an internal error.</dd>
+<dt><code>SGRCInvalidBodyException</code></dt>
+<dd>If the request body is invalid.</dd>
+<dt><code>SGRCMalformedBodyException</code></dt>
+<dd>If the request body is malformed.</dd>
+<dt><code>ValueError</code></dt>
+<dd>If any of the arguments is invalid.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def async_get_ticket_details(ticket_id: str) -&gt; Ticket:
+    &#34;&#34;&#34;
+    Gets the details of a ticket.
+
+    Args:
+        ticket_id (str): The ticket ID.
+
+    Returns:
+        Ticket: The ticket details.
+
+    Raises:
+        BaseSGRCException: If an unexpected exception occurs.
+        SGRCBusinessRuleException: If the request violates a business rule.
+        SGRCInternalErrorException: If the request causes an internal error.
+        SGRCInvalidBodyException: If the request body is invalid.
+        SGRCMalformedBodyException: If the request body is malformed.
+        ValueError: If any of the arguments is invalid.
+    &#34;&#34;&#34;
+    data = pre_get_ticket_details(ticket_id)
+    try:
+        response = await apost(settings.SGRC_URL_GET_TICKET_DETAILS, data)
+    except Exception as exc:
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return after_get_ticket_details(response)</code></pre>
+</details>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.async_version"><code class="name flex">
+<span>async def <span class="ident">async_version</span></span>(<span>) ‑> Dict[str, Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Gets the version of the SGRC API.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def async_version() -&gt; Dict[str, Any]:
+    &#34;&#34;&#34;
+    Gets the version of the SGRC API.
+    &#34;&#34;&#34;
+    return await apost(settings.SGRC_URL_VERSION, {}, add_token=False)</code></pre>
+</details>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.get_protocol_tickets"><code class="name flex">
+<span>def <span class="ident">get_protocol_tickets</span></span>(<span>protocol_id: str) ‑> List[<a title="prefeitura_rio.integrations.sgrc.models.TicketSummary" href="models.html#prefeitura_rio.integrations.sgrc.models.TicketSummary">TicketSummary</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the tickets of a protocol.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>protocol_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The protocol ID.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[TicketSummary]</code></dt>
+<dd>The tickets of the protocol.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>BaseSGRCException</code></dt>
+<dd>If an unexpected exception occurs.</dd>
+<dt><code>SGRCBusinessRuleException</code></dt>
+<dd>If the request violates a business rule.</dd>
+<dt><code>SGRCInternalErrorException</code></dt>
+<dd>If the request causes an internal error.</dd>
+<dt><code>SGRCInvalidBodyException</code></dt>
+<dd>If the request body is invalid.</dd>
+<dt><code>SGRCMalformedBodyException</code></dt>
+<dd>If the request body is malformed.</dd>
+<dt><code>ValueError</code></dt>
+<dd>If any of the arguments is invalid.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_protocol_tickets(protocol_id: str) -&gt; List[TicketSummary]:
+    &#34;&#34;&#34;
+    Get the tickets of a protocol.
+
+    Args:
+        protocol_id (str): The protocol ID.
+
+    Returns:
+        List[TicketSummary]: The tickets of the protocol.
+
+    Raises:
+        BaseSGRCException: If an unexpected exception occurs.
+        SGRCBusinessRuleException: If the request violates a business rule.
+        SGRCInternalErrorException: If the request causes an internal error.
+        SGRCInvalidBodyException: If the request body is invalid.
+        SGRCMalformedBodyException: If the request body is malformed.
+        ValueError: If any of the arguments is invalid.
+    &#34;&#34;&#34;
+    data = pre_get_protocol_tickets(protocol_id)
+    try:
+        response = post(settings.SGRC_URL_GET_PROTOCOL_TICKETS, data)
+    except Exception as exc:
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return after_get_protocol_tickets(response)</code></pre>
+</details>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.get_protocol_tickets_details"><code class="name flex">
+<span>def <span class="ident">get_protocol_tickets_details</span></span>(<span>protocol_id: str) ‑> List[<a title="prefeitura_rio.integrations.sgrc.models.TicketDetails" href="models.html#prefeitura_rio.integrations.sgrc.models.TicketDetails">TicketDetails</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Gets the details of the tickets of a protocol.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>protocol_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The protocol ID.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[TicketDetails]</code></dt>
+<dd>The details of the tickets of the protocol.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>BaseSGRCException</code></dt>
+<dd>If an unexpected exception occurs.</dd>
+<dt><code>SGRCBusinessRuleException</code></dt>
+<dd>If the request violates a business rule.</dd>
+<dt><code>SGRCInternalErrorException</code></dt>
+<dd>If the request causes an internal error.</dd>
+<dt><code>SGRCInvalidBodyException</code></dt>
+<dd>If the request body is invalid.</dd>
+<dt><code>SGRCMalformedBodyException</code></dt>
+<dd>If the request body is malformed.</dd>
+<dt><code>ValueError</code></dt>
+<dd>If any of the arguments is invalid.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_protocol_tickets_details(protocol_id: str) -&gt; List[TicketDetails]:
+    &#34;&#34;&#34;
+    Gets the details of the tickets of a protocol.
+
+    Args:
+        protocol_id (str): The protocol ID.
+
+    Returns:
+        List[TicketDetails]: The details of the tickets of the protocol.
+
+    Raises:
+        BaseSGRCException: If an unexpected exception occurs.
+        SGRCBusinessRuleException: If the request violates a business rule.
+        SGRCInternalErrorException: If the request causes an internal error.
+        SGRCInvalidBodyException: If the request body is invalid.
+        SGRCMalformedBodyException: If the request body is malformed.
+        ValueError: If any of the arguments is invalid.
+    &#34;&#34;&#34;
+    data = pre_get_protocol_tickets_details(protocol_id)
+    try:
+        response = post(settings.SGRC_URL_GET_PROTOCOL_TICKETS_DETAILS, data)
+    except Exception as exc:
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return after_get_protocol_tickets_details(response)</code></pre>
 </details>
 </dd>
 <dt id="prefeitura_rio.integrations.sgrc.get_protocols"><code class="name flex">
@@ -846,6 +1341,66 @@ def version() -&gt; Dict[str, Any]:
         SGRCMalformedBodyException: If the request body is malformed.
         ValueError: If any of the arguments is invalid.
     &#34;&#34;&#34;
+    data = pre_get_ticket_details(ticket_id)
+    try:
+        response = post(settings.SGRC_URL_GET_TICKET_DETAILS, data)
+    except Exception as exc:
+        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
+    return after_get_ticket_details(response)</code></pre>
+</details>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.pre_get_protocol_tickets"><code class="name flex">
+<span>def <span class="ident">pre_get_protocol_tickets</span></span>(<span>protocol_id: str) ‑> dict</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pre_get_protocol_tickets(protocol_id: str) -&gt; dict:
+    if not isinstance(protocol_id, str):
+        try:
+            protocol_id = str(protocol_id)
+        except Exception:
+            raise ValueError(
+                &#34;&#39;protocol_id&#39; must be a string or an object that implements the __str__ method.&#34;
+            )
+    data = {&#34;codigo&#34;: protocol_id}
+    return data</code></pre>
+</details>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.pre_get_protocol_tickets_details"><code class="name flex">
+<span>def <span class="ident">pre_get_protocol_tickets_details</span></span>(<span>protocol_id: str) ‑> dict</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pre_get_protocol_tickets_details(protocol_id: str) -&gt; dict:
+    if not isinstance(protocol_id, str):
+        try:
+            protocol_id = str(protocol_id)
+        except Exception:
+            raise ValueError(
+                &#34;&#39;protocol_id&#39; must be a string or an object that implements the __str__ method.&#34;
+            )
+    data = {&#34;codigo&#34;: protocol_id}
+    return data</code></pre>
+</details>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.pre_get_ticket_details"><code class="name flex">
+<span>def <span class="ident">pre_get_ticket_details</span></span>(<span>ticket_id: str) ‑> dict</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pre_get_ticket_details(ticket_id: str) -&gt; dict:
     if not isinstance(ticket_id, str):
         try:
             ticket_id = str(ticket_id)
@@ -854,68 +1409,79 @@ def version() -&gt; Dict[str, Any]:
                 &#34;&#39;ticket_id&#39; must be a string or an object that implements the __str__ method.&#34;
             )
     data = {&#34;codigo&#34;: ticket_id}
-    try:
-        response = post(settings.SGRC_URL_GET_TICKET_DETAILS, data)
-    except Exception as exc:
-        raise BaseSGRCException(&#34;Unexpected exception when trying to create a new ticket.&#34;) from exc
-
-    if &#34;codigo&#34; not in response or &#34;descricao&#34; not in response:
-        raise BaseSGRCException(
-            &#34;Unexpected response from SGRC. &#39;codigo&#39; or &#39;descricao&#39; key is missing.&#34;
+    return data</code></pre>
+</details>
+</dd>
+<dt id="prefeitura_rio.integrations.sgrc.pre_new_ticket"><code class="name flex">
+<span>def <span class="ident">pre_new_ticket</span></span>(<span>classification_code: str, description: str, address: <a title="prefeitura_rio.integrations.sgrc.models.Address" href="models.html#prefeitura_rio.integrations.sgrc.models.Address">Address</a> = None, date_time: Union[datetime.datetime, str] = None, requester: <a title="prefeitura_rio.integrations.sgrc.models.Requester" href="models.html#prefeitura_rio.integrations.sgrc.models.Requester">Requester</a> = None, occurrence_origin_code: str = '28', specific_attributes: Dict[str, Any] = None) ‑> dict</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pre_new_ticket(
+    classification_code: str,
+    description: str,
+    address: Address = None,
+    date_time: Union[datetime, str] = None,
+    requester: Requester = None,
+    occurrence_origin_code: str = &#34;28&#34;,
+    specific_attributes: Dict[str, Any] = None,
+) -&gt; dict:
+    if not isinstance(classification_code, str):
+        try:
+            classification_code = str(classification_code)
+        except Exception:
+            raise ValueError(
+                &#34;&#39;classification_code&#39; must be a string or an object that implements the __str__ method.&#34;  # noqa
+            )
+    if not isinstance(description, str):
+        try:
+            description = str(description)
+        except Exception:
+            raise ValueError(
+                &#34;&#39;description&#39; must be a string or an object that implements the __str__ method.&#34;  # noqa
+            )
+    if address and not isinstance(address, Address):
+        raise ValueError(&#34;&#39;address&#39; must be an Address object.&#34;)
+    if date_time is None:
+        date_time = pendulum.now(tz=pytz.timezone(&#34;America/Sao_Paulo&#34;)).strftime(
+            &#34;%Y-%m-%dT%H:%M:%S&#34;
         )
-
-    code = response[&#34;codigo&#34;]
-    try:
-        code = int(code)
-    except Exception as exc:  # noqa
-        raise BaseSGRCException(f&#34;Unexpected return code &#39;{code}&#39; from SGRC.&#34;) from exc
-
-    if code == 1:
-        if &#34;chamado&#34; not in response:
-            raise BaseSGRCException(&#34;Unexpected response from SGRC. &#39;chamado&#39; key is missing&#34;)
-        ticket_dict = response[&#34;chamado&#34;]
-        classification = Classification(
-            category_code=ticket_dict[&#34;classificacao&#34;][&#34;codigoCategoria&#34;],
-            category=ticket_dict[&#34;classificacao&#34;][&#34;categoria&#34;],
-            type_code=ticket_dict[&#34;classificacao&#34;][&#34;codigoTipo&#34;],
-            type=ticket_dict[&#34;classificacao&#34;][&#34;tipo&#34;],
-            subtype_code=ticket_dict[&#34;classificacao&#34;][&#34;codigoSubtipo&#34;],
-            subtype=ticket_dict[&#34;classificacao&#34;][&#34;subtipo&#34;],
+    elif isinstance(date_time, datetime):
+        date_time = date_time.strftime(&#34;%Y-%m-%dT%H:%M:%S&#34;)
+    elif not isinstance(date_time, str):
+        raise ValueError(
+            &#34;&#39;date_time&#39; must be a datetime object, a string or an object that implements the __str__ method.&#34;  # noqa
         )
-        address = Address(
-            locality=ticket_dict[&#34;endereco&#34;][&#34;localidade&#34;],
-            street_code=ticket_dict[&#34;endereco&#34;][&#34;codigoLogradouro&#34;],
-            street=ticket_dict[&#34;endereco&#34;][&#34;logradouro&#34;],
-            number=ticket_dict[&#34;endereco&#34;][&#34;numero&#34;],
-            neighborhood_code=ticket_dict[&#34;endereco&#34;][&#34;codigoBairro&#34;],
-            neighborhood=ticket_dict[&#34;endereco&#34;][&#34;bairro&#34;],
-            complement=ticket_dict[&#34;endereco&#34;][&#34;complemento&#34;],
-            zip_code=ticket_dict[&#34;endereco&#34;][&#34;cep&#34;],
-            x_coordinate=ticket_dict[&#34;endereco&#34;][&#34;coordenadaX&#34;],
-            y_coordinate=ticket_dict[&#34;endereco&#34;][&#34;coordenadaY&#34;],
-            photo_url=ticket_dict[&#34;endereco&#34;][&#34;urlFoto&#34;],
-        )
-        ticket = Ticket(
-            ticket_id=ticket_dict[&#34;codigoChamado&#34;],
-            organizational_unit=ticket_dict[&#34;unidadeOrganizacional&#34;],
-            date_time=ticket_dict[&#34;dataHora&#34;],
-            classification=classification,
-            address=address,
-            status=ticket_dict[&#34;status&#34;],
-        )
-        return ticket
-    elif code == 2:
-        raise SGRCMalformedBodyException(response[&#34;descricao&#34;])
-    elif code == 3:
-        raise SGRCInvalidBodyException(response[&#34;descricao&#34;])
-    elif code == 4:
-        raise SGRCBusinessRuleException(response[&#34;descricao&#34;])
-    elif code == 5:
-        raise SGRCInternalErrorException(response[&#34;descricao&#34;])
-    elif code == 6:
-        raise SGRCEquivalentTicketException(response[&#34;descricao&#34;])
-    elif code == 7:
-        raise SGRCDuplicateTicketException(response[&#34;descricao&#34;])</code></pre>
+    if requester is None:
+        requester = Requester()
+    elif not isinstance(requester, Requester):
+        raise ValueError(&#34;&#39;requester&#39; must be a Requester object.&#34;)
+    if occurrence_origin_code is None:
+        occurrence_origin_code = &#34;&#34;
+    data = {
+        &#34;codigoClassificacao&#34;: classification_code,
+        &#34;dataHora&#34;: date_time,
+        &#34;descricao&#34;: description,
+        &#34;solicitantePortalWeb&#34;: requester.to_dict(),
+        &#34;codigoOrigemOcorrencia&#34;: occurrence_origin_code,
+    }
+    if address:
+        data[&#34;endereco&#34;] = address.to_dict()
+    if specific_attributes is not None:
+        parsed_specific_attributes = []
+        for key, value in specific_attributes.items():
+            parsed_specific_attributes.append(
+                {
+                    &#34;nomeAtributoEspecifico&#34;: key,
+                    &#34;valorAtributoEspecifico&#34;: value,
+                }
+            )
+        data[&#34;atributosEspecificos&#34;] = parsed_specific_attributes
+    return data</code></pre>
 </details>
 </dd>
 <dt id="prefeitura_rio.integrations.sgrc.version"><code class="name flex">
@@ -959,10 +1525,23 @@ def version() -&gt; Dict[str, Any]:
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="prefeitura_rio.integrations.sgrc.after_get_protocol_tickets" href="#prefeitura_rio.integrations.sgrc.after_get_protocol_tickets">after_get_protocol_tickets</a></code></li>
+<li><code><a title="prefeitura_rio.integrations.sgrc.after_get_protocol_tickets_details" href="#prefeitura_rio.integrations.sgrc.after_get_protocol_tickets_details">after_get_protocol_tickets_details</a></code></li>
+<li><code><a title="prefeitura_rio.integrations.sgrc.after_get_ticket_details" href="#prefeitura_rio.integrations.sgrc.after_get_ticket_details">after_get_ticket_details</a></code></li>
+<li><code><a title="prefeitura_rio.integrations.sgrc.after_new_ticket" href="#prefeitura_rio.integrations.sgrc.after_new_ticket">after_new_ticket</a></code></li>
+<li><code><a title="prefeitura_rio.integrations.sgrc.async_get_protocol_tickets" href="#prefeitura_rio.integrations.sgrc.async_get_protocol_tickets">async_get_protocol_tickets</a></code></li>
+<li><code><a title="prefeitura_rio.integrations.sgrc.async_get_protocol_tickets_details" href="#prefeitura_rio.integrations.sgrc.async_get_protocol_tickets_details">async_get_protocol_tickets_details</a></code></li>
+<li><code><a title="prefeitura_rio.integrations.sgrc.async_get_protocols" href="#prefeitura_rio.integrations.sgrc.async_get_protocols">async_get_protocols</a></code></li>
+<li><code><a title="prefeitura_rio.integrations.sgrc.async_get_ticket_details" href="#prefeitura_rio.integrations.sgrc.async_get_ticket_details">async_get_ticket_details</a></code></li>
+<li><code><a title="prefeitura_rio.integrations.sgrc.async_version" href="#prefeitura_rio.integrations.sgrc.async_version">async_version</a></code></li>
 <li><code><a title="prefeitura_rio.integrations.sgrc.get_protocol_tickets" href="#prefeitura_rio.integrations.sgrc.get_protocol_tickets">get_protocol_tickets</a></code></li>
 <li><code><a title="prefeitura_rio.integrations.sgrc.get_protocol_tickets_details" href="#prefeitura_rio.integrations.sgrc.get_protocol_tickets_details">get_protocol_tickets_details</a></code></li>
 <li><code><a title="prefeitura_rio.integrations.sgrc.get_protocols" href="#prefeitura_rio.integrations.sgrc.get_protocols">get_protocols</a></code></li>
 <li><code><a title="prefeitura_rio.integrations.sgrc.get_ticket_details" href="#prefeitura_rio.integrations.sgrc.get_ticket_details">get_ticket_details</a></code></li>
+<li><code><a title="prefeitura_rio.integrations.sgrc.pre_get_protocol_tickets" href="#prefeitura_rio.integrations.sgrc.pre_get_protocol_tickets">pre_get_protocol_tickets</a></code></li>
+<li><code><a title="prefeitura_rio.integrations.sgrc.pre_get_protocol_tickets_details" href="#prefeitura_rio.integrations.sgrc.pre_get_protocol_tickets_details">pre_get_protocol_tickets_details</a></code></li>
+<li><code><a title="prefeitura_rio.integrations.sgrc.pre_get_ticket_details" href="#prefeitura_rio.integrations.sgrc.pre_get_ticket_details">pre_get_ticket_details</a></code></li>
+<li><code><a title="prefeitura_rio.integrations.sgrc.pre_new_ticket" href="#prefeitura_rio.integrations.sgrc.pre_new_ticket">pre_new_ticket</a></code></li>
 <li><code><a title="prefeitura_rio.integrations.sgrc.version" href="#prefeitura_rio.integrations.sgrc.version">version</a></code></li>
 </ul>
 </li>
