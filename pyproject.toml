@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "prefeitura-rio"
-version = "1.0.2"
+version = "1.1.0"
 description = "Pacote Python que implementa utilidades para nossos projetos!"
 authors = ["Gabriel Gazola Milan <gabriel.gazola@poli.ufrj.br>"]
 license = "GPL-3.0-only"
@@ -11,6 +11,7 @@ keywords = ["python", "utilities", "government"]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
+aiohttp = { version = "^3.8.5", optional = true }
 basedosdados = { version = "2.0.0b13", extras = ["upload"], optional = true }
 google-cloud-storage = { version = "^2.10.0", optional = true }
 infisical = { version = "^1.4.2", optional = true }
@@ -26,6 +27,7 @@ sentry-sdk = { version = "^1.29.2", optional = true }
 
 [tool.poetry.extras]
 all = [
+    "aiohttp",
     "basedosdados",
     "google-cloud-storage",
     "infisical",
@@ -47,7 +49,7 @@ pipelines = [
     "prefect",
     "sentry-sdk",
 ]
-sgrc = ["pendulum", "pytz", "requests"]
+sgrc = ["aiohttp", "pendulum", "pytz", "requests"]
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.3.0"
