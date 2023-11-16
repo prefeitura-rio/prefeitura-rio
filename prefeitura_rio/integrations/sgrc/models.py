@@ -3,7 +3,6 @@ from typing import List
 
 
 class SGRCModel:
-
     _attrs_dict = {}
 
     def to_dict(self):
@@ -80,6 +79,7 @@ class Address(SGRCModel):
         "coordenadaX": ("x_coordinate", str),
         "coordenadaY": ("y_coordinate", str),
         "urlFoto": ("photo_url", str),
+        "tipoEndereco": ("address_type", str),
     }
 
     def __init__(
@@ -95,6 +95,7 @@ class Address(SGRCModel):
         x_coordinate: str = None,
         y_coordinate: str = None,
         photo_url: str = None,
+        address_type: str = None,
     ):
         self.locality = locality or ""
         self.street_code = street_code or ""
@@ -107,6 +108,7 @@ class Address(SGRCModel):
         self.x_coordinate = x_coordinate or ""
         self.y_coordinate = y_coordinate or ""
         self.photo_url = photo_url or ""
+        self.address_type = address_type or ""
 
 
 class Phones(SGRCModel):
