@@ -31,7 +31,6 @@ from typing import List
 
 
 class SGRCModel:
-
     _attrs_dict = {}
 
     def to_dict(self):
@@ -108,6 +107,7 @@ class Address(SGRCModel):
         &#34;coordenadaX&#34;: (&#34;x_coordinate&#34;, str),
         &#34;coordenadaY&#34;: (&#34;y_coordinate&#34;, str),
         &#34;urlFoto&#34;: (&#34;photo_url&#34;, str),
+        &#34;tipoEndereco&#34;: (&#34;address_type&#34;, str),
     }
 
     def __init__(
@@ -123,6 +123,7 @@ class Address(SGRCModel):
         x_coordinate: str = None,
         y_coordinate: str = None,
         photo_url: str = None,
+        address_type: str = None,
     ):
         self.locality = locality or &#34;&#34;
         self.street_code = street_code or &#34;&#34;
@@ -135,6 +136,7 @@ class Address(SGRCModel):
         self.x_coordinate = x_coordinate or &#34;&#34;
         self.y_coordinate = y_coordinate or &#34;&#34;
         self.photo_url = photo_url or &#34;&#34;
+        self.address_type = address_type or &#34;&#34;
 
 
 class Phones(SGRCModel):
@@ -454,7 +456,7 @@ class TicketDetails(SGRCModel):
 <dl>
 <dt id="prefeitura_rio.integrations.sgrc.models.Address"><code class="flex name class">
 <span>class <span class="ident">Address</span></span>
-<span>(</span><span>locality: str = None, street_code: str = None, street: str = None, number: str = None, neighborhood_code: str = None, neighborhood: str = None, complement: str = None, zip_code: str = None, x_coordinate: str = None, y_coordinate: str = None, photo_url: str = None)</span>
+<span>(</span><span>locality: str = None, street_code: str = None, street: str = None, number: str = None, neighborhood_code: str = None, neighborhood: str = None, complement: str = None, zip_code: str = None, x_coordinate: str = None, y_coordinate: str = None, photo_url: str = None, address_type: str = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Wrapper for implementing "Endereco".</p></div>
@@ -479,6 +481,7 @@ class TicketDetails(SGRCModel):
         &#34;coordenadaX&#34;: (&#34;x_coordinate&#34;, str),
         &#34;coordenadaY&#34;: (&#34;y_coordinate&#34;, str),
         &#34;urlFoto&#34;: (&#34;photo_url&#34;, str),
+        &#34;tipoEndereco&#34;: (&#34;address_type&#34;, str),
     }
 
     def __init__(
@@ -494,6 +497,7 @@ class TicketDetails(SGRCModel):
         x_coordinate: str = None,
         y_coordinate: str = None,
         photo_url: str = None,
+        address_type: str = None,
     ):
         self.locality = locality or &#34;&#34;
         self.street_code = street_code or &#34;&#34;
@@ -505,7 +509,8 @@ class TicketDetails(SGRCModel):
         self.zip_code = zip_code or &#34;&#34;
         self.x_coordinate = x_coordinate or &#34;&#34;
         self.y_coordinate = y_coordinate or &#34;&#34;
-        self.photo_url = photo_url or &#34;&#34;</code></pre>
+        self.photo_url = photo_url or &#34;&#34;
+        self.address_type = address_type or &#34;&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -818,7 +823,6 @@ class TicketDetails(SGRCModel):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class SGRCModel:
-
     _attrs_dict = {}
 
     def to_dict(self):
