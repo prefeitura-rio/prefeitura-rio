@@ -8,6 +8,7 @@ from uuid import uuid4
 
 try:
     import basedosdados as bd
+    import pandas as pd
     import prefect
     from basedosdados.download.base import google_client
     from basedosdados.upload.base import Base
@@ -40,6 +41,9 @@ from prefeitura_rio.pipelines_utils.gcs import (
     parse_blobs_to_partition_dict,
 )
 from prefeitura_rio.pipelines_utils.geo import load_wkt, remove_third_dimension
+from prefeitura_rio.pipelines_utils.infisical import (
+    get_connection_string_from_secret as get_connection_string_from_secret_function,
+)
 from prefeitura_rio.pipelines_utils.infisical import (
     get_secret,
     get_username_and_password_from_secret,
@@ -318,6 +322,36 @@ def database_get(
     )
 
 
+@task(
+    checkpoint=False,
+    max_retries=settings.TASK_MAX_RETRIES_DEFAULT,
+    retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY_DEFAULT),
+)
+def database_get_mongo(
+    connection_string: str,
+    database: str,
+    collection: str,
+):
+    """
+    Returns a Mongo object.
+
+    Args:
+        connection_string (str): MongoDB connection string.
+        database (str): Database name.
+        collection (str): Collection name.
+
+    Returns:
+        A database object.
+    """
+    from prefeitura_rio.pipelines_utils.database_mongo import Mongo
+
+    return Mongo(
+        connection_string=connection_string,
+        database=database,
+        collection=collection,
+    )
+
+
 @task
 def download_data_to_gcs(  # pylint: disable=R0912,R0913,R0914,R0915
     project_id: str = None,
@@ -407,6 +441,72 @@ def download_data_to_gcs(  # pylint: disable=R0912,R0913,R0914,R0915
         raise ValueError(f"No blob found at {blob_path}")
 
     return blob_path
+
+
+@task(
+    max_retries=settings.TASK_MAX_RETRIES_DEFAULT,
+    retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY_DEFAULT),
+    nout=2,
+)
+def dump_batches_to_file(
+    database,
+    batch_size: int,
+    prepath: str | Path,
+    date_field: str = None,
+    date_lower_bound: str = None,
+    date_format: str = None,
+    batch_data_type: str = "csv",
+) -> Path:
+    """
+    Dumps batches of data to FILE.
+    """
+    # If either date_field or date_lower_bound is provided, all of them must be set
+    if date_field and not (date_lower_bound and date_format):
+        raise ValueError(
+            "If date_field is provided, date_lower_bound and date_format must be provided as well."
+        )
+    if date_lower_bound and not (date_field and date_format):
+        raise ValueError(
+            "If date_lower_bound is provided, date_field and date_format must be provided as well."
+        )
+    date_lower_bound_datetime = (
+        datetime.strptime(date_lower_bound, date_format) if date_lower_bound else None
+    )
+    # Dump batches
+    batch = database.fetch_batch(batch_size, date_field, date_lower_bound_datetime)
+    idx = 0
+    while len(batch) > 0:
+        if idx % 100 == 0:
+            log(f"Dumping batch {idx} with size {len(batch)}")
+        # Batch -> DataFrame
+        dataframe: pd.DataFrame = pd.DataFrame(batch)
+        # Clean DataFrame
+        old_columns = dataframe.columns.tolist()
+        dataframe.columns = remove_columns_accents(dataframe)
+        new_columns_dict = dict(zip(old_columns, dataframe.columns.tolist()))
+        dataframe = clean_dataframe(dataframe)
+        # DataFrame -> File
+        if date_field:
+            dataframe, date_partition_columns = parse_date_columns(
+                dataframe, new_columns_dict[date_field]
+            )
+            to_partitions(
+                data=dataframe,
+                partition_columns=date_partition_columns,
+                savepath=prepath,
+                data_type=batch_data_type,
+            )
+        elif batch_data_type == "csv":
+            dataframe_to_csv(dataframe, prepath / f"{uuid4()}.csv")
+        elif batch_data_type == "parquet":
+            dataframe_to_parquet(dataframe, prepath / f"{uuid4()}.parquet")
+        # Get next batch
+        batch = database.fetch_batch(batch_size, date_field, date_lower_bound)
+        idx += 1
+
+    log(f"Successfully dumped {idx} batches with size {len(batch)}")
+
+    return prepath, idx
 
 
 @task
@@ -810,6 +910,15 @@ def format_partitioned_query(
     """
 
 
+@task(checkpoint=False)
+def get_connection_string_from_secret(secret_path: str):
+    """
+    Returns the connection string for the given secret path.
+    """
+    log(f"Getting connection string for secret path: {secret_path}")
+    return get_connection_string_from_secret_function(secret_path)
+
+
 @task
 def get_current_flow_labels() -> List[str]:
     """
@@ -910,6 +1019,14 @@ def get_user_and_password(secret_path: str, wait=None):
     """
     log(f"Getting user and password for secret path: {secret_path}")
     return get_username_and_password_from_secret(secret_path)
+
+
+@task
+def greater_than(value, compare_to) -> bool:
+    """
+    Returns True if value is greater than compare_to.
+    """
+    return value > compare_to
 
 
 @task

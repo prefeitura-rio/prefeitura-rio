@@ -15,6 +15,13 @@ from prefeitura_rio.pipelines_utils.env import getenv_or_action
 from prefeitura_rio.pipelines_utils.prefect import get_flow_run_mode
 
 
+def get_connection_string_from_secret(secret_path: str) -> str:
+    """
+    Returns a connection string from a secret in Vault.
+    """
+    return get_secret(secret_path)
+
+
 def get_infisical_client() -> InfisicalClient:
     """
     Returns an Infisical client using the default settings from environment variables.
