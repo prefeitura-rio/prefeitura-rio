@@ -80,6 +80,10 @@ class Settings:
         return "[TEMPLATE] Ingerir tabela do banco de dados"
 
     @property
+    def FLOW_NAME_DUMP_EARTH_ENGINE(self) -> str:
+        return "[TEMPLATE] Ingerir tabela do Google Earth Engine"
+
+    @property
     def FLOW_NAME_DUMP_TO_GCS(self) -> str:
         return "[TEMPLATE] Fazer dump de tabela para o GCS"
 

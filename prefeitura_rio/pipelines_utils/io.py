@@ -9,6 +9,7 @@ from typing import List, Union
 from uuid import uuid4
 
 try:
+    import croniter
     import pandas as pd
 except ImportError:
     pass
@@ -66,6 +67,26 @@ def dataframe_to_parquet(
 
     # Write dataframe to Parquet
     dataframe.to_parquet(path, engine="pyarrow")
+
+
+@assert_dependencies(["croniter"], extras=["pipelines-templates"])
+def determine_whether_to_execute_or_not(
+    cron_expression: str, datetime_now: datetime, datetime_last_execution: datetime
+) -> bool:
+    """
+    Determines whether the cron expression is currently valid.
+
+    Args:
+        cron_expression: The cron expression to check.
+        datetime_now: The current datetime.
+        datetime_last_execution: The last datetime the cron expression was executed.
+
+    Returns:
+        True if the cron expression should trigger, False otherwise.
+    """
+    cron_expression_iterator = croniter.croniter(cron_expression, datetime_last_execution)
+    next_cron_expression_time = cron_expression_iterator.get_next(datetime)
+    return next_cron_expression_time <= datetime_now
 
 
 @assert_dependencies(["pandas"], extras=["pipelines"])
@@ -155,6 +176,29 @@ def get_root_path() -> Path:
     if str(root_path).endswith("site-packages"):
         root_path = Path("/app")
     return root_path
+
+
+def human_readable(
+    value: Union[int, float],
+    unit: str = "",
+    unit_prefixes: List[str] = None,
+    unit_divider: int = 1000,
+    decimal_places: int = 2,
+):
+    """
+    Formats a value in a human readable way.
+    """
+    if unit_prefixes is None:
+        unit_prefixes = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"]
+    if value == 0:
+        return f"{value}{unit}"
+    unit_prefix = unit_prefixes[0]
+    for prefix in unit_prefixes[1:]:
+        if value < unit_divider:
+            break
+        unit_prefix = prefix
+        value /= unit_divider
+    return f"{value:.{decimal_places}f}{unit_prefix}{unit}"
 
 
 def is_date(date_string: str, date_format: str = "%Y-%m-%d") -> Union[datetime, bool]:

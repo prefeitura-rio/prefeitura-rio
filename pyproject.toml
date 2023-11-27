@@ -13,8 +13,10 @@ keywords = ["python", "utilities", "government"]
 python = ">=3.9,<3.11"
 aiohttp = { version = "^3.8.5", optional = true }
 basedosdados = { version = "2.0.0b13", extras = ["upload"], optional = true }
+croniter = { version = "^2.0.1", optional = true }
 cx-oracle = { version = "^8.3.0", optional = true }
 dask = { version = "^2023.11.0", optional = true }
+earthengine-api = { version = "^0.1.379", optional = true }
 geojsplit = { version = "^0.1.2", optional = true }
 geopandas = { version = "^0.14.1", optional = true }
 google-cloud-storage = { version = "^2.10.0", optional = true }
@@ -27,6 +29,7 @@ prefect = { version = "1.4.1", optional = true }
 pymysql = { version = "^1.1.0", optional = true }
 pyodbc = { version = "^5.0.1", optional = true }
 pytz = { version = "^2023.3", optional = true }
+redis-pal = { version = "^1.0.0", optional = true }
 requests = { version = "^2.31.0", optional = true }
 scikit-learn = { version = "^1.1.2", optional = true }
 sentry-sdk = { version = "^1.29.2", optional = true }
@@ -36,8 +39,10 @@ shapely = { version = "^2.0.2", optional = true }
 all = [
     "aiohttp",
     "basedosdados",
+    "croniter",
     "cx-oracle",
     "dask",
+    "earthengine-api",
     "geojsplit",
     "geopandas",
     "google-cloud-storage",
@@ -49,6 +54,7 @@ all = [
     "pymysql",
     "pyodbc",
     "pytz",
+    "redis-pal",
     "requests",
     "scikit-learn",
     "shapely",
@@ -65,11 +71,14 @@ pipelines = [
     "sentry-sdk",
 ]
 pipelines-templates = [
+    "croniter",
     "cx-oracle",
+    "earthengine-api",
     "geojsplit",
     "geopandas",
     "pymysql",
     "pyodbc",
+    "redis-pal",
     "requests",
     "shapely",
 ]

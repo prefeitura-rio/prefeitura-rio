@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Database dumping flows..
-"""
-
 from datetime import timedelta
 
 try:

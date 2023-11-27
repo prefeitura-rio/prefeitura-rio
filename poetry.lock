@@ -568,17 +568,18 @@ toml = ["tomli"]
 
 [[package]]
 name = "croniter"
-version = "1.4.1"
+version = "2.0.1"
 description = "croniter provides iteration for datetime object with cron like format"
 optional = true
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 files = [
-    {file = "croniter-1.4.1-py2.py3-none-any.whl", hash = "sha256:9595da48af37ea06ec3a9f899738f1b2c1c13da3c38cea606ef7cd03ea421128"},
-    {file = "croniter-1.4.1.tar.gz", hash = "sha256:1a6df60eacec3b7a0aa52a8f2ef251ae3dd2a7c7c8b9874e73e791636d55a361"},
+    {file = "croniter-2.0.1-py2.py3-none-any.whl", hash = "sha256:4cb064ce2d8f695b3b078be36ff50115cf8ac306c10a7e8653ee2a5b534673d7"},
+    {file = "croniter-2.0.1.tar.gz", hash = "sha256:d199b2ec3ea5e82988d1f72022433c5f9302b3b3ea9e6bfd6a1518f6ea5e700a"},
 ]
 
 [package.dependencies]
 python-dateutil = "*"
+pytz = ">2021.1"
 
 [[package]]
 name = "cx-oracle"
@@ -652,6 +653,20 @@ pandas = ">=0.24.2"
 pyarrow = ">=3.0.0"
 
 [[package]]
+name = "dill"
+version = "0.3.7"
+description = "serialize all of Python"
+optional = true
+python-versions = ">=3.7"
+files = [
+    {file = "dill-0.3.7-py3-none-any.whl", hash = "sha256:76b122c08ef4ce2eedcd4d1abd8e641114bfc6c2867f49f3c41facf65bf19f5e"},
+    {file = "dill-0.3.7.tar.gz", hash = "sha256:cc1c8b182eb3013e24bd475ff2e9295af86c1a38eb1aff128dac8962a9ce3c03"},
+]
+
+[package.extras]
+graph = ["objgraph (>=1.7.2)"]
+
+[[package]]
 name = "distlib"
 version = "0.3.6"
 description = "Distribution utilities"
@@ -710,6 +725,24 @@ websocket-client = ">=0.32.0"
 
 [package.extras]
 ssh = ["paramiko (>=2.4.3)"]
+
+[[package]]
+name = "earthengine-api"
+version = "0.1.379"
+description = "Earth Engine Python API"
+optional = true
+python-versions = ">=3.7"
+files = [
+    {file = "earthengine-api-0.1.379.tar.gz", hash = "sha256:156e2324c74591c215118e792f3d68a9d5143950f1976114be578b66a357b84c"},
+]
+
+[package.dependencies]
+google-api-python-client = ">=1.12.1"
+google-auth = ">=1.4.1"
+google-auth-httplib2 = ">=0.0.3"
+google-cloud-storage = "*"
+httplib2 = ">=0.9.2,<1dev"
+requests = "*"
 
 [[package]]
 name = "filelock"
@@ -2926,6 +2959,39 @@ files = [
 ]
 
 [[package]]
+name = "redis"
+version = "4.6.0"
+description = "Python client for Redis database and key-value store"
+optional = true
+python-versions = ">=3.7"
+files = [
+    {file = "redis-4.6.0-py3-none-any.whl", hash = "sha256:e2b03db868160ee4591de3cb90d40ebb50a90dd302138775937f6a42b7ed183c"},
+    {file = "redis-4.6.0.tar.gz", hash = "sha256:585dc516b9eb042a619ef0a39c3d7d55fe81bdb4df09a52c9cdde0d07bf1aa7d"},
+]
+
+[package.dependencies]
+async-timeout = {version = ">=4.0.2", markers = "python_full_version <= \"3.11.2\""}
+
+[package.extras]
+hiredis = ["hiredis (>=1.0.0)"]
+ocsp = ["cryptography (>=36.0.1)", "pyopenssl (==20.0.1)", "requests (>=2.26.0)"]
+
+[[package]]
+name = "redis-pal"
+version = "1.0.0"
+description = "Store things in Redis without worrying about types or anything, just do it!"
+optional = true
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "redis-pal-1.0.0.tar.gz", hash = "sha256:8e20caf8127056a2d1208d6dd0873643efb8357602193e26c1ada8ed6737fa88"},
+    {file = "redis_pal-1.0.0-py3-none-any.whl", hash = "sha256:8cbf55c926c761ce9d60803ed66ef2575f351b43c9554fd66f6458d323430bf0"},
+]
+
+[package.dependencies]
+dill = ">=0.3.5,<0.4.0"
+redis = ">=4.0,<5.0"
+
+[[package]]
 name = "requests"
 version = "2.31.0"
 description = "Python HTTP for Humans."
@@ -3671,13 +3737,13 @@ docs = ["furo", "jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "rst.linker
 testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)"]
 
 [extras]
-all = ["aiohttp", "basedosdados", "cx-oracle", "dask", "geojsplit", "geopandas", "google-cloud-storage", "infisical", "numpy", "pandas", "pendulum", "prefect", "pymysql", "pyodbc", "pytz", "requests", "scikit-learn", "sentry-sdk", "shapely"]
+all = ["aiohttp", "basedosdados", "croniter", "cx-oracle", "dask", "earthengine-api", "geojsplit", "geopandas", "google-cloud-storage", "infisical", "numpy", "pandas", "pendulum", "prefect", "pymysql", "pyodbc", "pytz", "redis-pal", "requests", "scikit-learn", "sentry-sdk", "shapely"]
 metrics = ["numpy", "scikit-learn"]
 pipelines = ["basedosdados", "dask", "google-cloud-storage", "infisical", "pandas", "prefect", "sentry-sdk"]
-pipelines-templates = ["cx-oracle", "geojsplit", "geopandas", "pymysql", "pyodbc", "requests", "shapely"]
+pipelines-templates = ["croniter", "cx-oracle", "earthengine-api", "geojsplit", "geopandas", "pymysql", "pyodbc", "redis-pal", "requests", "shapely"]
 sgrc = ["aiohttp", "pendulum", "pytz", "requests"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "9f51171a440131cac4cde1c7030e4533277c71a0ab401bce523a41dd795c38a8"
+content-hash = "51c3d00a139da9eb0eb633344ebbbcad09933e4540353ed378e31e26f89172b1"
