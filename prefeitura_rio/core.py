@@ -71,5 +71,33 @@ class Settings:
     def SGRC_BODY_TOKEN(self) -> str:
         return getenv_or_action("SGRC_BODY_TOKEN", action="raise")
 
+    @property
+    def FLOW_NAME_DUMP_DATARIO(self) -> str:
+        return "[TEMPLATE] Ingerir tabela do data.rio"
+
+    @property
+    def FLOW_NAME_DUMP_DB(self) -> str:
+        return "[TEMPLATE] Ingerir tabela do banco de dados"
+
+    @property
+    def FLOW_NAME_DUMP_TO_GCS(self) -> str:
+        return "[TEMPLATE] Fazer dump de tabela para o GCS"
+
+    @property
+    def FLOW_NAME_EXECUTE_DBT_MODEL(self) -> str:
+        return "[TEMPLATE] Executar modelo DBT"
+
+    @property
+    def GCS_DUMP_MAX_BYTES_PROCESSED_PER_TABLE(self) -> int:
+        return 5 * 1024 * 1024 * 1024  # 5GB
+
+    @property
+    def TASK_MAX_RETRIES_DEFAULT(self) -> int:
+        return 3
+
+    @property
+    def TASK_RETRY_DELAY_DEFAULT(self) -> int:
+        return 30
+
 
 settings = Settings()

@@ -13,6 +13,17 @@ from prefeitura_rio.pipelines_utils.env import get_bd_credentials_from_env
 from prefeitura_rio.pipelines_utils.prefect import get_flow_run_mode
 
 
+def delete_blobs_list(bucket_name: str, blobs: List[Blob], mode: str = "prod") -> None:
+    """
+    Deletes all blobs in the bucket that are in the blobs list.
+    Mode needs to be "prod" or "staging"
+    """
+    storage_client = get_gcs_client(mode=mode)
+
+    bucket = storage_client.bucket(bucket_name)
+    bucket.delete_blobs(blobs)
+
+
 def get_gcs_client(mode: str = None) -> storage.Client:
     """
     Get a GCS client with the credentials from the environment.
@@ -49,6 +60,24 @@ def list_blobs_with_prefix(bucket_name: str, prefix: str, mode: str = None) -> L
     storage_client = get_gcs_client(mode=mode)
     blobs = storage_client.list_blobs(bucket_name, prefix=prefix)
     return list(blobs)
+
+
+def parse_blobs_to_partition_dict(blobs: list) -> dict:
+    """
+    Extracts the partition information from the blobs.
+    """
+
+    partitions_dict = {}
+    for blob in blobs:
+        for folder in blob.name.split("/"):
+            if "=" in folder:
+                key = folder.split("=")[0]
+                value = folder.split("=")[1]
+                try:
+                    partitions_dict[key].append(value)
+                except KeyError:
+                    partitions_dict[key] = [value]
+    return partitions_dict
 
 
 def parse_blobs_to_partition_list(blobs: List[Blob]) -> List[str]:

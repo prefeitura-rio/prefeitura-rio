@@ -159,3 +159,24 @@ def get_project_id(mode: str = None) -> str:
         raise ValueError("Mode must be 'prod' or 'staging'")
     base = Base()
     return base.config["gcloud-projects"][mode]["name"]
+
+
+def get_storage_blobs(dataset_id: str, table_id: str, mode: str = "staging") -> list:
+    """
+    Get all blobs from a table in a dataset.
+
+    Args:
+        dataset_id (str): dataset id
+        table_id (str): table id
+        mode (str, optional): mode to use. Defaults to "staging".
+
+    Returns:
+        list: list of blobs
+    """
+
+    bd_storage = bd.Storage(dataset_id=dataset_id, table_id=table_id)
+    return list(
+        bd_storage.client["storage_staging"]
+        .bucket(bd_storage.bucket_name)
+        .list_blobs(prefix=f"{mode}/{bd_storage.dataset_id}/{bd_storage.table_id}/")
+    )

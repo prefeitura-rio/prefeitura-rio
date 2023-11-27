@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import base64
+import json
 from os import environ
-from typing import Literal
+from typing import Literal, Tuple
 
 try:
     from infisical import InfisicalClient
@@ -62,6 +63,20 @@ def get_secret(
         environment=environment,
         path=path,
     ).secret_value
+
+
+def get_username_and_password_from_secret(
+    secret_path: str,
+    client: InfisicalClient = None,
+) -> Tuple[str, str]:
+    """
+    Returns a username and password from a secret in Vault.
+    """
+    secret = json.loads(get_secret(secret_path, client))
+    return (
+        secret["username"],
+        secret["password"],
+    )
 
 
 def inject_env(

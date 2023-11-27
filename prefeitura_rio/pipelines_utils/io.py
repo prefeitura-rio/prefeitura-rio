@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
+import re
+import textwrap
+from datetime import datetime
 from os import walk
 from os.path import join
 from pathlib import Path
-from typing import Union
+from typing import List, Union
 from uuid import uuid4
 
 try:
@@ -118,6 +121,26 @@ def dump_header_to_file(data_path: Union[str, Path], data_type: str = "csv"):
     return save_header_path
 
 
+def extract_last_partition_date(partitions_dict: dict, date_format: str):
+    """
+    Extract last date from partitions folders
+    """
+    last_partition_date = None
+    for partition, values in partitions_dict.items():
+        new_values = [date for date in values if is_date(date_string=date, date_format=date_format)]
+        try:
+            last_partition_date = datetime.strptime(max(new_values), date_format).strftime(
+                date_format
+            )
+            log(
+                f"last partition from {partition} is in date format "
+                f"{date_format}: {last_partition_date}"
+            )
+        except ValueError:
+            log(f"partition {partition} is not a date or not in correct format {date_format}")
+    return last_partition_date
+
+
 def get_root_path() -> Path:
     """
     Returns the root path of the project.
@@ -132,6 +155,32 @@ def get_root_path() -> Path:
     if str(root_path).endswith("site-packages"):
         root_path = Path("/app")
     return root_path
+
+
+def is_date(date_string: str, date_format: str = "%Y-%m-%d") -> Union[datetime, bool]:
+    """
+    Checks whether a string is a valid date.
+    """
+    try:
+        return datetime.strptime(date_string, date_format).strftime(date_format)
+    except ValueError:
+        return False
+
+
+def query_to_line(query: str) -> str:
+    """
+    Converts a query to a line.
+    """
+    query = textwrap.dedent(query)
+    return " ".join([line.strip() for line in query.split("\n")])
+
+
+def remove_tabs_from_query(query: str) -> str:
+    """
+    Removes tabs from a query.
+    """
+    query = query_to_line(query)
+    return re.sub(r"\s+", " ", query).strip()
 
 
 @assert_dependencies(["pandas"], extras=["pipelines"])
@@ -165,3 +214,84 @@ def to_json_dataframe(
     if save_to:
         dataframe.to_csv(save_to, index=False)
     return dataframe
+
+
+def to_partitions(
+    data: pd.DataFrame,
+    partition_columns: List[str],
+    savepath: str,
+    data_type: str = "csv",
+    suffix: str = None,
+    build_json_dataframe: bool = False,
+    dataframe_key_column: str = None,
+) -> List[Path]:  # sourcery skip: raise-specific-error
+    """Save data in to hive patitions schema, given a dataframe and a list of partition columns.
+    Args:
+        data (pandas.core.frame.DataFrame): Dataframe to be partitioned.
+        partition_columns (list): List of columns to be used as partitions.
+        savepath (str, pathlib.PosixPath): folder path to save the partitions
+    Exemple:
+        data = {
+            "ano": [2020, 2021, 2020, 2021, 2020, 2021, 2021,2025],
+            "mes": [1, 2, 3, 4, 5, 6, 6,9],
+            "sigla_uf": ["SP", "SP", "RJ", "RJ", "PR", "PR", "PR","PR"],
+            "dado": ["a", "b", "c", "d", "e", "f", "g",'h'],
+        }
+        to_partitions(
+            data=pd.DataFrame(data),
+            partition_columns=['ano','mes','sigla_uf'],
+            savepath='partitions/'
+        )
+    """
+    saved_files = []
+    if isinstance(data, (pd.core.frame.DataFrame)):
+        savepath = Path(savepath)
+
+        # create unique combinations between partition columns
+        unique_combinations = (
+            data[partition_columns]
+            .drop_duplicates(subset=partition_columns)
+            .to_dict(orient="records")
+        )
+
+        for filter_combination in unique_combinations:
+            patitions_values = [
+                f"{partition}={value}" for partition, value in filter_combination.items()
+            ]
+
+            # get filtered data
+            df_filter = data.loc[
+                data[filter_combination.keys()].isin(filter_combination.values()).all(axis=1),
+                :,
+            ]
+            df_filter = df_filter.drop(columns=partition_columns).reset_index(drop=True)
+
+            # create folder tree
+            filter_save_path = Path(savepath / "/".join(patitions_values))
+            filter_save_path.mkdir(parents=True, exist_ok=True)
+            if suffix is not None:
+                file_filter_save_path = Path(filter_save_path) / f"data_{suffix}.{data_type}"
+            else:
+                file_filter_save_path = Path(filter_save_path) / f"data.{data_type}"
+
+            if build_json_dataframe:
+                df_filter = to_json_dataframe(df_filter, key_column=dataframe_key_column)
+
+            if data_type == "csv":
+                # append data to csv
+                df_filter.to_csv(
+                    file_filter_save_path,
+                    index=False,
+                    mode="a",
+                    header=not file_filter_save_path.exists(),
+                )
+                saved_files.append(file_filter_save_path)
+            elif data_type == "parquet":
+                dataframe_to_parquet(dataframe=df_filter, path=file_filter_save_path)
+                saved_files.append(file_filter_save_path)
+            else:
+                raise ValueError(f"Invalid data type: {data_type}")
+    else:
+        raise BaseException("Data need to be a pandas DataFrame")
+
+    return saved_files
