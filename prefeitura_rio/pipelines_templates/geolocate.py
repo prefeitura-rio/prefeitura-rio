@@ -6,11 +6,6 @@ Flow for georeferencing tables
 
 from datetime import timedelta
 
-from prefect import Parameter, case
-from prefect.run_configs import KubernetesRun
-from prefect.storage import GCS
-from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
-
 from pipelines.constants import constants
 from pipelines.utils.constants import constants as utils_constants
 from pipelines.utils.decorators import Flow
@@ -23,9 +18,13 @@ from pipelines.utils.georeference.tasks import (
     validate_georeference_mode,
 )
 from pipelines.utils.tasks import (
-    get_current_flow_labels,
     create_table_and_upload_to_gcs,
+    get_current_flow_labels,
 )
+from prefect import Parameter, case
+from prefect.run_configs import KubernetesRun
+from prefect.storage import GCS
+from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
 
 with Flow(
     "EMD: template - Geolocalizar tabela",
@@ -48,18 +47,12 @@ with Flow(
     destination_table_id = Parameter("destination_table_id")
 
     # Georeference parameters
-    georeference_mode = Parameter(
-        "georeference_mode", default="distinct", required=False
-    )
+    georeference_mode = Parameter("georeference_mode", default="distinct", required=False)
 
     # Materialization parameters
     materialize = Parameter("materialize", default=False, required=False)
-    materialization_mode = Parameter(
-        "materialization_mode", default="dev", required=False
-    )
-    materialize_to_datario = Parameter(
-        "materialize_to_datario", default=False, required=False
-    )
+    materialization_mode = Parameter("materialization_mode", default="dev", required=False)
+    materialize_to_datario = Parameter("materialize_to_datario", default=False, required=False)
 
     # Dump to GCS after? Should only dump to GCS if materializing to datario
     dump_to_gcs = Parameter("dump_to_gcs", default=False, required=False)
