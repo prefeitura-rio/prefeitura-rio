@@ -94,11 +94,11 @@ class Settings:
     @property
     def FLOW_NAME_EXECUTE_DBT_MODEL(self) -> str:
         return "[TEMPLATE] Executar modelo DBT"
-    
+
     @property
     def FLOW_NAME_GEOLOCATE(self) -> str:
         return "[TEMPLATE] Geolocalizar tabela"
-    
+
     @property
     def GCS_DUMP_MAX_BYTES_PROCESSED_PER_TABLE(self) -> int:
         return 5 * 1024 * 1024 * 1024  # 5GB
@@ -110,15 +110,18 @@ class Settings:
     @property
     def TASK_RETRY_DELAY_DEFAULT(self) -> int:
         return 30
+
     @property
     def WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS(self) -> int:
         return 3
+
     @property
     def WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL(self) -> int:
         return 5
-    
+
     @property
     def PREFECT_DEFAULT_PROJECT(self) -> str:
         return "main"
-    
+
+
 settings = Settings()

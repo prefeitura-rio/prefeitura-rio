@@ -2,7 +2,7 @@
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
-from time import time, sleep
+from time import sleep, time
 from typing import Dict, List, Tuple
 from uuid import uuid4
 
@@ -12,12 +12,12 @@ try:
     import prefect
     from basedosdados.download.base import google_client
     from basedosdados.upload.base import Base
-    from google.cloud import bigquery
-    from prefect import Client, task
-    from prefect.backend import FlowRunView
     from geopy.extra.rate_limiter import RateLimiter
     from geopy.geocoders import Nominatim
     from geopy.location import Location
+    from google.cloud import bigquery
+    from prefect import Client, task
+    from prefect.backend import FlowRunView
 except ImportError:
     from prefeitura_rio.utils import base_assert_dependencies
 
@@ -34,6 +34,7 @@ from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.bd import get_project_id as get_project_id_function
 from prefeitura_rio.pipelines_utils.bd import get_storage_blobs
 from prefeitura_rio.pipelines_utils.geo import check_if_belongs_to_rio
+
 try:
     from prefeitura_rio.pipelines_utils.database_sql import Database
 except ImportError:
@@ -71,7 +72,6 @@ from prefeitura_rio.pipelines_utils.pandas import (
 )
 from prefeitura_rio.pipelines_utils.redis_pal import get_redis_client
 from prefeitura_rio.utils import assert_dependencies
-
 
 
 @task(
@@ -1249,9 +1249,7 @@ def validate_georeference_mode(mode: str) -> None:
 
 
 @assert_dependencies(["geojsplit", "geopandas"], extras=["pipelines-templates"])
-def georeference_dataframe(
-    new_addresses: pd.DataFrame, log_divider: int = 60
-) -> pd.DataFrame:
+def georeference_dataframe(new_addresses: pd.DataFrame, log_divider: int = 60) -> pd.DataFrame:
     """
     Georeference all addresses in a dataframe
     """
@@ -1345,9 +1343,7 @@ def get_new_addresses(  # pylint: disable=too-many-arguments, too-many-locals
             destination_addresses = pd.DataFrame(columns=["address"])
 
         # pylint: disable=invalid-unary-operand-type
-        new_addresses = source_addresses[
-            ~source_addresses.isin(destination_addresses)
-        ].dropna()
+        new_addresses = source_addresses[~source_addresses.isin(destination_addresses)].dropna()
         exists_new_addresses = not new_addresses.empty
 
     return new_addresses, exists_new_addresses

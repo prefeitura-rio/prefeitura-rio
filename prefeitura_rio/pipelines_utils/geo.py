@@ -12,13 +12,12 @@ try:
         Point,
         Polygon,
     )
-    
-    
+
+
 except ImportError:
     pass
 
 from prefeitura_rio.utils import assert_dependencies
-
 
 
 @assert_dependencies(["shapely"], extras=["pipelines-templates"])
@@ -86,7 +85,6 @@ def remove_third_dimension(geom):
         raise RuntimeError(f"Currently this type of geometry is not supported: {type(geom)}")
 
 
-
 @assert_dependencies(["shapely"], extras=["pipelines-templates"])
 def check_if_belongs_to_rio(lat: float, long: float) -> list:
     """
@@ -112,5 +110,3 @@ def check_if_belongs_to_rio(lat: float, long: float) -> list:
     else:
         lat_lon = [None, None]
     return lat_lon
-
-

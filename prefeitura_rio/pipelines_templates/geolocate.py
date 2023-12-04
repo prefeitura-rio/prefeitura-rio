@@ -13,7 +13,6 @@ from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
 
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.custom import Flow
-
 from prefeitura_rio.pipelines_utils.tasks import (
     create_table_and_upload_to_gcs,
     dataframe_to_csv,
@@ -109,9 +108,7 @@ with Flow(
                 raise_final_state=True,
             )
 
-            wait_for_materialization.max_retries = (
-                settings.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS
-            )
+            wait_for_materialization.max_retries = settings.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS
             wait_for_materialization.retry_delay = timedelta(
                 seconds=settings.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL
             )
