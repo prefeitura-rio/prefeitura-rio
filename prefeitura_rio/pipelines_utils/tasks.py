@@ -1232,6 +1232,22 @@ def update_last_trigger(
     redis_client.set(key, {"last_trigger": execution_time})
 
 
+
+@task
+def validate_georeference_mode(mode: str) -> None:
+    """
+    Validates georeference mode
+    """
+    if mode not in [
+        "distinct",
+        # insert new modes here
+    ]:
+        raise ValueError(
+            f"Invalid georeference mode: {mode}. Valid modes are: distinct"
+        )
+
+
+
 @assert_dependencies(["geojsplit", "geopandas"], extras=["pipelines-templates"])
 def georeference_dataframe(
     new_addresses: pd.DataFrame, log_divider: int = 60
