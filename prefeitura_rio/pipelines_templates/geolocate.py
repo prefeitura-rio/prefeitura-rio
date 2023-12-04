@@ -24,7 +24,7 @@ from prefeitura_rio.pipelines_utils.tasks import (
 )
 
 with Flow(
-    settings.FLOW_GEOREFERENCE,
+    settings.FLOW_NAME_GEOLOCATE,
 ) as utils_georeference_flow:
     ################################
     #
@@ -40,18 +40,12 @@ with Flow(
     destination_table_id = Parameter("destination_table_id")
 
     # Georeference parameters
-    georeference_mode = Parameter(
-        "georeference_mode", default="distinct", required=False
-    )
+    georeference_mode = Parameter("georeference_mode", default="distinct", required=False)
 
     # Materialization parameters
     materialize = Parameter("materialize", default=False, required=False)
-    materialization_mode = Parameter(
-        "materialization_mode", default="dev", required=False
-    )
-    materialize_to_datario = Parameter(
-        "materialize_to_datario", default=False, required=False
-    )
+    materialization_mode = Parameter("materialization_mode", default="dev", required=False)
+    materialize_to_datario = Parameter("materialize_to_datario", default=False, required=False)
 
     # Dump to GCS after? Should only dump to GCS if materializing to datario
     dump_to_gcs = Parameter("dump_to_gcs", default=False, required=False)
@@ -148,8 +142,7 @@ with Flow(
                 )
 
 
-utils_georeference_flow.storage = GCS(constants.GCS_FLOWS_BUCKET.value)
+utils_georeference_flow.storage = GCS("<REPLACE_ME_WHEN_USING")
 utils_georeference_flow.run_config = KubernetesRun(
-    image=constants.DOCKER_IMAGE.value,
-    labels=[constants.RJ_ESCRITORIO_DEV_AGENT_LABEL.value],
+    image="<REPLACE_ME_WHEN_USING",
 )

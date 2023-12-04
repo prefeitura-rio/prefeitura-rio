@@ -96,7 +96,7 @@ class Settings:
         return "[TEMPLATE] Executar modelo DBT"
     
     @property
-    def FLOW_NAME_GEOREFERENCE(self) -> str:
+    def FLOW_NAME_GEOLOCATE(self) -> str:
         return "[TEMPLATE] Geolocalizar tabela"
     
     @property
