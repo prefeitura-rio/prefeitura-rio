@@ -2,8 +2,8 @@
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
-from time import sleep
-from typing import Dict, List
+from time import time, sleep
+from typing import Dict, List, Tuple
 from uuid import uuid4
 
 try:
@@ -15,6 +15,9 @@ try:
     from google.cloud import bigquery
     from prefect import Client, task
     from prefect.backend import FlowRunView
+    from geopy.extra.rate_limiter import RateLimiter
+    from geopy.geocoders import Nominatim
+    from geopy.location import Location
 except ImportError:
     from prefeitura_rio.utils import base_assert_dependencies
 
@@ -30,7 +33,7 @@ except ImportError:
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.bd import get_project_id as get_project_id_function
 from prefeitura_rio.pipelines_utils.bd import get_storage_blobs
-
+from prefeitura_rio.pipelines_utils.geo import check_if_belongs_to_rio
 try:
     from prefeitura_rio.pipelines_utils.database_sql import Database
 except ImportError:
@@ -68,6 +71,7 @@ from prefeitura_rio.pipelines_utils.pandas import (
 )
 from prefeitura_rio.pipelines_utils.redis_pal import get_redis_client
 from prefeitura_rio.utils import assert_dependencies
+
 
 
 @task(
@@ -1226,3 +1230,108 @@ def update_last_trigger(
     redis_client = get_redis_client()
     key = f"{project_id}__{ee_asset_path}"
     redis_client.set(key, {"last_trigger": execution_time})
+
+
+@assert_dependencies(["geojsplit", "geopandas"], extras=["pipelines-templates"])
+def georeference_dataframe(
+    new_addresses: pd.DataFrame, log_divider: int = 60
+) -> pd.DataFrame:
+    """
+    Georeference all addresses in a dataframe
+    """
+    start_time = time()
+
+    all_addresses = new_addresses["address"].tolist()
+    all_addresses = [f"{address}, Rio de Janeiro" for address in all_addresses]
+
+    geolocator = Nominatim(user_agent="prefeitura-rio")
+    geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
+
+    log(f"There are {len(all_addresses)} addresses to georeference")
+
+    locations: List[Location] = []
+    for i, address in enumerate(all_addresses):
+        if i % log_divider == 0:
+            log(f"Georeferencing address {i} of {len(all_addresses)}...")
+        location = geocode(address)
+        locations.append(location)
+
+    geolocated_addresses = [
+        {
+            "latitude": location.latitude,
+            "longitude": location.longitude,
+        }
+        if location is not None
+        else {"latitude": None, "longitude": None}
+        for location in locations
+    ]
+
+    output = pd.DataFrame(geolocated_addresses)
+    output["address"] = new_addresses["address"]
+    output[["latitude", "longitude"]] = output.apply(
+        lambda x: check_if_belongs_to_rio(x.latitude, x.longitude),
+        axis=1,
+        result_type="expand",
+    )
+
+    log(f"--- {(time() - start_time)} seconds ---")
+
+    return output
+
+
+@task(nout=2)
+@assert_dependencies(["geojsplit", "geopandas"], extras=["pipelines-templates"])
+def get_new_addresses(  # pylint: disable=too-many-arguments, too-many-locals
+    source_dataset_id: str,
+    source_table_id: str,
+    source_table_address_column: str,
+    destination_dataset_id: str,
+    destination_table_id: str,
+    georef_mode: str,
+    current_flow_labels: List[str],
+) -> Tuple[pd.DataFrame, bool]:
+    """
+    Get new addresses from source table
+    """
+
+    new_addresses = pd.DataFrame(columns=["address"])
+    exists_new_addresses = False
+
+    source_table_ref = f"{source_dataset_id}.{source_table_id}"
+    destination_table_ref = f"{destination_dataset_id}.{destination_table_id}"
+    billing_project_id = current_flow_labels[0]
+
+    if georef_mode == "distinct":
+        query_source = f"""
+        SELECT DISTINCT
+            {source_table_address_column}
+        FROM
+            `{source_table_ref}`
+        """
+
+        query_destination = f"""
+        SELECT DISTINCT
+            address
+        FROM
+            `{destination_table_ref}`
+        """
+
+        source_addresses = bd.read_sql(
+            query_source, billing_project_id=billing_project_id, from_file=True
+        )
+        source_addresses.columns = ["address"]
+        try:
+            destination_addresses = bd.read_sql(
+                query_destination, billing_project_id=billing_project_id, from_file=True
+            )
+            destination_addresses.columns = ["address"]
+        except Exception:  # pylint: disable=broad-except
+            destination_addresses = pd.DataFrame(columns=["address"])
+
+        # pylint: disable=invalid-unary-operand-type
+        new_addresses = source_addresses[
+            ~source_addresses.isin(destination_addresses)
+        ].dropna()
+        exists_new_addresses = not new_addresses.empty
+
+    return new_addresses, exists_new_addresses

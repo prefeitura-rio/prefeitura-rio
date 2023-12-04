@@ -11,28 +11,20 @@ from prefect.run_configs import KubernetesRun
 from prefect.storage import GCS
 from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
 
-from pipelines.constants import constants
-from pipelines.utils.constants import constants as utils_constants
-from pipelines.utils.decorators import Flow
-from pipelines.utils.dump_db.constants import constants as dump_db_constants
-from pipelines.utils.dump_to_gcs.constants import constants as dump_to_gcs_constants
-from pipelines.utils.georeference.tasks import (
+from prefeitura_rio.core import settings
+from prefeitura_rio.pipelines_utils.custom import Flow
+
+from prefeitura_rio.pipelines_utils.tasks import (
+    create_table_and_upload_to_gcs,
     dataframe_to_csv,
     georeference_dataframe,
+    get_current_flow_labels,
     get_new_addresses,
     validate_georeference_mode,
 )
-from pipelines.utils.tasks import (
-    get_current_flow_labels,
-    create_table_and_upload_to_gcs,
-)
 
 with Flow(
-    "EMD: template - Geolocalizar tabela",
-    code_owners=[
-        "gabriel",
-        "paty",
-    ],
+    settings.FLOW_GEOREFERENCE,
 ) as utils_georeference_flow:
     ################################
     #
@@ -66,7 +58,7 @@ with Flow(
     maximum_bytes_processed = Parameter(
         "maximum_bytes_processed",
         required=False,
-        default=dump_to_gcs_constants.MAX_BYTES_PROCESSED_PER_TABLE.value,
+        default=settings.MAX_BYTES_PROCESSED_PER_TABLE,
     )
     biglake_table = Parameter("biglake_table", default=False, required=False)
 
@@ -103,8 +95,8 @@ with Flow(
         with case(materialize, True):
             # Trigger DBT flow run
             materialization_flow = create_flow_run(
-                flow_name=utils_constants.FLOW_EXECUTE_DBT_MODEL_NAME.value,
-                project_name=constants.PREFECT_DEFAULT_PROJECT.value,
+                flow_name=settings.FLOW_EXECUTE_DBT_MODEL_NAME,
+                project_name=settings.PREFECT_DEFAULT_PROJECT,
                 parameters={
                     "dataset_id": destination_dataset_id,
                     "table_id": destination_table_id,
@@ -124,17 +116,17 @@ with Flow(
             )
 
             wait_for_materialization.max_retries = (
-                dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS.value
+                settings.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS
             )
             wait_for_materialization.retry_delay = timedelta(
-                seconds=dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL.value
+                seconds=settings.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL
             )
 
             with case(dump_to_gcs, True):
                 # Trigger Dump to GCS flow run with project id as datario
                 dump_to_gcs_flow = create_flow_run(
-                    flow_name=utils_constants.FLOW_DUMP_TO_GCS_NAME.value,
-                    project_name=constants.PREFECT_DEFAULT_PROJECT.value,
+                    flow_name=settings.FLOW_DUMP_TO_GCS_NAME,
+                    project_name=settings.PREFECT_DEFAULT_PROJECT,
                     parameters={
                         "project_id": "datario",
                         "dataset_id": destination_dataset_id,
