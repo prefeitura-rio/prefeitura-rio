@@ -1232,7 +1232,6 @@ def update_last_trigger(
     redis_client.set(key, {"last_trigger": execution_time})
 
 
-
 @task
 def validate_georeference_mode(mode: str) -> None:
     """
@@ -1242,10 +1241,7 @@ def validate_georeference_mode(mode: str) -> None:
         "distinct",
         # insert new modes here
     ]:
-        raise ValueError(
-            f"Invalid georeference mode: {mode}. Valid modes are: distinct"
-        )
-
+        raise ValueError(f"Invalid georeference mode: {mode}. Valid modes are: distinct")
 
 
 @assert_dependencies(["geojsplit", "geopandas"], extras=["pipelines-templates"])
