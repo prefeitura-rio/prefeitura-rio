@@ -24,7 +24,7 @@ from prefeitura_rio.pipelines_utils.tasks import (
 
 with Flow(
     settings.FLOW_NAME_GEOLOCATE,
-) as utils_georeference_flow:
+) as utils_geolocate_flow:
     ################################
     #
     # Parameters
@@ -139,7 +139,7 @@ with Flow(
                 )
 
 
-utils_georeference_flow.storage = GCS("<REPLACE_ME_WHEN_USING")
-utils_georeference_flow.run_config = KubernetesRun(
+utils_geolocate_flow.storage = GCS("<REPLACE_ME_WHEN_USING")
+utils_geolocate_flow.run_config = KubernetesRun(
     image="<REPLACE_ME_WHEN_USING",
 )

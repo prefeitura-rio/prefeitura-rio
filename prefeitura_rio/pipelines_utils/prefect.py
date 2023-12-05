@@ -63,6 +63,17 @@ def get_tenant_slug(tenant_id: str) -> str:
     )
     return response["data"]["tenant"][0]["slug"]
 
+def set_default_parameters(
+    flow: prefect.Flow, default_parameters: dict
+) -> prefect.Flow:
+    """
+    Sets default parameters for a flow.
+    """
+    for parameter in flow.parameters():
+        if parameter.name in default_parameters:
+            parameter.default = default_parameters[parameter.name]
+    return flow
+
 
 @task
 def task_get_current_flow_run_labels() -> List[str]:
@@ -101,3 +112,5 @@ def task_rename_current_flow_run_dataset_table(prefix: str, dataset_id: str, tab
     flow_run_id = prefect.context.get("flow_run_id")
     client = Client()
     return client.set_flow_run_name(flow_run_id, f"{prefix}{dataset_id}.{table_id}")
+
+
