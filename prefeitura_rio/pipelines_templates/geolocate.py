@@ -139,7 +139,7 @@ with Flow(
                 )
 
 
-utils_geolocate_flow.storage = GCS("<REPLACE_ME_WHEN_USING")
+utils_geolocate_flow.storage = GCS("<REPLACE_ME_WHEN_USING>")
 utils_geolocate_flow.run_config = KubernetesRun(
-    image="<REPLACE_ME_WHEN_USING",
+    image="<REPLACE_ME_WHEN_USING>",
 )
