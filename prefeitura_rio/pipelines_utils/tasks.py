@@ -33,7 +33,6 @@ except ImportError:
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.bd import get_project_id as get_project_id_function
 from prefeitura_rio.pipelines_utils.bd import get_storage_blobs
-from prefeitura_rio.pipelines_utils.geo import check_if_belongs_to_rio
 
 try:
     from prefeitura_rio.pipelines_utils.database_sql import Database
@@ -1279,7 +1278,7 @@ def georeference_dataframe(new_addresses: pd.DataFrame, log_divider: int = 60) -
     output = pd.DataFrame(geolocated_addresses)
     output["address"] = new_addresses["address"]
     output[["latitude", "longitude"]] = output.apply(
-        lambda x: check_if_belongs_to_rio(x.latitude, x.longitude),
+        lambda x: [x.latitude, x.longitude],
         axis=1,
         result_type="expand",
     )
