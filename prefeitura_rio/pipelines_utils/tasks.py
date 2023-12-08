@@ -1304,7 +1304,7 @@ def get_new_addresses(  # pylint: disable=too-many-arguments, too-many-locals
     new_addresses = pd.DataFrame(columns=["address"])
     exists_new_addresses = False
 
-    billing_project_id = current_flow_labels[0]
+    billing_project_id = Base().config["gcloud-projects"]["prod"]["name"]
     source_table_ref = f"{billing_project_id}.{source_dataset_id}.{source_table_id}"
     destination_table_ref = f"{billing_project_id}.{destination_dataset_id}.{destination_table_id}"
     if georef_mode == "distinct":
@@ -1321,7 +1321,7 @@ def get_new_addresses(  # pylint: disable=too-many-arguments, too-many-locals
         FROM
             `{destination_table_ref}`
         """
-
+        log(query_source)
         source_addresses = bd.read_sql(
             query_source, billing_project_id=billing_project_id, from_file=True
         )
