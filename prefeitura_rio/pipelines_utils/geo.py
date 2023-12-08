@@ -11,6 +11,7 @@ try:
         Point,
         Polygon,
     )
+    from geopy.geocoders import Nominatim
 
 
 except ImportError:
@@ -82,3 +83,25 @@ def remove_third_dimension(geom):
 
     else:
         raise RuntimeError(f"Currently this type of geometry is not supported: {type(geom)}")
+
+
+class Geolocator:
+    def __init__(self, user_agent="my_geocoder"):
+        self.geopy_geolocator_nominatim = Nominatim(user_agent=user_agent)
+        self.google_api_url = "https://maps.googleapis.com/maps/api/geocode/json"
+
+    def geopy_nominatim(self, address, language=None, timeout=None, viewbox=None):
+        viewbox_parsed = (
+            None if viewbox is None else ((viewbox[1], viewbox[0]), (viewbox[3], viewbox[2]))
+        )
+        location = self.geopy_geolocator_nominatim.geocode(
+            address,
+            language=language,
+            timeout=timeout,
+            viewbox=viewbox_parsed,
+            bounded=True if viewbox is not None else False,
+        )
+
+        latitude = None if location is None else location.latitude
+        longitude = None if location is None else location.longitude
+        return latitude, longitude

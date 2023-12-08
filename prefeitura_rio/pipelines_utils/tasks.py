@@ -12,9 +12,6 @@ try:
     import prefect
     from basedosdados.download.base import google_client
     from basedosdados.upload.base import Base
-    from geopy.extra.rate_limiter import RateLimiter
-    from geopy.geocoders import Nominatim
-    from geopy.location import Location
     from google.cloud import bigquery
     from prefect import Client, task
     from prefect.backend import FlowRunView
@@ -33,6 +30,8 @@ except ImportError:
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.bd import get_project_id as get_project_id_function
 from prefeitura_rio.pipelines_utils.bd import get_storage_blobs
+from prefeitura_rio.pipelines_utils.geo import Geolocator
+
 
 try:
     from prefeitura_rio.pipelines_utils.database_sql import Database
@@ -1249,52 +1248,43 @@ def validate_georeference_mode(mode: str) -> None:
 
 
 @task
-def georeference_dataframe(new_addresses: pd.DataFrame, log_divider: int = 60) -> pd.DataFrame:
+def georeference_dataframe(
+    new_addresses: pd.DataFrame,
+    address_column="address",
+    log_divider: int = 1,
+    language="pt",
+    timeout=10,
+    viewbox=None,
+    sulfix=None,
+) -> pd.DataFrame:
     """
     Georeference all addresses in a dataframe
     """
-    base_assert_dependencies(["geojsplit", "geopandas"], extras=["pipelines-templates"])
     start_time = time()
 
-    all_addresses = new_addresses["address"].tolist()
-    all_addresses = [
-        f"{address}, Rio de Janeiro" if address.upper().endswith("RIO DE JANEIRO") else address
-        for address in all_addresses
-    ]
-
-    geolocator = Nominatim(user_agent="prefeitura-rio")
-    geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
-
+    all_addresses = new_addresses[address_column].tolist()
+    all_addresses = [f"{address}{sulfix}" if sulfix else address for address in all_addresses]
     log(f"There are {len(all_addresses)} addresses to georeference")
 
-    locations: List[Location] = []
+    geolocate_address = Geolocator()
+    latitudes = []
+    longitudes = []
     for i, address in enumerate(all_addresses):
         if i % log_divider == 0:
             log(f"Georeferencing address {i} of {len(all_addresses)}...")
-        location = geocode(address)
-        locations.append(location)
-
-    geolocated_addresses = [
-        {
-            "latitude": location.latitude,
-            "longitude": location.longitude,
-        }
-        if location is not None
-        else {"latitude": None, "longitude": None}
-        for location in locations
-    ]
-
-    output = pd.DataFrame(geolocated_addresses)
-    output["address"] = new_addresses["address"]
-    output[["latitude", "longitude"]] = output.apply(
-        lambda x: [x.latitude, x.longitude],
-        axis=1,
-        result_type="expand",
-    )
-
+        latitude, longitude = geolocate_address.geopy_nominatim(
+            address=address,
+            language=language,
+            timeout=timeout,
+            viewbox=viewbox,
+        )
+        latitudes.append(latitude)
+        longitudes.append(longitude)
+    new_addresses["latitude"] = latitudes
+    new_addresses["longitude"] = longitudes
     log(f"--- {(time() - start_time)} seconds ---")
-
-    return output
+    cols = [address_column, "latitude", "longitude"]
+    return new_addresses[cols]
 
 
 @task(nout=2)

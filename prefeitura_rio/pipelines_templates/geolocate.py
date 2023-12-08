@@ -35,7 +35,7 @@ with Flow(
     # Table parameters
     source_dataset_id = Parameter("source_dataset_id")
     source_table_id = Parameter("source_table_id")
-    source_table_address_column = Parameter("source_table_address_column")
+    source_table_address_column = Parameter("source_table_address_column", default="address")
     destination_dataset_id = Parameter("destination_dataset_id")
     destination_table_id = Parameter("destination_table_id")
 
@@ -55,7 +55,13 @@ with Flow(
         default=settings.GCS_DUMP_MAX_BYTES_PROCESSED_PER_TABLE,
     )
     biglake_table = Parameter("biglake_table", default=False, required=False)
-
+    log_divider = Parameter("log_divider", default=100, required=False)
+    language = Parameter("language", default="pt", required=False)
+    timeout = Parameter("timeout", default=10, required=False)
+    sulfix = Parameter("sulfix", default=None, required=False)
+    viewbox = Parameter(
+        "viewbox", default="-44.03122,-22.74202,-43.09189,-23.51051", required=False
+    )
     # Validate the georeference mode
     georef_mode_valid = validate_georeference_mode(mode=georeference_mode)
 
@@ -76,7 +82,15 @@ with Flow(
 
     with case(exists_new_addresses, True):
         # Georeference the table
-        georeferenced_table = georeference_dataframe(new_addresses=new_addresses)
+        georeferenced_table = georeference_dataframe(
+            new_addresses=new_addresses,
+            address_column=source_table_address_column,
+            log_divider=log_divider,
+            language=language,
+            timeout=timeout,
+            viewbox=viewbox,
+            sulfix=sulfix,
+        )
         base_path = dataframe_to_csv_task(dataframe=georeferenced_table, path=f"data/{uuid4()}/")
         create_staging_table = create_table_and_upload_to_gcs(
             data_path=base_path,
