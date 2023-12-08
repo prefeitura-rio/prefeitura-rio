@@ -13,12 +13,12 @@ except ImportError:
 
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.custom import Flow
+from prefeitura_rio.pipelines_utils.prefect import task_get_current_flow_run_labels
 from prefeitura_rio.pipelines_utils.tasks import (
     database_execute,
     database_get,
     dump_upload_batch,
     format_partitioned_query,
-    get_current_flow_labels,
     get_current_flow_project_name,
     get_user_and_password,
     parse_comma_separated_string_to_list,
@@ -99,7 +99,7 @@ with Flow(
     #####################################
 
     # Get current flow labels
-    current_flow_labels = get_current_flow_labels()
+    current_flow_labels = task_get_current_flow_run_labels()
 
     # Parse partition columns
     partition_columns = parse_comma_separated_string_to_list(text=partition_columns)

@@ -13,9 +13,9 @@ except ImportError:
 
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.custom import Flow
+from prefeitura_rio.pipelines_utils.prefect import task_get_current_flow_run_labels
 from prefeitura_rio.pipelines_utils.tasks import (
     create_table_and_upload_to_gcs,
-    get_current_flow_labels,
     get_current_flow_project_name,
     get_datario_geodataframe,
     rename_current_flow_run_dataset_table,
@@ -95,7 +95,7 @@ with Flow(name=settings.FLOW_NAME_DUMP_DATARIO) as flow:
 
     with case(materialize_after_dump, True):
         # Trigger DBT flow run
-        current_flow_labels = get_current_flow_labels()
+        current_flow_labels = task_get_current_flow_run_labels()
         materialization_flow = create_flow_run(
             flow_name=settings.FLOW_NAME_EXECUTE_DBT_MODEL,
             project_name=get_current_flow_project_name(),

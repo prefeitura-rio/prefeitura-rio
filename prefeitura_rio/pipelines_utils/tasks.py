@@ -926,16 +926,6 @@ def get_connection_string_from_secret(secret_path: str):
 
 
 @task
-def get_current_flow_labels() -> List[str]:
-    """
-    Get the labels of the current flow.
-    """
-    flow_run_id = prefect.context.get("flow_run_id")
-    flow_run_view = FlowRunView.from_flow_run_id(flow_run_id)
-    return flow_run_view.labels
-
-
-@task
 def get_current_flow_project_name() -> str:
     """
     Get the project name of the current flow.

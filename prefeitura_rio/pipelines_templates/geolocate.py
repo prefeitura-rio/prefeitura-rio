@@ -14,11 +14,11 @@ from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
 
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.custom import Flow
+from prefeitura_rio.pipelines_utils.prefect import task_get_current_flow_run_labels
 from prefeitura_rio.pipelines_utils.tasks import (
     create_table_and_upload_to_gcs,
     dataframe_to_csv_task,
     georeference_dataframe,
-    get_current_flow_labels,
     get_new_addresses,
     validate_georeference_mode,
 )
@@ -66,7 +66,7 @@ with Flow(
     georef_mode_valid = validate_georeference_mode(mode=georeference_mode)
 
     # Get agent labels
-    current_flow_labels = get_current_flow_labels()
+    current_flow_labels = task_get_current_flow_run_labels()
     current_flow_labels.set_upstream(georef_mode_valid)
 
     # Checks if there are new addresses
