@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 try:
+    from geopy.geocoders import Nominatim
     from shapely import wkt
     from shapely.geometry import (
         GeometryCollection,
@@ -11,7 +12,6 @@ try:
         Point,
         Polygon,
     )
-    from geopy.geocoders import Nominatim
 
 
 except ImportError:
