@@ -54,7 +54,7 @@ with Flow(
         required=False,
         default=settings.GCS_DUMP_MAX_BYTES_PROCESSED_PER_TABLE,
     )
-    biglake_table = Parameter("biglake_table", default=False, required=False)
+    biglake_table = Parameter("biglake_table", default=True, required=False)
     log_divider = Parameter("log_divider", default=100, required=False)
     language = Parameter("language", default="pt", required=False)
     timeout = Parameter("timeout", default=10, required=False)

@@ -1305,10 +1305,9 @@ def get_new_addresses(  # pylint: disable=too-many-arguments, too-many-locals
     new_addresses = pd.DataFrame(columns=["address"])
     exists_new_addresses = False
 
-    source_table_ref = f"{source_dataset_id}.{source_table_id}"
-    destination_table_ref = f"{destination_dataset_id}.{destination_table_id}"
     billing_project_id = current_flow_labels[0]
-
+    source_table_ref = f"{billing_project_id}.{source_dataset_id}.{source_table_id}"
+    destination_table_ref = f"{billing_project_id}.{destination_dataset_id}.{destination_table_id}"
     if georef_mode == "distinct":
         query_source = f"""
         SELECT DISTINCT
