@@ -1243,6 +1243,7 @@ def validate_georeference_mode(mode: str) -> None:
         raise ValueError(f"Invalid georeference mode: {mode}. Valid modes are: distinct")
 
 
+@task
 @assert_dependencies(["geojsplit", "geopandas"], extras=["pipelines-templates"])
 def georeference_dataframe(new_addresses: pd.DataFrame, log_divider: int = 60) -> pd.DataFrame:
     """
