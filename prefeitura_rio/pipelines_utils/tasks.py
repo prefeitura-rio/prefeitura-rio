@@ -70,7 +70,6 @@ from prefeitura_rio.pipelines_utils.pandas import (
     remove_columns_accents,
 )
 from prefeitura_rio.pipelines_utils.redis_pal import get_redis_client
-from prefeitura_rio.utils import assert_dependencies
 
 
 @task(
@@ -251,7 +250,6 @@ def create_table_asset(
     max_retries=settings.TASK_MAX_RETRIES_DEFAULT,
     retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY_DEFAULT),
 )
-@assert_dependencies(["cx_Oracle", "pymysql", "pyodbc"], extras=["pipelines-templates"])
 def database_execute(
     database: "Database",
     query: str,
@@ -268,6 +266,7 @@ def database_execute(
         database: The database object.
         query: The query to execute.
     """
+    base_assert_dependencies(["cx_Oracle", "pymysql", "pyodbc"], extras=["pipelines-templates"])
     log(f"Query parsed: {query}")
     query = remove_tabs_from_query(query)
     log(f"Executing query line: {query}")
@@ -952,7 +951,6 @@ def get_current_flow_project_name() -> str:
     max_retries=settings.TASK_MAX_RETRIES_DEFAULT,
     retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY_DEFAULT),
 )
-@assert_dependencies(["requests"], extras=["pipelines-templates"])
 def get_datario_geodataframe(
     url: str,  # URL of the data.rio API
     path: str | Path,
@@ -964,6 +962,7 @@ def get_datario_geodataframe(
         - url (str): URL of the data.rio API
         - path (Union[str, Path]): Local path to save the file
     """
+    base_assert_dependencies(["requests"], extras=["pipelines-templates"])
     # Create the path if it doesn't exist
     path = Path(path)
     path.mkdir(parents=True, exist_ok=True)
@@ -1088,7 +1087,6 @@ def rename_current_flow_run_msg(msg: str, wait=None) -> None:
     max_retries=settings.TASK_MAX_RETRIES_DEFAULT,
     retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY_DEFAULT),
 )
-@assert_dependencies(["geojsplit", "geopandas"], extras=["pipelines-templates"])
 def transform_geodataframe(
     file_path: str | Path,
     batch_size: int = 50000,
@@ -1106,6 +1104,7 @@ def transform_geodataframe(
         - convert_to_crs_4326 (bool): Convert the geometry data to the crs 4326 projection.
         - geometry_3d_to_2d (bool): Convert the geometry data from 3D to 2D.
     """
+    base_assert_dependencies(["geojsplit", "geopandas"], extras=["pipelines-templates"])
     eventid = datetime.now().strftime("%Y%m%d-%H%M%S")
 
     # move to path file since file_path is path / "geo_data" / "data.geojson"
@@ -1249,11 +1248,12 @@ def validate_georeference_mode(mode: str) -> None:
         raise ValueError(f"Invalid georeference mode: {mode}. Valid modes are: distinct")
 
 
-@assert_dependencies(["geojsplit", "geopandas"], extras=["pipelines-templates"])
+@task
 def georeference_dataframe(new_addresses: pd.DataFrame, log_divider: int = 60) -> pd.DataFrame:
     """
     Georeference all addresses in a dataframe
     """
+    base_assert_dependencies(["geojsplit", "geopandas"], extras=["pipelines-templates"])
     start_time = time()
 
     all_addresses = new_addresses["address"].tolist()
@@ -1298,7 +1298,6 @@ def georeference_dataframe(new_addresses: pd.DataFrame, log_divider: int = 60) -
 
 
 @task(nout=2)
-@assert_dependencies(["geojsplit", "geopandas"], extras=["pipelines-templates"])
 def get_new_addresses(  # pylint: disable=too-many-arguments, too-many-locals
     source_dataset_id: str,
     source_table_id: str,
@@ -1311,6 +1310,7 @@ def get_new_addresses(  # pylint: disable=too-many-arguments, too-many-locals
     """
     Get new addresses from source table
     """
+    base_assert_dependencies(["geojsplit", "geopandas"], extras=["pipelines-templates"])
 
     new_addresses = pd.DataFrame(columns=["address"])
     exists_new_addresses = False
