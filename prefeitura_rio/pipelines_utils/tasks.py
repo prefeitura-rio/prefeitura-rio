@@ -32,7 +32,6 @@ from prefeitura_rio.pipelines_utils.bd import get_project_id as get_project_id_f
 from prefeitura_rio.pipelines_utils.bd import get_storage_blobs
 from prefeitura_rio.pipelines_utils.geo import Geolocator
 
-
 try:
     from prefeitura_rio.pipelines_utils.database_sql import Database
 except ImportError:
