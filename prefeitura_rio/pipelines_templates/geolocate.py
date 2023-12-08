@@ -15,7 +15,6 @@ from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.custom import Flow
 from prefeitura_rio.pipelines_utils.prefect import task_get_current_flow_run_labels
-from prefeitura_rio.pipelines_utils.state_handlers import handler_inject_bd_credentials
 from prefeitura_rio.pipelines_utils.tasks import (
     create_table_and_upload_to_gcs,
     dataframe_to_csv_task,
@@ -24,9 +23,7 @@ from prefeitura_rio.pipelines_utils.tasks import (
     validate_georeference_mode,
 )
 
-with Flow(
-    settings.FLOW_NAME_GEOLOCATE, state_handlers=[handler_inject_bd_credentials]
-) as utils_geolocate_flow:
+with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
     ################################
     #
     # Parameters
