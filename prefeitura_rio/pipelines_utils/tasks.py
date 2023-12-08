@@ -356,6 +356,12 @@ def database_get_mongo(
 
 
 @task
+def dataframe_to_csv_task(dataframe: pd.DataFrame, path: str | Path):
+    dataframe_to_csv(dataframe=dataframe, path=path)
+    return path
+
+
+@task
 def download_data_to_gcs(  # pylint: disable=R0912,R0913,R0914,R0915
     project_id: str = None,
     query: str = None,
@@ -1251,7 +1257,10 @@ def georeference_dataframe(new_addresses: pd.DataFrame, log_divider: int = 60) -
     start_time = time()
 
     all_addresses = new_addresses["address"].tolist()
-    all_addresses = [f"{address}, Rio de Janeiro" for address in all_addresses]
+    all_addresses = [
+        f"{address}, Rio de Janeiro" if address.upper().endswith("RIO DE JANEIRO") else address
+        for address in all_addresses
+    ]
 
     geolocator = Nominatim(user_agent="prefeitura-rio")
     geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)

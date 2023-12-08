@@ -5,6 +5,7 @@ Flow for georeferencing tables
 """
 
 from datetime import timedelta
+from uuid import uuid4
 
 from prefect import Parameter, case
 from prefect.run_configs import KubernetesRun
@@ -15,7 +16,7 @@ from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.custom import Flow
 from prefeitura_rio.pipelines_utils.tasks import (
     create_table_and_upload_to_gcs,
-    dataframe_to_csv,
+    dataframe_to_csv_task,
     georeference_dataframe,
     get_current_flow_labels,
     get_new_addresses,
@@ -76,7 +77,7 @@ with Flow(
     with case(exists_new_addresses, True):
         # Georeference the table
         georeferenced_table = georeference_dataframe(new_addresses=new_addresses)
-        base_path = dataframe_to_csv(dataframe=georeferenced_table)
+        base_path = dataframe_to_csv_task(dataframe=georeferenced_table, path=f"data/{uuid4()}/")
         create_staging_table = create_table_and_upload_to_gcs(
             data_path=base_path,
             dataset_id=destination_dataset_id,
