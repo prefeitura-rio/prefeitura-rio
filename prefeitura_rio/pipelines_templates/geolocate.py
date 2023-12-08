@@ -51,7 +51,7 @@ with Flow(
     maximum_bytes_processed = Parameter(
         "maximum_bytes_processed",
         required=False,
-        default=settings.MAX_BYTES_PROCESSED_PER_TABLE,
+        default=settings.GCS_DUMP_MAX_BYTES_PROCESSED_PER_TABLE,
     )
     biglake_table = Parameter("biglake_table", default=False, required=False)
 
@@ -88,7 +88,7 @@ with Flow(
         with case(materialize, True):
             # Trigger DBT flow run
             materialization_flow = create_flow_run(
-                flow_name=settings.FLOW_EXECUTE_DBT_MODEL_NAME,
+                flow_name=settings.FLOW_NAME_EXECUTE_DBT_MODEL,
                 project_name=settings.PREFECT_DEFAULT_PROJECT,
                 parameters={
                     "dataset_id": destination_dataset_id,
@@ -116,7 +116,7 @@ with Flow(
             with case(dump_to_gcs, True):
                 # Trigger Dump to GCS flow run with project id as datario
                 dump_to_gcs_flow = create_flow_run(
-                    flow_name=settings.FLOW_DUMP_TO_GCS_NAME,
+                    flow_name=settings.FLOW_NAME_DUMP_TO_GCS,
                     project_name=settings.PREFECT_DEFAULT_PROJECT,
                     parameters={
                         "project_id": "datario",
