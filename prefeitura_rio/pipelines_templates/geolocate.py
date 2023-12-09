@@ -42,8 +42,8 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
     georeference_mode = Parameter("georeference_mode", default="distinct", required=False)
 
     # Materialization parameters
-    materialize = Parameter("materialize", default=False, required=False)
-    materialization_mode = Parameter("materialization_mode", default="dev", required=False)
+    materialize_after_dump = Parameter("materialize_after_dump", default=True, required=False)
+    materialization_mode = Parameter("materialization_mode", default="prod", required=False)
     materialize_to_datario = Parameter("materialize_to_datario", default=False, required=False)
 
     # Dump to GCS after? Should only dump to GCS if materializing to datario
@@ -109,7 +109,7 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
         )
         create_staging_table.set_upstream(base_path)
 
-        with case(materialize, True):
+        with case(materialize_after_dump, True):
             # Trigger DBT flow run
             materialization_flow = create_flow_run(
                 flow_name=settings.FLOW_NAME_EXECUTE_DBT_MODEL,

@@ -30,6 +30,7 @@ except ImportError:
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.bd import get_project_id as get_project_id_function
 from prefeitura_rio.pipelines_utils.bd import get_storage_blobs
+from prefeitura_rio.pipelines_utils.dbt import run_dbt_model
 from prefeitura_rio.pipelines_utils.geo import Geolocator
 from prefeitura_rio.utils import base_assert_dependencies
 
@@ -1340,3 +1341,26 @@ def get_new_addresses(  # pylint: disable=too-many-arguments, too-many-locals
         exists_new_addresses = not new_addresses.empty
 
     return new_addresses, exists_new_addresses
+
+
+@task
+def task_run_dbt_model_task(
+    dataset_id: str = None,
+    table_id: str = None,
+    dbt_alias: bool = False,
+    upstream: bool = None,
+    downstream: bool = None,
+    exclude: str = None,
+    flags: str = None,
+    _vars: dict | List[Dict] = None,
+) -> None:
+    run_dbt_model(
+        dataset_id=dataset_id,
+        table_id=table_id,
+        dbt_alias=dbt_alias,
+        upstream=upstream,
+        downstream=downstream,
+        exclude=exclude,
+        flags=flags,
+        _vars=_vars,
+    )
