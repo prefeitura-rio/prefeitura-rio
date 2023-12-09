@@ -62,7 +62,7 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
     )
     # Validate the georeference mode
     georef_mode_valid = validate_georeference_mode(mode=georeference_mode)
-
+    georef_mode_valid.set_upstream(viewbox)
     # Get agent labels
     current_flow_labels = task_get_current_flow_run_labels()
     current_flow_labels.set_upstream(georef_mode_valid)
@@ -77,7 +77,7 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
         georef_mode=georeference_mode,
         current_flow_labels=current_flow_labels,
     )
-
+    new_addresses.set_upstream(current_flow_labels)
     with case(exists_new_addresses, True):
         # Georeference the table
         georeferenced_table = georeference_dataframe(
@@ -89,7 +89,11 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
             viewbox=viewbox,
             sulfix=sulfix,
         )
-        base_path = dataframe_to_csv_task(dataframe=georeferenced_table, path=f"data/{uuid4()}/")
+        georeferenced_table.set_upstream(new_addresses)
+        base_path = dataframe_to_csv_task(
+            dataframe=georeferenced_table, path=f"/tmp/data/{uuid4()}/"
+        )
+        base_path.set_upstream(base_path)
         create_staging_table = create_table_and_upload_to_gcs(
             data_path=base_path,
             dataset_id=destination_dataset_id,
@@ -97,6 +101,7 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
             biglake_table=biglake_table,
             dump_mode="append",
         )
+        create_staging_table.set_upstream(base_path)
 
         with case(materialize, True):
             # Trigger DBT flow run

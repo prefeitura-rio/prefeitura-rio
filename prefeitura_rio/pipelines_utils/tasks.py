@@ -356,6 +356,7 @@ def database_get_mongo(
 @task
 def dataframe_to_csv_task(dataframe: pd.DataFrame, path: str | Path):
     dataframe_to_csv(dataframe=dataframe, path=path)
+    log(f"Dataframe saved: {path}")
     return path
 
 
