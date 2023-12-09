@@ -92,7 +92,9 @@ class Geolocator:
 
     def geopy_nominatim(self, address, language=None, timeout=None, viewbox=None):
         viewbox_parsed = (
-            None if viewbox is None else ((viewbox[1], viewbox[0]), (viewbox[3], viewbox[2]))
+            None
+            if viewbox is None
+            else ((float(viewbox[1]), float(viewbox[0])), (float(viewbox[3]), float(viewbox[2])))
         )
         location = self.geopy_geolocator_nominatim.geocode(
             address,
