@@ -31,6 +31,7 @@ from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.bd import get_project_id as get_project_id_function
 from prefeitura_rio.pipelines_utils.bd import get_storage_blobs
 from prefeitura_rio.pipelines_utils.geo import Geolocator
+from prefeitura_rio.utils import base_assert_dependencies
 
 try:
     from prefeitura_rio.pipelines_utils.database_sql import Database
