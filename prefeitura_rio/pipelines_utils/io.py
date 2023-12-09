@@ -21,7 +21,7 @@ from prefeitura_rio.utils import assert_dependencies
 @assert_dependencies(["pandas"], extras=["pipelines"])
 def dataframe_to_csv(
     dataframe: "pd.DataFrame",
-    path: Union[str, Path],
+    filepath: Union[str, Path],
     build_json_dataframe: bool = False,
     dataframe_key_column: str = None,
 ) -> None:
@@ -32,12 +32,12 @@ def dataframe_to_csv(
         dataframe = to_json_dataframe(dataframe, key_column=dataframe_key_column)
 
     # Remove filename from path
-    path = Path(path)
+    filepath = Path(filepath)
     # Create directory if it doesn't exist
-    path.parent.mkdir(parents=True, exist_ok=True)
+    filepath.parent.mkdir(parents=True, exist_ok=True)
 
     # Write dataframe to CSV
-    dataframe.to_csv(path, index=False, encoding="utf-8")
+    dataframe.to_csv(filepath, index=False, encoding="utf-8")
 
 
 @assert_dependencies(["pandas"], extras=["pipelines"])

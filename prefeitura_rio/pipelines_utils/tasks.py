@@ -107,6 +107,7 @@ def create_table_and_upload_to_gcs(
     #
     #####################################
     log("STARTING TABLE CREATION MANAGEMENT")
+    log(f"GETTING DATA FROM: {data_path}")
     if dump_mode == "append":
         if tb.table_exists(mode="staging"):
             log(f"MODE APPEND: Table ALREADY EXISTS:" f"\n{table_staging}" f"\n{storage_path_link}")
@@ -354,10 +355,10 @@ def database_get_mongo(
 
 
 @task
-def dataframe_to_csv_task(dataframe: pd.DataFrame, path: str | Path):
-    dataframe_to_csv(dataframe=dataframe, path=path)
-    log(f"Dataframe saved: {path}")
-    return path
+def dataframe_to_csv_task(dataframe: pd.DataFrame, filepath: str | Path):
+    log(f"Saving dataframe: {filepath}")
+    dataframe_to_csv(dataframe=dataframe, filepath=filepath)
+    return str(Path(filepath).parent)
 
 
 @task
@@ -994,6 +995,14 @@ def get_earth_engine_key_from_secret(
         json.dump(secret, f, ensure_ascii=False, indent=4)
 
     return service_account_secret_path
+
+
+@task(checkpoint=False)
+def get_now_datetime():
+    """
+    Returns the current datetime in YYYY_MM_DD__H_M_S.
+    """
+    return datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
 
 
 @task
