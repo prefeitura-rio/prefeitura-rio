@@ -356,10 +356,16 @@ def database_get_mongo(
 
 
 @task
-def dataframe_to_csv_task(dataframe: pd.DataFrame, filepath: str | Path):
+def task_dataframe_to_csv(dataframe: pd.DataFrame, base_path: str | Path, unique_file: bool = True):
+    if unique_file:
+        now = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
+        filepath = str(Path(base_path) / f"data_{now}.csv")
+    else:
+        filepath = str(Path(base_path) / "data.csv")
+
     log(f"Saving dataframe: {filepath}")
     dataframe_to_csv(dataframe=dataframe, filepath=filepath)
-    return str(Path(filepath).parent)
+    return str(Path(base_path).parent)
 
 
 @task

@@ -17,10 +17,9 @@ from prefeitura_rio.pipelines_utils.custom import Flow
 from prefeitura_rio.pipelines_utils.prefect import task_get_current_flow_run_labels
 from prefeitura_rio.pipelines_utils.tasks import (
     create_table_and_upload_to_gcs,
-    dataframe_to_csv_task,
     georeference_dataframe,
     get_new_addresses,
-    get_now_datetime,
+    task_dataframe_to_csv,
     validate_georeference_mode,
 )
 
@@ -92,13 +91,9 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
         )
         georeferenced_table.set_upstream(new_addresses)
 
-        now = get_now_datetime()
-        now.set_upstream(georeferenced_table)
-
-        base_path = dataframe_to_csv_task(
-            dataframe=georeferenced_table, filepath=f"/tmp/data/{uuid4()}/data_{now}.csv"
+        base_path = task_dataframe_to_csv(
+            dataframe=georeferenced_table, base_path=f"/tmp/data/{uuid4()}/", unique_file=True
         )
-        base_path.set_upstream(now)
 
         create_staging_table = create_table_and_upload_to_gcs(
             data_path=base_path,
