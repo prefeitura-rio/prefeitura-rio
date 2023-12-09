@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import base64
 import json
-import re
 from os import environ
 from typing import Literal, Tuple
 
@@ -144,18 +143,7 @@ def inject_bd_credentials() -> None:
         )
 
     service_account_name = f"BASEDOSDADOS_CREDENTIALS_{environment.upper()}"
-    service_account_byte_string = base64.b64decode(environ[service_account_name])
-
-    def replace_newline(match):
-        private_key_value = match.group(1)
-        new_private_key_value = private_key_value.replace("\n", "\\n")
-        return f'"private_key": "{new_private_key_value}"'
-
-    pattern = re.compile(r'"private_key": "([^"]+)"')
-    service_account = json.loads(
-        pattern.sub(replace_newline, service_account_byte_string.decode("utf-8"))
-    )
-
-    with open("/tmp/credentials.json", "w") as credentials_file:
-        json.dump(service_account, credentials_file, indent=2)
+    service_account = base64.b64decode(environ[service_account_name])
+    with open("/tmp/credentials.json", "wb") as credentials_file:
+        credentials_file.write(service_account)
     environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/credentials.json"
