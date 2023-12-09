@@ -14,7 +14,10 @@ from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
 
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.custom import Flow
-from prefeitura_rio.pipelines_utils.prefect import task_get_current_flow_run_labels
+from prefeitura_rio.pipelines_utils.prefect import (
+    task_get_current_flow_run_labels,
+    task_get_flow_group_id,
+)
 from prefeitura_rio.pipelines_utils.tasks import (
     create_table_and_upload_to_gcs,
     georeference_dataframe,
@@ -61,8 +64,12 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
         "viewbox", default="-44.03122,-22.74202,-43.09189,-23.51051", required=False
     )
     # Validate the georeference mode
+
+    materialization_flow_id = task_get_flow_group_id(flow_name=settings.FLOW_NAME_EXECUTE_DBT_MODEL)
+    materialization_flow_id.set_upstream(viewbox)
+
     georef_mode_valid = validate_georeference_mode(mode=georeference_mode)
-    georef_mode_valid.set_upstream(viewbox)
+    georef_mode_valid.set_upstream(materialization_flow_id)
     # Get agent labels
     current_flow_labels = task_get_current_flow_run_labels()
     current_flow_labels.set_upstream(georef_mode_valid)
@@ -107,7 +114,7 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
         with case(materialize_after_dump, True):
             # Trigger DBT flow run
             materialization_flow = create_flow_run(
-                flow_name=settings.FLOW_NAME_EXECUTE_DBT_MODEL,
+                flow_id=materialization_flow_id,
                 project_name=settings.PREFECT_DEFAULT_PROJECT,
                 parameters={
                     "dataset_id": destination_dataset_id,
