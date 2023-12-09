@@ -90,10 +90,12 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
             sulfix=sulfix,
         )
         georeferenced_table.set_upstream(new_addresses)
+
         base_path = dataframe_to_csv_task(
             dataframe=georeferenced_table, path=f"/tmp/data/{uuid4()}/"
         )
-        base_path.set_upstream(base_path)
+        base_path.set_upstream(georeferenced_table)
+
         create_staging_table = create_table_and_upload_to_gcs(
             data_path=base_path,
             dataset_id=destination_dataset_id,
