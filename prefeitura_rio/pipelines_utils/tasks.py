@@ -365,7 +365,7 @@ def task_dataframe_to_csv(dataframe: pd.DataFrame, base_path: str | Path, unique
 
     log(f"Saving dataframe: {filepath}")
     dataframe_to_csv(dataframe=dataframe, filepath=filepath)
-    return str(Path(base_path).parent)
+    return base_path
 
 
 @task
