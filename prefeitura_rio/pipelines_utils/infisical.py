@@ -128,7 +128,8 @@ def inject_bd_credentials() -> None:
     """
     client = get_infisical_client()
 
-    environment = get_flow_run_mode()
+    # environment = get_flow_run_mode()
+    environment = "staging"
     log(f"ENVIROMENT: {environment}")
     for secret_name in [
         "BASEDOSDADOS_CONFIG",
@@ -142,7 +143,12 @@ def inject_bd_credentials() -> None:
         )
 
     service_account_name = f"BASEDOSDADOS_CREDENTIALS_{environment.upper()}"
-    service_account = base64.b64decode(environ[service_account_name])
-    with open("/tmp/credentials.json", "wb") as credentials_file:
-        credentials_file.write(service_account)
+    service_account = json.loads(
+        base64.b64decode(environ[service_account_name])
+        .decode("utf-8")
+        .replace("\n ", "")
+        .replace("\n", "")
+    )
+    with open("/tmp/credentials.json", "w") as credentials_file:
+        json.dump(service_account, credentials_file, indent=2)
     environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/credentials.json"
