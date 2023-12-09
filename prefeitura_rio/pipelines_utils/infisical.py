@@ -12,6 +12,7 @@ except ImportError:
     base_assert_dependencies(["infisical"], extras=["pipelines"])
 
 from prefeitura_rio.pipelines_utils.env import getenv_or_action
+from prefeitura_rio.pipelines_utils.logging import log
 from prefeitura_rio.pipelines_utils.prefect import get_flow_run_mode
 
 
@@ -31,6 +32,7 @@ def get_infisical_client() -> InfisicalClient:
     """
     token = getenv_or_action("INFISICAL_TOKEN", action="raise")
     site_url = getenv_or_action("INFISICAL_ADDRESS", action="raise")
+    log(f"INFISICAL_ADDRESS: {site_url}")
     return InfisicalClient(
         token=token,
         site_url=site_url,
@@ -109,7 +111,7 @@ def inject_env(
 
     if not environment:
         environment = get_flow_run_mode()
-
+    log(f"Getting secret: {secret_name}")
     secret_value = client.get_secret(
         secret_name=secret_name,
         type=type,
@@ -126,7 +128,7 @@ def inject_bd_credentials() -> None:
     """
     client = get_infisical_client()
 
-    environment = get_flow_run_mode()
+    environment = "prod"
 
     for secret_name in [
         "BASEDOSDADOS_CONFIG",
