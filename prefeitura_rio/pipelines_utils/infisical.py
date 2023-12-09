@@ -129,7 +129,8 @@ def inject_bd_credentials() -> None:
     client = get_infisical_client()
 
     environment = get_flow_run_mode()
-
+    log(f"ENVIROMENT: {environment}")
+    environment = "prod"
     for secret_name in [
         "BASEDOSDADOS_CONFIG",
         "BASEDOSDADOS_CREDENTIALS_PROD",
