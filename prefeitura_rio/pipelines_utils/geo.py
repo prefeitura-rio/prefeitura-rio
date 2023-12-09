@@ -91,10 +91,14 @@ class Geolocator:
         self.google_api_url = "https://maps.googleapis.com/maps/api/geocode/json"
 
     def geopy_nominatim(self, address, language=None, timeout=None, viewbox=None):
+        viewbox_list = viewbox.split(",") if viewbox is not None else None
         viewbox_parsed = (
             None
-            if viewbox is None
-            else ((float(viewbox[1]), float(viewbox[0])), (float(viewbox[3]), float(viewbox[2])))
+            if viewbox_list is None
+            else (
+                (float(viewbox_list[1]), float(viewbox_list[0])),
+                (float(viewbox_list[3]), float(viewbox_list[2])),
+            )
         )
         location = self.geopy_geolocator_nominatim.geocode(
             address,
