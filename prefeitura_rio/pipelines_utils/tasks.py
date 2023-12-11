@@ -30,7 +30,6 @@ except ImportError:
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.bd import get_project_id as get_project_id_function
 from prefeitura_rio.pipelines_utils.bd import get_storage_blobs
-from prefeitura_rio.pipelines_utils.database_sql import Database
 from prefeitura_rio.pipelines_utils.dbt import run_dbt_model
 from prefeitura_rio.pipelines_utils.gcs import (
     delete_blobs_list,
@@ -69,6 +68,11 @@ from prefeitura_rio.pipelines_utils.pandas import (
 )
 from prefeitura_rio.pipelines_utils.redis_pal import get_redis_client
 from prefeitura_rio.utils import base_assert_dependencies
+
+try:
+    from prefeitura_rio.pipelines_utils.database_sql import Database
+except ImportError:
+    base_assert_dependencies(["cx_Oracle", "pymysql", "pyodbc"], extras=["pipelines-templates"])
 
 
 @task(
@@ -251,7 +255,7 @@ def create_table_asset(
     retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY_DEFAULT),
 )
 def database_execute(
-    database: Database,
+    database,
     query: str,
     wait=None,  # pylint: disable=unused-argument
     flow_name: str = None,
