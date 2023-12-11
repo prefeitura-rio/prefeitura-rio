@@ -1263,6 +1263,9 @@ def georeference_dataframe(
     timeout=10,
     viewbox=None,
     sulfix=None,
+    retry_request_number=1,
+    retry_request_time=60,
+    time_between_requests=1,
 ) -> pd.DataFrame:
     """
     Georeference all addresses in a dataframe
@@ -1279,12 +1282,23 @@ def georeference_dataframe(
     for i, address in enumerate(all_addresses):
         if i % log_divider == 0:
             log(f"Georeferencing address {i} of {len(all_addresses)}...")
-        latitude, longitude = geolocate_address.geopy_nominatim(
-            address=address,
-            language=language,
-            timeout=timeout,
-            viewbox=viewbox,
-        )
+
+        # retry request
+        for _ in range(retry_request_number):
+            try:
+                latitude, longitude = geolocate_address.geopy_nominatim(
+                    address=address,
+                    language=language,
+                    timeout=timeout,
+                    viewbox=viewbox,
+                )
+                break
+            except Exception as err:
+                log(f"Error georeferencing address {address}: {err}")
+                log(f"Waiting {retry_request_time} seconds before retrying...")
+                sleep(retry_request_time)
+                continue
+        sleep(time_between_requests)
         latitudes.append(latitude)
         longitudes.append(longitude)
     new_addresses["latitude"] = latitudes

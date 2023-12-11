@@ -60,6 +60,9 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
     language = Parameter("language", default="pt", required=False)
     timeout = Parameter("timeout", default=10, required=False)
     sulfix = Parameter("sulfix", default=None, required=False)
+    time_between_requests = Parameter("time_between_requests", default=2, required=False)
+    retry_request_number = Parameter("retry_request_number", default=5, required=False)
+    retry_request_time = Parameter("retry_request_time", default=60, required=False)
     viewbox = Parameter(
         "viewbox", default="-44.03122,-22.74202,-43.09189,-23.51051", required=False
     )
@@ -95,6 +98,9 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
             timeout=timeout,
             viewbox=viewbox,
             sulfix=sulfix,
+            retry_request_number=retry_request_number,
+            retry_request_time=retry_request_time,
+            time_between_requests=time_between_requests,
         )
         georeferenced_table.set_upstream(new_addresses)
 
