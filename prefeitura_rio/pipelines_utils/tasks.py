@@ -1318,6 +1318,7 @@ def get_new_addresses(  # pylint: disable=too-many-arguments, too-many-locals
     source_table_id: str,
     source_table_address_column: str,
     source_table_address_query: str,
+    use_source_table_address_query: bool,
     destination_dataset_id: str,
     destination_table_id: str,
     georef_mode: str,
@@ -1335,7 +1336,7 @@ def get_new_addresses(  # pylint: disable=too-many-arguments, too-many-locals
     source_table_ref = f"{billing_project_id}.{source_dataset_id}.{source_table_id}"
     destination_table_ref = f"{billing_project_id}.{destination_dataset_id}.{destination_table_id}"
     if georef_mode == "distinct":
-        if source_table_address_query:
+        if use_source_table_address_query:
             query_source = source_table_address_query
         else:
             query_source = f"""

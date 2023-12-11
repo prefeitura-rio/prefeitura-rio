@@ -38,7 +38,10 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
     source_table_id = Parameter("source_table_id")
     source_table_address_column = Parameter("source_table_address_column", default="address")
     source_table_address_query = Parameter(
-        "source_table_address_column", default=None, required=False
+        "source_table_address_query", default=None, required=False
+    )
+    use_source_table_address_query = Parameter(
+        "use_source_table_address_query", default=False, required=False
     )
     destination_dataset_id = Parameter("destination_dataset_id")
     destination_table_id = Parameter("destination_table_id")
@@ -86,6 +89,7 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
         source_table_id=source_table_id,
         source_table_address_column=source_table_address_column,
         source_table_address_query=source_table_address_query,
+        use_source_table_address_query=use_source_table_address_query,
         destination_dataset_id=destination_dataset_id,
         destination_table_id=destination_table_id,
         georef_mode=georeference_mode,
