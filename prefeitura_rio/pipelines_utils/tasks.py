@@ -251,7 +251,7 @@ def create_table_asset(
     retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY_DEFAULT),
 )
 def database_execute(
-    database: "Database",
+    database: Database,
     query: str,
     wait=None,  # pylint: disable=unused-argument
     flow_name: str = None,
