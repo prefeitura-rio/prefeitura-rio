@@ -531,7 +531,7 @@ def dump_batches_to_file(
 
 @task
 def dump_upload_batch(
-    database: Database,
+    database,
     batch_size: int,
     dataset_id: str,
     table_id: str,
