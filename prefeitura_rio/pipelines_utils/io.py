@@ -132,7 +132,7 @@ def dump_header_to_file(data_path: Union[str, Path], data_type: str = "csv"):
     # Read just first row and write dataframe to file
     if data_type == "csv":
         dataframe = pd.read_csv(file, nrows=1)
-        dataframe_to_csv(dataframe=dataframe, path=save_header_file_path)
+        dataframe_to_csv(dataframe=dataframe, filepath=save_header_file_path)
     elif data_type == "parquet":
         dataframe = pd.read_parquet(file)[:1]
         dataframe_to_parquet(dataframe=dataframe, path=save_header_file_path)
