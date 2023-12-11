@@ -30,20 +30,18 @@ except ImportError:
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.bd import get_project_id as get_project_id_function
 from prefeitura_rio.pipelines_utils.bd import get_storage_blobs
+from prefeitura_rio.pipelines_utils.database_sql import Database
 from prefeitura_rio.pipelines_utils.dbt import run_dbt_model
-from prefeitura_rio.pipelines_utils.geo import Geolocator
-from prefeitura_rio.utils import base_assert_dependencies
-
-try:
-    from prefeitura_rio.pipelines_utils.database_sql import Database
-except ImportError:
-    pass
 from prefeitura_rio.pipelines_utils.gcs import (
     delete_blobs_list,
     list_blobs_with_prefix,
     parse_blobs_to_partition_dict,
 )
-from prefeitura_rio.pipelines_utils.geo import load_wkt, remove_third_dimension
+from prefeitura_rio.pipelines_utils.geo import (
+    Geolocator,
+    load_wkt,
+    remove_third_dimension,
+)
 from prefeitura_rio.pipelines_utils.infisical import (
     get_connection_string_from_secret as get_connection_string_from_secret_function,
 )
@@ -70,6 +68,7 @@ from prefeitura_rio.pipelines_utils.pandas import (
     remove_columns_accents,
 )
 from prefeitura_rio.pipelines_utils.redis_pal import get_redis_client
+from prefeitura_rio.utils import base_assert_dependencies
 
 
 @task(
