@@ -70,7 +70,12 @@ from prefeitura_rio.pipelines_utils.redis_pal import get_redis_client
 from prefeitura_rio.utils import base_assert_dependencies
 
 try:
-    from prefeitura_rio.pipelines_utils.database_sql import Database
+    from prefeitura_rio.pipelines_utils.database_sql import (
+        Database,
+        MySql,
+        Oracle,
+        SqlServer,
+    )
 except ImportError:
     # TODO: remove this when fix pyodbc Oracle docker configuration.
     # base_assert_dependencies(["cx_Oracle", "pymysql", "pyodbc"], extras=["pipelines-templates"])
@@ -306,12 +311,6 @@ def database_get(
     Returns:
         A database object.
     """
-    from prefeitura_rio.pipelines_utils.database_sql import (
-        Database,
-        MySql,
-        Oracle,
-        SqlServer,
-    )
 
     DATABASE_MAPPING: Dict[str, Database] = {
         "mysql": MySql,
