@@ -72,7 +72,7 @@ from prefeitura_rio.utils import base_assert_dependencies
 try:
     from prefeitura_rio.pipelines_utils.database_sql import Database
 except ImportError:
-    # TODO: remove this when fix pyodbc Oracle docker configuration
+    # TODO: remove this when fix pyodbc Oracle docker configuration.
     # base_assert_dependencies(["cx_Oracle", "pymysql", "pyodbc"], extras=["pipelines-templates"])
     pass
 
