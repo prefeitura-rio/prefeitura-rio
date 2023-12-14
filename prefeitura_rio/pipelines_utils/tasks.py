@@ -1351,7 +1351,8 @@ def get_new_addresses(  # pylint: disable=too-many-arguments, too-many-locals
         FROM
             `{destination_table_ref}`
         """
-        log(query_source)
+        log(f"Source query: {query_source}")
+        log(f"Destination query: {query_destination}")
         source_addresses = bd.read_sql(
             query_source, billing_project_id=billing_project_id, from_file=True
         )
@@ -1363,9 +1364,13 @@ def get_new_addresses(  # pylint: disable=too-many-arguments, too-many-locals
             destination_addresses.columns = ["address"]
         except Exception:  # pylint: disable=broad-except
             destination_addresses = pd.DataFrame(columns=["address"])
-
+        log(f"Source lengh: {len(source_addresses)}")
+        log(f"Destination lengh: {len(destination_addresses)}")
         # pylint: disable=invalid-unary-operand-type
-        new_addresses = source_addresses[~source_addresses.isin(destination_addresses)].dropna()
+        mask = source_addresses["address"].isin(destination_addresses["address"].tolist())
+        new_addresses = source_addresses[~mask].dropna()
+        log(f"new_addresses lengh: {len(new_addresses)}")
+
         exists_new_addresses = not new_addresses.empty
 
     return new_addresses, exists_new_addresses
