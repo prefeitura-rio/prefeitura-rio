@@ -339,3 +339,10 @@ def to_partitions(
         raise BaseException("Data need to be a pandas DataFrame")
 
     return saved_files
+
+
+def untuple_clocks(clocks):
+    """
+    Converts a list of tuples to a list of clocks.
+    """
+    return [clock[0] if isinstance(clock, tuple) else clock for clock in clocks]

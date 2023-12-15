@@ -117,13 +117,6 @@ def task_rename_current_flow_run_dataset_table(prefix: str, dataset_id: str, tab
     return client.set_flow_run_name(flow_run_id, f"{prefix}{dataset_id}.{table_id}")
 
 
-def untuple_clocks(clocks):
-    """
-    Converts a list of tuples to a list of clocks.
-    """
-    return [clock[0] if isinstance(clock, tuple) else clock for clock in clocks]
-
-
 def generate_dump_db_schedules(  # pylint: disable=too-many-arguments,too-many-locals
     interval: timedelta,
     start_date: datetime,
