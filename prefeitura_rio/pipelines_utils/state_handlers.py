@@ -19,9 +19,10 @@ def handler_initialize_sentry(obj, old_state: State, new_state: State) -> State:
     """
     if new_state.is_running():
         sentry_dsn = get_secret("SENTRY_DSN")
+        sentry_dsn_secret = sentry_dsn.get("SENTRY_DSN")
         environment = get_flow_run_mode()
         sentry_sdk.init(
-            dsn=sentry_dsn,
+            dsn=sentry_dsn_secret,
             traces_sample_rate=0,
             environment=environment,
         )

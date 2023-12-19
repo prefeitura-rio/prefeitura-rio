@@ -45,7 +45,7 @@ def get_secret_folder(
     type: Literal["shared", "personal"] = "personal",
     environment: str = None,
     client: InfisicalClient = None,
-) -> dict[str, str]:
+) -> dict:
     """
     Fetches secrets from Infisical. If passing only `secret_path` and
     no `secret_name`, returns all secrets inside a folder.
@@ -68,7 +68,9 @@ def get_secret_folder(
         secrets = client.get_all_secrets(path=secret_path)
         return {s.secret_name: s.secret_value for s in secrets}
 
-    secret = client.get_secret(secret_name=secret_name, path=secret_path, environment=environment)
+    secret = client.get_secret(
+        secret_name=secret_name, path=secret_path, type=type, environment=environment
+    )
     return {secret_name: secret.secret_value}
 
 
@@ -78,7 +80,7 @@ def get_secret(
     type: Literal["shared", "personal"] = "personal",
     path: str = "/",
     client: InfisicalClient = None,
-) -> str | None:
+) -> dict:
     """
     Returns the secret with the given name from Infisical.
 
@@ -98,13 +100,13 @@ def get_secret(
 
     if not environment:
         environment = get_flow_run_mode() or environment
-
-    return client.get_secret(
+    secret = client.get_secret(
         secret_name=secret_name,
         type=type,
         environment=environment,
         path=path,
-    ).secret_value
+    )
+    return {secret_name: secret.secret_value}
 
 
 def get_username_and_password_from_secret(
@@ -143,7 +145,7 @@ def inject_env(
         client = get_infisical_client()
 
     if not environment:
-        environment = get_flow_run_mode()
+        environment = get_flow_run_mode() or environment
     log(f"Getting secret: {secret_name}")
     secret_value = client.get_secret(
         secret_name=secret_name,

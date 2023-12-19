@@ -23,7 +23,7 @@ def get_earth_engine_key_from_secret(
         f"Getting Earth Engine key from https://vault.dados.rio/ui/vault/secrets/secret/show/{vault_path_earth_engine_key}"  # noqa
     )
     secret = get_secret(vault_path_earth_engine_key)
-
+    secret = secret.get(vault_path_earth_engine_key)
     service_account_secret_path = Path("/tmp/earth-engine/key.json")
     service_account_secret_path.parent.mkdir(parents=True, exist_ok=True)
 
