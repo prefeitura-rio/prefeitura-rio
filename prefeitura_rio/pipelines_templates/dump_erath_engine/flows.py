@@ -9,11 +9,13 @@ except ImportError:
     base_assert_dependencies(["prefect"], extras=["pipelines"])
 
 from prefeitura_rio.core import settings
+from prefeitura_rio.pipelines_templates.dump_erath_engine.tasks import (
+    get_earth_engine_key_from_secret,
+)
 from prefeitura_rio.pipelines_utils.custom import Flow
 from prefeitura_rio.pipelines_utils.tasks import (
     create_table_asset,
     download_data_to_gcs,
-    get_earth_engine_key_from_secret,
     get_project_id,
     rename_current_flow_run_msg,
     trigger_cron_job,

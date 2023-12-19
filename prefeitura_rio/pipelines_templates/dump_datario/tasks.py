@@ -7,7 +7,7 @@ try:
 except ImportError:
     from prefeitura_rio.utils import base_assert_dependencies
 
-    base_assert_dependencies(["basedosdados", "prefect"], extras=["pipelines"])
+    base_assert_dependencies(["prefect"], extras=["pipelines"])
 
 try:
     import geopandas as gpd

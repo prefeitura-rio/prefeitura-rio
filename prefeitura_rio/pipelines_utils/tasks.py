@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 from datetime import datetime, timedelta
 from pathlib import Path
 from time import sleep
@@ -33,7 +32,6 @@ from prefeitura_rio.pipelines_utils.infisical import (
     get_connection_string_from_secret as get_connection_string_from_secret_function,
 )
 from prefeitura_rio.pipelines_utils.infisical import (
-    get_secret,
     get_username_and_password_from_secret,
 )
 from prefeitura_rio.pipelines_utils.io import (
@@ -226,36 +224,6 @@ def create_table_asset(
     request_id = ee.data.newTaskId(1)[0]
     task_status = ee.data.startTableIngestion(request_id=request_id, params=params)
     log(ee.data.getTaskStatus(task_status["id"]))
-
-
-@task(
-    checkpoint=False,
-    max_retries=settings.TASK_MAX_RETRIES_DEFAULT,
-    retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY_DEFAULT),
-)
-def database_get_mongo(
-    connection_string: str,
-    database: str,
-    collection: str,
-):
-    """
-    Returns a Mongo object.
-
-    Args:
-        connection_string (str): MongoDB connection string.
-        database (str): Database name.
-        collection (str): Collection name.
-
-    Returns:
-        A database object.
-    """
-    from prefeitura_rio.pipelines_utils.database_mongo import Mongo
-
-    return Mongo(
-        connection_string=connection_string,
-        database=database,
-        collection=collection,
-    )
 
 
 @task
@@ -483,27 +451,6 @@ def get_datario_geodataframe(
     log("Data saved")
 
     return file_path
-
-
-@task
-def get_earth_engine_key_from_secret(
-    vault_path_earth_engine_key: str,
-):
-    """
-    Get earth engine service account key from vault.
-    """
-    log(
-        f"Getting Earth Engine key from https://vault.dados.rio/ui/vault/secrets/secret/show/{vault_path_earth_engine_key}"  # noqa
-    )
-    secret = get_secret(vault_path_earth_engine_key)
-
-    service_account_secret_path = Path("/tmp/earth-engine/key.json")
-    service_account_secret_path.parent.mkdir(parents=True, exist_ok=True)
-
-    with open(service_account_secret_path, "w", encoding="utf-8") as f:
-        json.dump(secret, f, ensure_ascii=False, indent=4)
-
-    return service_account_secret_path
 
 
 @task(checkpoint=False)
