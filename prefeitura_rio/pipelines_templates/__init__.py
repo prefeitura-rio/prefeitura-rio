@@ -13,8 +13,8 @@ from prefeitura_rio.pipelines_templates.dump_to_gcs.flows import (  # noqa
     flow as dump_to_gcs,
 )
 from prefeitura_rio.pipelines_templates.geolocate.flows import (  # noqa
-    utils_geolocate_flow,
+    utils_geolocate_flow as geolocate,
 )
 from prefeitura_rio.pipelines_templates.run_dbt_model.flows import (  # noqa
-    templates__run_dbt_model__flow,
+    templates__run_dbt_model__flow as run_dbt_model,
 )
