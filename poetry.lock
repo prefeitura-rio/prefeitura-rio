@@ -1633,7 +1633,7 @@ requirements-deprecated-finder = ["pip-api", "pipreqs"]
 name = "jinja2"
 version = "3.1.2"
 description = "A very fast and expressive template engine."
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "Jinja2-3.1.2-py3-none-any.whl", hash = "sha256:6088930bfe239f0e6710546ab9c19c9ef35e29792895fed6e6e31a023a182a61"},
@@ -3902,4 +3902,4 @@ sgrc = ["aiohttp", "pendulum", "pytz", "requests"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "773b9a4917b1f581df8f9697658ca83e9270163f6879b5bc402f62bf2fa6cfce"
+content-hash = "de170cb07e5c0c96751f7edd557c03731470ede9c85244bc6aea61d0435a34e2"

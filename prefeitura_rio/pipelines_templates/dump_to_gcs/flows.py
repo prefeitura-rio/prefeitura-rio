@@ -6,7 +6,7 @@ try:
 except ImportError:
     from prefeitura_rio.utils import base_assert_dependencies
 
-    base_assert_dependencies(["prefect"], extras=["pipelines"])
+    base_assert_dependencies(["prefect"], extras=["pipelines-templates"])
 
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.custom import Flow

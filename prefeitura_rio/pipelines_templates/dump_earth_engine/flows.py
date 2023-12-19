@@ -10,16 +10,16 @@ except ImportError:
 
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_templates.dump_earth_engine.tasks import (
+    create_table_asset,
+    download_data_to_gcs,
     get_earth_engine_key_from_secret,
+    trigger_cron_job,
+    update_last_trigger,
 )
 from prefeitura_rio.pipelines_utils.custom import Flow
 from prefeitura_rio.pipelines_utils.tasks import (
-    create_table_asset,
-    download_data_to_gcs,
     get_project_id,
     rename_current_flow_run_msg,
-    trigger_cron_job,
-    update_last_trigger,
 )
 
 with Flow(
