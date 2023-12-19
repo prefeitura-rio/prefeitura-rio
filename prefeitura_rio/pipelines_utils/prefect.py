@@ -19,12 +19,15 @@ def get_flow_run_mode() -> str:
     """
     Returns the mode of the current flow run (either "prod" or "staging").
     """
-    project_name = prefect.context.get("project_name")
-    if project_name not in ["production", "staging"]:
+    project_name = prefect.context.get("project_name") or "dev"
+    if project_name not in ["production", "staging", "dev"]:
         raise ValueError(f"Invalid project name: {project_name}")
     if project_name == "production":
         return "prod"
-    return "staging"
+    elif project_name == "staging":
+        return "staging"
+    else:
+        return "dev"
 
 
 def get_flow_run_url(id: str, prefix: str = "https://prefect-dev.dados.rio") -> str:

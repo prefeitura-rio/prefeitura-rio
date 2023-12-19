@@ -39,6 +39,39 @@ def get_infisical_client() -> InfisicalClient:
     )
 
 
+def get_secret_folder(
+    secret_path: str = "/",
+    secret_name: str = None,
+    type: Literal["shared", "personal"] = "personal",
+    environment: str = None,
+    client: InfisicalClient = None,
+) -> dict[str, str]:
+    """
+    Fetches secrets from Infisical. If passing only `secret_path` and
+    no `secret_name`, returns all secrets inside a folder.
+
+    Args:
+        secret_name (str, optional): _description_. Defaults to None.
+        secret_path (str, optional): _description_. Defaults to '/'.
+        environment (str, optional): _description_. Defaults to 'dev'.
+
+    Returns:
+        _type_: _description_
+    """
+    if client is None:
+        client = get_infisical_client()
+    if not environment:
+        environment = get_flow_run_mode() or environment
+    if not secret_path.startswith("/"):
+        secret_path = f"/{secret_path}"
+    if secret_path and not secret_name:
+        secrets = client.get_all_secrets(path=secret_path)
+        return {s.secret_name: s.secret_value for s in secrets}
+
+    secret = client.get_secret(secret_name=secret_name, path=secret_path, environment=environment)
+    return {secret_name: secret.secret_value}
+
+
 def get_secret(
     secret_name: str,
     environment: str = None,
@@ -64,7 +97,7 @@ def get_secret(
         client = get_infisical_client()
 
     if not environment:
-        environment = get_flow_run_mode()
+        environment = get_flow_run_mode() or environment
 
     return client.get_secret(
         secret_name=secret_name,
