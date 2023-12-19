@@ -2,8 +2,8 @@
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
-from time import sleep, time
-from typing import Dict, List, Tuple
+from time import sleep
+from typing import Dict, List
 from uuid import uuid4
 
 try:
@@ -21,9 +21,7 @@ except ImportError:
     base_assert_dependencies(["basedosdados", "prefect"], extras=["pipelines"])
 try:
     import ee
-    import geopandas as gpd
     import requests
-    from geojsplit import geojsplit
 except ImportError:
     pass
 
@@ -35,11 +33,6 @@ from prefeitura_rio.pipelines_utils.gcs import (
     delete_blobs_list,
     list_blobs_with_prefix,
     parse_blobs_to_partition_dict,
-)
-from prefeitura_rio.pipelines_utils.geo import (
-    Geolocator,
-    load_wkt,
-    remove_third_dimension,
 )
 from prefeitura_rio.pipelines_utils.infisical import (
     get_connection_string_from_secret as get_connection_string_from_secret_function,
@@ -1093,120 +1086,6 @@ def rename_current_flow_run_msg(msg: str, wait=None) -> None:
     return client.set_flow_run_name(flow_run_id, msg)
 
 
-@task(
-    max_retries=settings.TASK_MAX_RETRIES_DEFAULT,
-    retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY_DEFAULT),
-)
-def transform_geodataframe(
-    file_path: str | Path,
-    batch_size: int = 50000,
-    geometry_column: str = "geometry",
-    convert_to_crs_4326: bool = False,
-    geometry_3d_to_2d: bool = False,
-):  # sourcery skip: convert-to-enumerate
-    """ "
-    Transform a CSV from data.rio API
-
-    Parameters:
-        - file_path (Union[str, Path]): Path to the geojson file to be transformed.
-        - batch_size (int): Number of rows to process at once.
-        - geometry_column (str): Column containing the geometry data.
-        - convert_to_crs_4326 (bool): Convert the geometry data to the crs 4326 projection.
-        - geometry_3d_to_2d (bool): Convert the geometry data from 3D to 2D.
-    """
-    base_assert_dependencies(["geojsplit", "geopandas"], extras=["pipelines-templates"])
-    eventid = datetime.now().strftime("%Y%m%d-%H%M%S")
-
-    # move to path file since file_path is path / "geo_data" / "data.geojson"
-    save_path = file_path.parent.parent / "csv_data" / f"{eventid}.csv"
-    save_path.parent.mkdir(parents=True, exist_ok=True)
-
-    geojson = geojsplit.GeoJSONBatchStreamer(file_path)
-
-    # only print every print_mod batches
-    mod = 1000
-    count = 1
-    for feature_collection in geojson.stream(batch=batch_size):
-        geodataframe = gpd.GeoDataFrame.from_features(feature_collection["features"])
-        log_mod(
-            msg=f"{count} x {batch_size} rows: geodataframe loaded",
-            index=count,
-            mod=mod,
-        )
-
-        # move geometry column to the end
-        cols = geodataframe.columns.tolist()
-        cols.remove(geometry_column)
-        cols.append(geometry_column)
-        geodataframe = geodataframe[cols]
-
-        # remove accents from columns
-        geodataframe.columns = remove_columns_accents(geodataframe)
-        geodataframe["geometry_wkt"] = geodataframe[geometry_column].copy()
-
-        # convert geometry to crs 4326
-        if convert_to_crs_4326:
-            try:
-                geodataframe.crs = "epsg:4326"
-                geodataframe[geometry_column] = geodataframe[geometry_column].to_crs("epsg:4326")
-            except Exception as err:
-                log(f"{count}: error converting to crs 4326: {err}")
-                raise err
-
-            log_mod(
-                msg=f"{count}: geometry converted to crs 4326",
-                index=count,
-                mod=mod,
-            )
-
-        # convert geometry 3d to 2d
-        if geometry_3d_to_2d:
-            try:
-                geodataframe[geometry_column] = (
-                    geodataframe[geometry_column].astype(str).apply(load_wkt)
-                )
-
-                geodataframe[geometry_column] = geodataframe[geometry_column].apply(
-                    remove_third_dimension
-                )
-            except Exception as err:
-                log(f"{count}: error converting 3d to 2d: {err}")
-                raise err
-
-            log_mod(
-                msg=f"{count}: geometry converted 3D to 2D",
-                index=count,
-                mod=mod,
-            )
-
-        log_mod(
-            msg=f"{count}: new columns: {geodataframe.columns.tolist()}",
-            index=count,
-            mod=mod,
-        )
-
-        # save geodataframe to csv
-        geodataframe.to_csv(
-            save_path,
-            index=False,
-            encoding="utf-8",
-            mode="a",
-            header=not save_path.exists(),
-        )
-
-        # clear memory
-        del geodataframe
-
-        log_mod(
-            msg=f"{count} x {batch_size} rows: Data saved",
-            index=count,
-            mod=mod,
-        )
-        count += 1
-    log(f"{count} x {batch_size} DATA TRANSFORMED!!!")
-    return save_path
-
-
 @task(nout=2)
 def trigger_cron_job(
     project_id: str,
@@ -1244,136 +1123,6 @@ def update_last_trigger(
     redis_client = get_redis_client()
     key = f"{project_id}__{ee_asset_path}"
     redis_client.set(key, {"last_trigger": execution_time})
-
-
-@task
-def validate_georeference_mode(mode: str) -> None:
-    """
-    Validates georeference mode
-    """
-    if mode not in [
-        "distinct",
-        # insert new modes here
-    ]:
-        raise ValueError(f"Invalid georeference mode: {mode}. Valid modes are: distinct")
-
-
-@task
-def georeference_dataframe(
-    new_addresses: pd.DataFrame,
-    address_column="address",
-    log_divider: int = 1,
-    language="pt",
-    timeout=10,
-    viewbox=None,
-    sulfix=None,
-    retry_request_number=1,
-    retry_request_time=60,
-    time_between_requests=1,
-) -> pd.DataFrame:
-    """
-    Georeference all addresses in a dataframe
-    """
-    start_time = time()
-
-    all_addresses = new_addresses[address_column].tolist()
-    all_addresses = [f"{address}{sulfix}" if sulfix else address for address in all_addresses]
-    log(f"There are {len(all_addresses)} addresses to georeference")
-
-    geolocate_address = Geolocator()
-    latitudes = []
-    longitudes = []
-    for i, address in enumerate(all_addresses):
-        if i % log_divider == 0:
-            log(f"Georeferencing address {i} of {len(all_addresses)}...")
-
-        # retry request
-        for _ in range(retry_request_number):
-            try:
-                latitude, longitude = geolocate_address.geopy_nominatim(
-                    address=address,
-                    language=language,
-                    timeout=timeout,
-                    viewbox=viewbox,
-                )
-                break
-            except Exception as err:
-                log(f"Error georeferencing address {address}: {err}")
-                log(f"Waiting {retry_request_time} seconds before retrying...")
-                sleep(retry_request_time)
-                continue
-        sleep(time_between_requests)
-        latitudes.append(latitude)
-        longitudes.append(longitude)
-    new_addresses["latitude"] = latitudes
-    new_addresses["longitude"] = longitudes
-    log(f"--- {(time() - start_time)} seconds ---")
-    cols = [address_column, "latitude", "longitude"]
-    return new_addresses[cols]
-
-
-@task(nout=2)
-def get_new_addresses(  # pylint: disable=too-many-arguments, too-many-locals
-    source_dataset_id: str,
-    source_table_id: str,
-    source_table_address_column: str,
-    source_table_address_query: str,
-    use_source_table_address_query: bool,
-    destination_dataset_id: str,
-    destination_table_id: str,
-    georef_mode: str,
-    current_flow_labels: List[str],
-) -> Tuple[pd.DataFrame, bool]:
-    """
-    Get new addresses from source table
-    """
-    base_assert_dependencies(["geojsplit", "geopandas"], extras=["pipelines-templates"])
-
-    new_addresses = pd.DataFrame(columns=["address"])
-    exists_new_addresses = False
-
-    billing_project_id = Base().config["gcloud-projects"]["prod"]["name"]
-    source_table_ref = f"{billing_project_id}.{source_dataset_id}.{source_table_id}"
-    destination_table_ref = f"{billing_project_id}.{destination_dataset_id}.{destination_table_id}"
-    if georef_mode == "distinct":
-        if use_source_table_address_query:
-            query_source = source_table_address_query
-        else:
-            query_source = f"""
-                SELECT DISTINCT
-                    {source_table_address_column}
-                FROM
-                    `{source_table_ref}`
-            """
-        query_destination = f"""
-        SELECT DISTINCT
-            address
-        FROM
-            `{destination_table_ref}`
-        """
-        log(f"Source query: {query_source}")
-        log(f"Destination query: {query_destination}")
-        source_addresses = bd.read_sql(
-            query_source, billing_project_id=billing_project_id, from_file=True
-        )
-        source_addresses.columns = ["address"]
-        try:
-            destination_addresses = bd.read_sql(
-                query_destination, billing_project_id=billing_project_id, from_file=True
-            )
-            destination_addresses.columns = ["address"]
-        except Exception:  # pylint: disable=broad-except
-            destination_addresses = pd.DataFrame(columns=["address"])
-        log(f"Source lengh: {len(source_addresses)}")
-        log(f"Destination lengh: {len(destination_addresses)}")
-        # pylint: disable=invalid-unary-operand-type
-        mask = source_addresses["address"].isin(destination_addresses["address"].tolist())
-        new_addresses = source_addresses[~mask].dropna()
-        log(f"new_addresses lengh: {len(new_addresses)}")
-
-        exists_new_addresses = not new_addresses.empty
-
-    return new_addresses, exists_new_addresses
 
 
 @task

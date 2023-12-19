@@ -13,6 +13,11 @@ from prefect.storage import GCS
 from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
 
 from prefeitura_rio.core import settings
+from prefeitura_rio.pipelines_templates.geolocate.tasks import (
+    georeference_dataframe,
+    get_new_addresses,
+    validate_georeference_mode,
+)
 from prefeitura_rio.pipelines_utils.custom import Flow
 from prefeitura_rio.pipelines_utils.prefect import (
     task_get_current_flow_run_labels,
@@ -20,10 +25,7 @@ from prefeitura_rio.pipelines_utils.prefect import (
 )
 from prefeitura_rio.pipelines_utils.tasks import (
     create_table_and_upload_to_gcs,
-    georeference_dataframe,
-    get_new_addresses,
     task_dataframe_to_csv,
-    validate_georeference_mode,
 )
 
 with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
