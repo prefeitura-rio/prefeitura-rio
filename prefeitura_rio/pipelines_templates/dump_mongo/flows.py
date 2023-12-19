@@ -13,11 +13,13 @@ except ImportError:
     base_assert_dependencies(["prefect"], extras=["pipelines"])
 
 from prefeitura_rio.core import settings
+from prefeitura_rio.pipelines_templates.dump_mongo.tasks import (
+    database_get_mongo as database_get,
+)
 from prefeitura_rio.pipelines_utils.custom import Flow
 from prefeitura_rio.pipelines_utils.prefect import task_get_current_flow_run_labels
-from prefeitura_rio.pipelines_utils.tasks import create_table_and_upload_to_gcs
-from prefeitura_rio.pipelines_utils.tasks import database_get_mongo as database_get
 from prefeitura_rio.pipelines_utils.tasks import (
+    create_table_and_upload_to_gcs,
     dump_batches_to_file,
     get_connection_string_from_secret,
     get_current_flow_project_name,
