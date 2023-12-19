@@ -12,6 +12,7 @@ except ImportError:
     base_assert_dependencies(["prefect"], extras=["pipelines"])
 
 from prefeitura_rio.core import settings
+from prefeitura_rio.pipelines_templates.dump_datario.tasks import transform_geodataframe
 from prefeitura_rio.pipelines_utils.custom import Flow
 from prefeitura_rio.pipelines_utils.prefect import task_get_current_flow_run_labels
 from prefeitura_rio.pipelines_utils.tasks import (
@@ -19,7 +20,6 @@ from prefeitura_rio.pipelines_utils.tasks import (
     get_current_flow_project_name,
     get_datario_geodataframe,
     rename_current_flow_run_dataset_table,
-    transform_geodataframe,
 )
 
 with Flow(name=settings.FLOW_NAME_DUMP_DATARIO) as flow:
