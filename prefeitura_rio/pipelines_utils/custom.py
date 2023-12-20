@@ -70,7 +70,7 @@ class Flow(PrefectFlow):
     def __setattr__(self, __name: str, __value: Any) -> None:
         super().__setattr__(__name, __value)
         if __name == "run_config":
-            if self._threaded_heartbeat:
+            if self._threaded_heartbeat and self.run_config is not None:
                 if self.run_config.env is None:
                     self.run_config.env = {}
                 self.run_config.env["PREFECT__CLOUD__HEARTBEAT_MODE"] = "thread"
