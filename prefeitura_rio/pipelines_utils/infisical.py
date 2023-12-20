@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import base64
-import json
 from os import environ
 from typing import Literal, Tuple
 
@@ -109,18 +108,21 @@ def get_secret(
     return {secret_name: secret.secret_value}
 
 
-def get_username_and_password_from_secret(
+def get_database_username_and_password_from_secret(
     secret_path: str,
     client: InfisicalClient = None,
 ) -> Tuple[str, str]:
     """
     Returns a username and password from a secret in Vault.
     """
-    secret = json.loads(get_secret(secret_path, client))
-    return (
-        secret["username"],
-        secret["password"],
-    )
+    secrets = []
+    for secret_name in [
+        "DB_USERNAME",
+        "DB_PASSWORD",
+    ]:
+        secret = get_secret(secret_name=secret_name, path=secret_path, client=client)
+        secrets.append(secret.get(secret_name))
+    return secrets
 
 
 def inject_env(

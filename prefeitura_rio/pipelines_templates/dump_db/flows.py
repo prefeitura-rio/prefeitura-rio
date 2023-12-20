@@ -59,8 +59,8 @@ with Flow(
         default=settings.GCS_DUMP_MAX_BYTES_PROCESSED_PER_TABLE,
     )
 
-    # Use Vault for credentials
-    secret_path = Parameter("vault_secret_path")
+    # Use Infisical for credentials
+    infisical_secret_path = Parameter("infisical_secret_path", default="/")
 
     # Data file parameters
     batch_size = Parameter("batch_size", default=50000, required=False)
@@ -92,7 +92,7 @@ with Flow(
     #####################################
 
     # Get credentials from Vault
-    user, password = get_user_and_password(secret_path=secret_path)
+    user, password = get_user_and_password(secret_path=infisical_secret_path)
 
     #####################################
     #
