@@ -129,7 +129,7 @@ def generate_dump_db_schedules(  # pylint: disable=too-many-arguments,too-many-l
     db_port: Union[str, int],
     db_type: str,
     dataset_id: str,
-    vault_secret_path: str,
+    infisical_secret_path: str,
     table_parameters: dict,
     batch_size: int = 50000,
     runs_interval_minutes: int = 15,
@@ -142,7 +142,7 @@ def generate_dump_db_schedules(  # pylint: disable=too-many-arguments,too-many-l
     for count, (table_id, parameters) in enumerate(table_parameters.items()):
         parameter_defaults = {
             "batch_size": batch_size,
-            "vault_secret_path": vault_secret_path,
+            "infisical_secret_path": infisical_secret_path,
             "db_database": db_database,
             "db_host": db_host,
             "db_port": db_port,
