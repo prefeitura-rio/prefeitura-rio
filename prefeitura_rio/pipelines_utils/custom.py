@@ -38,6 +38,7 @@ class Flow(PrefectFlow):
         terminal_state_handler: Callable[[Flow, State, Set[State]], State | None] | None = None,
         skip_if_running: bool = False,
         parallelism: int | None = None,
+        threaded_heartbeat: bool = True,
     ):
         if skip_if_running:
             if state_handlers is None:
@@ -49,6 +50,7 @@ class Flow(PrefectFlow):
             else:
                 raise ValueError(f"parallelism must be an integer, not {type(parallelism)}")
             executor = executor or new_executor
+        self._threaded_heartbeat = threaded_heartbeat
         super().__init__(
             name=name,
             schedule=schedule,
@@ -64,3 +66,11 @@ class Flow(PrefectFlow):
             result=result,
             terminal_state_handler=terminal_state_handler,
         )
+
+    def __setattr__(self, __name: str, __value: Any) -> None:
+        super().__setattr__(__name, __value)
+        if __name == "run_config":
+            if self._threaded_heartbeat:
+                if self.run_config.env is None:
+                    self.run_config.env = {}
+                self.run_config.env["PREFECT__CLOUD__HEARTBEAT_MODE"] = "thread"
