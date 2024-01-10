@@ -236,3 +236,200 @@ def to_json_dataframe(
     if save_to:
         dataframe.to_csv(save_to, index=False)
     return dataframe
+
+
+# pylint: disable=R0913
+def handle_dataframe_chunk(
+    dataframe: pd.DataFrame,
+    save_path: str,
+    partition_columns: List[str],
+    event_id: str,
+    idx: int,
+    build_json_dataframe: bool = False,
+    dataframe_key_column: str = None,
+):
+    """
+    Handles a chunk of dataframe.
+    """
+    if not partition_columns or partition_columns[0] == "":
+        partition_column = None
+    else:
+        partition_column = partition_columns[0]
+
+    old_columns = dataframe.columns.tolist()
+    dataframe.columns = remove_columns_accents(dataframe)
+    new_columns_dict = dict(zip(old_columns, dataframe.columns.tolist()))
+    if idx == 0:
+        if partition_column:
+            log(
+                f"Partition column: {partition_column} FOUND!! Write to partitioned files"
+            )
+
+        else:
+            log("NO partition column specified! Writing unique files")
+
+        log(f"New columns without accents: {new_columns_dict}")
+
+    dataframe = clean_dataframe(dataframe)
+
+    if partition_column:
+        dataframe, date_partition_columns = parse_date_columns(
+            dataframe, new_columns_dict[partition_column]
+        )
+
+        partitions = date_partition_columns + [
+            new_columns_dict[col] for col in partition_columns[1:]
+        ]
+        to_partitions(
+            data=dataframe,
+            partition_columns=partitions,
+            savepath=save_path,
+            data_type="csv",
+            build_json_dataframe=build_json_dataframe,
+            dataframe_key_column=dataframe_key_column,
+        )
+    else:
+        dataframe_to_csv(
+            dataframe=dataframe,
+            path=Path(save_path) / f"{event_id}-{idx}.csv",
+            build_json_dataframe=build_json_dataframe,
+            dataframe_key_column=dataframe_key_column,
+        )
+
+
+# pylint: disable=R0913
+def to_partitions(
+    data: pd.DataFrame,
+    partition_columns: List[str],
+    savepath: str,
+    data_type: str = "csv",
+    suffix: str = None,
+    build_json_dataframe: bool = False,
+    dataframe_key_column: str = None,
+) -> List[Path]:  # sourcery skip: raise-specific-error
+    """Save data in to hive patitions schema, given a dataframe and a list of partition columns.
+    Args:
+        data (pandas.core.frame.DataFrame): Dataframe to be partitioned.
+        partition_columns (list): List of columns to be used as partitions.
+        savepath (str, pathlib.PosixPath): folder path to save the partitions
+    Exemple:
+        data = {
+            "ano": [2020, 2021, 2020, 2021, 2020, 2021, 2021,2025],
+            "mes": [1, 2, 3, 4, 5, 6, 6,9],
+            "sigla_uf": ["SP", "SP", "RJ", "RJ", "PR", "PR", "PR","PR"],
+            "dado": ["a", "b", "c", "d", "e", "f", "g",'h'],
+        }
+        to_partitions(
+            data=pd.DataFrame(data),
+            partition_columns=['ano','mes','sigla_uf'],
+            savepath='partitions/'
+        )
+    """
+    saved_files = []
+    if isinstance(data, (pd.core.frame.DataFrame)):
+        savepath = Path(savepath)
+
+        # create unique combinations between partition columns
+        unique_combinations = (
+            data[partition_columns]
+            .drop_duplicates(subset=partition_columns)
+            .to_dict(orient="records")
+        )
+
+        for filter_combination in unique_combinations:
+            patitions_values = [
+                f"{partition}={value}"
+                for partition, value in filter_combination.items()
+            ]
+
+            # get filtered data
+            df_filter = data.loc[
+                data[filter_combination.keys()]
+                .isin(filter_combination.values())
+                .all(axis=1),
+                :,
+            ]
+            df_filter = df_filter.drop(columns=partition_columns).reset_index(drop=True)
+
+            # create folder tree
+            filter_save_path = Path(savepath / "/".join(patitions_values))
+            filter_save_path.mkdir(parents=True, exist_ok=True)
+            if suffix is not None:
+                file_filter_save_path = (
+                    Path(filter_save_path) / f"data_{suffix}.{data_type}"
+                )
+            else:
+                file_filter_save_path = Path(filter_save_path) / f"data.{data_type}"
+
+            if build_json_dataframe:
+                df_filter = to_json_dataframe(
+                    df_filter, key_column=dataframe_key_column
+                )
+
+            if data_type == "csv":
+                # append data to csv
+                df_filter.to_csv(
+                    file_filter_save_path,
+                    index=False,
+                    mode="a",
+                    header=not file_filter_save_path.exists(),
+                )
+                saved_files.append(file_filter_save_path)
+            elif data_type == "parquet":
+                dataframe_to_parquet(dataframe=df_filter, path=file_filter_save_path)
+                saved_files.append(file_filter_save_path)
+            else:
+                raise ValueError(f"Invalid data type: {data_type}")
+    else:
+        raise BaseException("Data need to be a pandas DataFrame")
+
+    return saved_files
+
+
+def dataframe_to_csv(
+    dataframe: pd.DataFrame,
+    path: Union[str, Path],
+    build_json_dataframe: bool = False,
+    dataframe_key_column: str = None,
+) -> None:
+    """
+    Writes a dataframe to CSV file.
+    """
+    if build_json_dataframe:
+        dataframe = to_json_dataframe(dataframe, key_column=dataframe_key_column)
+
+    # Remove filename from path
+    path = Path(path)
+    # Create directory if it doesn't exist
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Write dataframe to CSV
+    dataframe.to_csv(path, index=False, encoding="utf-8")
+
+
+def dataframe_to_parquet(
+    dataframe: pd.DataFrame,
+    path: Union[str, Path],
+    build_json_dataframe: bool = False,
+    dataframe_key_column: str = None,
+):
+    """
+    Writes a dataframe to Parquet file with Schema as STRING.
+    """
+    # Code adapted from
+    # https://stackoverflow.com/a/70817689/9944075
+
+    if build_json_dataframe:
+        dataframe = to_json_dataframe(dataframe, key_column=dataframe_key_column)
+
+    # If the file already exists, we:
+    # - Load it
+    # - Merge the new dataframe with the existing one
+    if Path(path).exists():
+        # Load it
+        original_df = pd.read_parquet(path)
+        # Merge the new dataframe with the existing one
+        dataframe = pd.concat([original_df, dataframe], sort=False)
+
+    # Write dataframe to Parquet
+    dataframe.to_parquet(path, engine="pyarrow")
