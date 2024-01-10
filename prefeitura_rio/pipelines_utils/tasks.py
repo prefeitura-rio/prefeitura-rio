@@ -601,3 +601,13 @@ def update_last_trigger(
     redis_client = get_redis_client()
     key = f"{project_id}__{dataset_id}__{table_id}"
     redis_client.set(key, {"last_trigger": execution_time})
+
+
+@task
+def get_current_flow_labels() -> List[str]:
+    """
+    Get the labels of the current flow.
+    """
+    flow_run_id = prefect.context.get("flow_run_id")
+    flow_run_view = FlowRunView.from_flow_run_id(flow_run_id)
+    return flow_run_view.labels
