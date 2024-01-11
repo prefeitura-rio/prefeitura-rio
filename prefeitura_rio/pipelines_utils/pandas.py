@@ -3,7 +3,7 @@ import re
 from os import walk
 from os.path import join
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Union
 from uuid import uuid4
 
 try:
