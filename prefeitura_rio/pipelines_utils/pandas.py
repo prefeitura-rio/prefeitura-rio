@@ -261,9 +261,7 @@ def handle_dataframe_chunk(
     new_columns_dict = dict(zip(old_columns, dataframe.columns.tolist()))
     if idx == 0:
         if partition_column:
-            log(
-                f"Partition column: {partition_column} FOUND!! Write to partitioned files"
-            )
+            log(f"Partition column: {partition_column} FOUND!! Write to partitioned files")
 
         else:
             log("NO partition column specified! Writing unique files")
@@ -338,15 +336,12 @@ def to_partitions(
 
         for filter_combination in unique_combinations:
             patitions_values = [
-                f"{partition}={value}"
-                for partition, value in filter_combination.items()
+                f"{partition}={value}" for partition, value in filter_combination.items()
             ]
 
             # get filtered data
             df_filter = data.loc[
-                data[filter_combination.keys()]
-                .isin(filter_combination.values())
-                .all(axis=1),
+                data[filter_combination.keys()].isin(filter_combination.values()).all(axis=1),
                 :,
             ]
             df_filter = df_filter.drop(columns=partition_columns).reset_index(drop=True)
@@ -355,16 +350,12 @@ def to_partitions(
             filter_save_path = Path(savepath / "/".join(patitions_values))
             filter_save_path.mkdir(parents=True, exist_ok=True)
             if suffix is not None:
-                file_filter_save_path = (
-                    Path(filter_save_path) / f"data_{suffix}.{data_type}"
-                )
+                file_filter_save_path = Path(filter_save_path) / f"data_{suffix}.{data_type}"
             else:
                 file_filter_save_path = Path(filter_save_path) / f"data.{data_type}"
 
             if build_json_dataframe:
-                df_filter = to_json_dataframe(
-                    df_filter, key_column=dataframe_key_column
-                )
+                df_filter = to_json_dataframe(df_filter, key_column=dataframe_key_column)
 
             if data_type == "csv":
                 # append data to csv

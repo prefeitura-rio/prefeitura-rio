@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import base64
 from os import environ
-from typing import Literal, Tuple, List
+from typing import List, Literal, Tuple
 
 try:
     from infisical import InfisicalClient
@@ -10,12 +10,14 @@ except ImportError:
 
     base_assert_dependencies(["infisical"], extras=["pipelines"])
 
+import json
+from os import getenv
+
+from google.oauth2 import service_account
+
 from prefeitura_rio.pipelines_utils.env import getenv_or_action
 from prefeitura_rio.pipelines_utils.logging import log
 from prefeitura_rio.pipelines_utils.prefect import get_flow_run_mode
-from google.oauth2 import service_account
-from os import getenv
-import json
 
 
 def get_connection_string_from_secret(secret_path: str) -> str:
@@ -188,6 +190,7 @@ def inject_bd_credentials() -> None:
         credentials_file.write(service_account)
     environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/credentials.json"
 
+
 def get_credentials_from_env(
     mode: str = "prod", scopes: List[str] = None
 ) -> service_account.Credentials:
@@ -200,9 +203,7 @@ def get_credentials_from_env(
     if env == "":
         raise ValueError(f"BASEDOSDADOS_CREDENTIALS_{mode.upper()} env var not set!")
     info: dict = json.loads(base64.b64decode(env))
-    cred: service_account.Credentials = (
-        service_account.Credentials.from_service_account_info(info)
-    )
+    cred: service_account.Credentials = service_account.Credentials.from_service_account_info(info)
     if scopes:
         cred = cred.with_scopes(scopes)
     return cred

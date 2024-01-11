@@ -5,26 +5,27 @@ Dumping  data from URLs
 """
 from datetime import timedelta
 
-from prefect import case, Parameter
+from prefect import Parameter, case
 from prefect.run_configs import KubernetesRun
 from prefect.storage import GCS
 from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
 
 from prefeitura_rio.constants import constants
-from prefeitura_rio.pipelines_utils.constants import constants as utils_constants
-from prefeitura_rio.pipelines_templates.dump_db.constants import constants as dump_db_constants
-from prefeitura_rio.pipelines_templates.dump_to_gcs.constants import constants as dump_to_gcs_constants
-
-from prefeitura_rio.pipelines_utils.custom import Flow
+from prefeitura_rio.pipelines_templates.dump_db.constants import (
+    constants as dump_db_constants,
+)
+from prefeitura_rio.pipelines_templates.dump_to_gcs.constants import (
+    constants as dump_to_gcs_constants,
+)
 from prefeitura_rio.pipelines_templates.dump_url.tasks import download_url, dump_files
+from prefeitura_rio.pipelines_utils.constants import constants as utils_constants
+from prefeitura_rio.pipelines_utils.custom import Flow
 from prefeitura_rio.pipelines_utils.tasks import (
+    create_table_and_upload_to_gcs,
     get_current_flow_labels,
     parse_comma_separated_string_to_list,
     rename_current_flow_run_dataset_table,
-    create_table_and_upload_to_gcs
 )
-
-
 
 with Flow(
     name=utils_constants.FLOW_DUMP_URL_NAME.value,
@@ -50,15 +51,9 @@ with Flow(
     partition_columns = Parameter("partition_columns", required=False, default="")
 
     # Materialization parameters
-    materialize_after_dump = Parameter(
-        "materialize_after_dump", default=False, required=False
-    )
-    materialization_mode = Parameter(
-        "materialization_mode", default="dev", required=False
-    )
-    materialize_to_datario = Parameter(
-        "materialize_to_datario", default=False, required=False
-    )
+    materialize_after_dump = Parameter("materialize_after_dump", default=False, required=False)
+    materialization_mode = Parameter("materialization_mode", default="dev", required=False)
+    materialize_to_datario = Parameter("materialize_to_datario", default=False, required=False)
 
     # Dump to GCS after? Should only dump to GCS if materializing to datario
     dump_to_gcs = Parameter("dump_to_gcs", default=False, required=False)
@@ -75,12 +70,8 @@ with Flow(
     batch_data_type = Parameter("batch_data_type", default="csv")  # csv or parquet
 
     # JSON dataframe parameters
-    dataframe_key_column = Parameter(
-        "dataframe_key_column", default=None, required=False
-    )
-    build_json_dataframe = Parameter(
-        "build_json_dataframe", default=False, required=False
-    )
+    dataframe_key_column = Parameter("dataframe_key_column", default=None, required=False)
+    build_json_dataframe = Parameter("build_json_dataframe", default=False, required=False)
     biglake_table = Parameter("biglake_table", default=False, required=False)
     #####################################
     #

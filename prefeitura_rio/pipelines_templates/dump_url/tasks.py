@@ -4,29 +4,27 @@
 General purpose tasks for dumping data from URLs.
 """
 
-from datetime import datetime, timedelta
 import io
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List
 
+import gspread
+import pandas as pd
+import requests
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
-import gspread
-import pandas as pd
-from prefect import task
-import requests
-
 from pipelines.constants import constants
-from prefeitura_rio.pipelines_utils.pandas import (
-    remove_columns_accents,
-    handle_dataframe_chunk
-)
-from prefeitura_rio.pipelines_utils.logging import log
 
 # FALTA ESSE
-from pipelines.utils.utils import (
-    get_credentials_from_env,
+from pipelines.utils.utils import get_credentials_from_env
+from prefect import task
+
+from prefeitura_rio.pipelines_utils.logging import log
+from prefeitura_rio.pipelines_utils.pandas import (
+    handle_dataframe_chunk,
+    remove_columns_accents,
 )
 
 
@@ -71,8 +69,7 @@ def download_url(  # pylint: disable=too-many-arguments
         url_prefix = "https://docs.google.com/spreadsheets/d/"
         if not url.startswith(url_prefix):
             raise ValueError(
-                "URL must start with https://docs.google.com/spreadsheets/d/"
-                f"Invalid URL: {url}"
+                "URL must start with https://docs.google.com/spreadsheets/d/" f"Invalid URL: {url}"
             )
         log(">>>>> URL is a Google Sheets URL, downloading directly")
         credentials = get_credentials_from_env(
@@ -116,14 +113,11 @@ def download_url(  # pylint: disable=too-many-arguments
         url_prefix = "https://drive.google.com/file/d/"
         if not url.startswith(url_prefix):
             raise ValueError(
-                "URL must start with https://drive.google.com/file/d/."
-                f"Invalid URL: {url}"
+                "URL must start with https://drive.google.com/file/d/." f"Invalid URL: {url}"
             )
         file_id = url.removeprefix(url_prefix).split("/")[0]
         log(f">>>>> FILE_ID: {file_id}")
-        creds = get_credentials_from_env(
-            scopes=["https://www.googleapis.com/auth/drive"]
-        )
+        creds = get_credentials_from_env(scopes=["https://www.googleapis.com/auth/drive"])
         try:
             service = build("drive", "v3", credentials=creds)
             request = service.files().get_media(fileId=file_id)  # pylint: disable=E1101
@@ -170,6 +164,7 @@ def dump_files(
             dataframe_key_column=dataframe_key_column,
         )
 
+
 @task(
     checkpoint=False,
     max_retries=constants.TASK_MAX_RETRIES.value,
@@ -211,8 +206,7 @@ def download_url(  # pylint: disable=too-many-arguments
         url_prefix = "https://docs.google.com/spreadsheets/d/"
         if not url.startswith(url_prefix):
             raise ValueError(
-                "URL must start with https://docs.google.com/spreadsheets/d/"
-                f"Invalid URL: {url}"
+                "URL must start with https://docs.google.com/spreadsheets/d/" f"Invalid URL: {url}"
             )
         log(">>>>> URL is a Google Sheets URL, downloading directly")
         credentials = get_credentials_from_env(
@@ -256,14 +250,11 @@ def download_url(  # pylint: disable=too-many-arguments
         url_prefix = "https://drive.google.com/file/d/"
         if not url.startswith(url_prefix):
             raise ValueError(
-                "URL must start with https://drive.google.com/file/d/."
-                f"Invalid URL: {url}"
+                "URL must start with https://drive.google.com/file/d/." f"Invalid URL: {url}"
             )
         file_id = url.removeprefix(url_prefix).split("/")[0]
         log(f">>>>> FILE_ID: {file_id}")
-        creds = get_credentials_from_env(
-            scopes=["https://www.googleapis.com/auth/drive"]
-        )
+        creds = get_credentials_from_env(scopes=["https://www.googleapis.com/auth/drive"])
         try:
             service = build("drive", "v3", credentials=creds)
             request = service.files().get_media(fileId=file_id)  # pylint: disable=E1101
