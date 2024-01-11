@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import base64
 from os import environ
-from typing import Literal, Tuple
+from typing import Literal, Tuple, List
 
 try:
     from infisical import InfisicalClient
