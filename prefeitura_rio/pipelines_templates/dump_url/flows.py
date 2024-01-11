@@ -16,7 +16,7 @@ from prefeitura_rio.pipelines_templates.dump_db.constants import constants as du
 from prefeitura_rio.pipelines_templates.dump_to_gcs.constants import constants as dump_to_gcs_constants
 
 from prefeitura_rio.pipelines_utils.custom import Flow
-from pipelines_templates.dump_url.tasks import download_url, dump_files
+from prefeitura_rio.pipelines_templates.dump_url.tasks import download_url, dump_files
 from prefeitura_rio.pipelines_utils.tasks import (
     get_current_flow_labels,
     parse_comma_separated_string_to_list,
