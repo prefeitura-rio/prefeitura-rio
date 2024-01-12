@@ -120,6 +120,22 @@ class Settings:
         return 5
 
     @property
+    def FLOW_EXECUTE_DBT_MODEL_NAME(self) -> str:
+        return "EMD: template - Executa DBT model"
+
+    @property
+    def FLOW_DUMP_DB_NAME(self) -> str:
+        return "EMD: template - Ingerir tabela de banco SQL"
+    
+    @property
+    def FLOW_DUMP_TO_GCS_NAME(self) -> str:
+        return "EMD: template - Ingerir tabela zipada para GCS"
+    
+    @property
+    def GCS_FLOWS_BUCKET (self) -> str:
+        return "datario-public"
+    
+    @property
     def PREFECT_DEFAULT_PROJECT(self) -> str:
         return "main"
 

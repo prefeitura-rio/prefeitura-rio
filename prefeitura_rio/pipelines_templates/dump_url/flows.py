@@ -10,13 +10,8 @@ from prefect.run_configs import KubernetesRun
 from prefect.storage import GCS
 from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
 
-from prefeitura_rio.constants import constants
 from prefeitura_rio.core import settings
-from prefeitura_rio.pipelines_templates.dump_to_gcs.constants import (
-    constants as dump_to_gcs_constants,
-)
 from prefeitura_rio.pipelines_templates.dump_url.tasks import download_url, dump_files
-from prefeitura_rio.pipelines_utils.constants import constants as utils_constants
 from prefeitura_rio.pipelines_utils.custom import Flow
 from prefeitura_rio.pipelines_utils.tasks import (
     create_table_and_upload_to_gcs,
@@ -26,7 +21,7 @@ from prefeitura_rio.pipelines_utils.tasks import (
 )
 
 with Flow(
-    name=utils_constants.FLOW_DUMP_URL_NAME.value,
+    name=settings.FLOW_DUMP_URL_NAME.value,
     code_owners=[
         "diego",
         "gabriel",
@@ -58,7 +53,7 @@ with Flow(
     maximum_bytes_processed = Parameter(
         "maximum_bytes_processed",
         required=False,
-        default=dump_to_gcs_constants.MAX_BYTES_PROCESSED_PER_TABLE.value,
+        default=settings.MAX_BYTES_PROCESSED_PER_TABLE.value,
     )
 
     # BigQuery parameters
@@ -135,8 +130,8 @@ with Flow(
     with case(materialize_after_dump, True):
         # Trigger DBT flow run
         materialization_flow = create_flow_run(
-            flow_name=utils_constants.FLOW_EXECUTE_DBT_MODEL_NAME.value,
-            project_name=constants.PREFECT_DEFAULT_PROJECT.value,
+            flow_name=settings.FLOW_EXECUTE_DBT_MODEL_NAME.value,
+            project_name=settings.PREFECT_DEFAULT_PROJECT.value,
             parameters={
                 "dataset_id": dataset_id,
                 "table_id": table_id,
@@ -157,6 +152,7 @@ with Flow(
         wait_for_materialization.max_retries = (
             settings.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS.value
         )
+
         wait_for_materialization.retry_delay = timedelta(
             seconds=settings.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL.value
         )
@@ -164,8 +160,8 @@ with Flow(
         with case(dump_to_gcs, True):
             # Trigger Dump to GCS flow run with project id as datario
             dump_to_gcs_flow = create_flow_run(
-                flow_name=utils_constants.FLOW_DUMP_TO_GCS_NAME.value,
-                project_name=constants.PREFECT_DEFAULT_PROJECT.value,
+                flow_name=settings.FLOW_DUMP_TO_GCS_NAME.value,
+                project_name=settings.PREFECT_DEFAULT_PROJECT.value,
                 parameters={
                     "project_id": "datario",
                     "dataset_id": dataset_id,
@@ -186,5 +182,5 @@ with Flow(
                 raise_final_state=True,
             )
 
-dump_url_flow.storage = GCS(constants.GCS_FLOWS_BUCKET.value)
+dump_url_flow.storage = GCS(settings.GCS_FLOWS_BUCKET.value)
 dump_url_flow.run_config = KubernetesRun(image=constants.DOCKER_IMAGE.value)
