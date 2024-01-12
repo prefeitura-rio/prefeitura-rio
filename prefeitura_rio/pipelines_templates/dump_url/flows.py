@@ -11,9 +11,7 @@ from prefect.storage import GCS
 from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
 
 from prefeitura_rio.constants import constants
-from prefeitura_rio.pipelines_templates.dump_db.constants import (
-    constants as dump_db_constants,
-)
+from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_templates.dump_to_gcs.constants import (
     constants as dump_to_gcs_constants,
 )
@@ -157,10 +155,10 @@ with Flow(
             raise_final_state=True,
         )
         wait_for_materialization.max_retries = (
-            dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS.value
+            settings.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS.value
         )
         wait_for_materialization.retry_delay = timedelta(
-            seconds=dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL.value
+            seconds=settings.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL.value
         )
 
         with case(dump_to_gcs, True):
