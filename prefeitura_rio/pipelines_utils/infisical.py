@@ -187,22 +187,3 @@ def inject_bd_credentials() -> None:
     with open("/tmp/credentials.json", "wb") as credentials_file:
         credentials_file.write(service_account)
     environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/credentials.json"
-
-def get_credentials_from_env(
-    mode: str = "prod", scopes: List[str] = None
-) -> service_account.Credentials:
-    """
-    Gets credentials from env vars
-    """
-    if mode not in ["prod", "staging"]:
-        raise ValueError("Mode must be 'prod' or 'staging'")
-    env: str = getenv(f"BASEDOSDADOS_CREDENTIALS_{mode.upper()}", "")
-    if env == "":
-        raise ValueError(f"BASEDOSDADOS_CREDENTIALS_{mode.upper()} env var not set!")
-    info: dict = json.loads(base64.b64decode(env))
-    cred: service_account.Credentials = (
-        service_account.Credentials.from_service_account_info(info)
-    )
-    if scopes:
-        cred = cred.with_scopes(scopes)
-    return cred
