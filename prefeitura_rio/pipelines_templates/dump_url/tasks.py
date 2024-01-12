@@ -12,7 +12,6 @@ from os import getenv
 from pathlib import Path
 from typing import List
 
-from prefeitura_rio.core import settings
 import gspread
 import pandas as pd
 import requests
@@ -20,9 +19,9 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
-
 from prefect import task
 
+from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.logging import log
 from prefeitura_rio.pipelines_utils.pandas import (
     handle_dataframe_chunk,
