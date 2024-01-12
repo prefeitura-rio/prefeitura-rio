@@ -10,11 +10,6 @@ except ImportError:
 
     base_assert_dependencies(["infisical"], extras=["pipelines"])
 
-import json
-from os import getenv
-
-from google.oauth2 import service_account
-
 from prefeitura_rio.pipelines_utils.env import getenv_or_action
 from prefeitura_rio.pipelines_utils.logging import log
 from prefeitura_rio.pipelines_utils.prefect import get_flow_run_mode
@@ -188,26 +183,4 @@ def inject_bd_credentials() -> None:
     service_account = base64.b64decode(environ[service_account_name])
     with open("/tmp/credentials.json", "wb") as credentials_file:
         credentials_file.write(service_account)
-<<<<<<< HEAD
     environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/credentials.json"
-=======
-    environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/credentials.json"
-
-
-def get_credentials_from_env(
-    mode: str = "prod", scopes: List[str] = None
-) -> service_account.Credentials:
-    """
-    Gets credentials from env vars
-    """
-    if mode not in ["prod", "staging"]:
-        raise ValueError("Mode must be 'prod' or 'staging'")
-    env: str = getenv(f"BASEDOSDADOS_CREDENTIALS_{mode.upper()}", "")
-    if env == "":
-        raise ValueError(f"BASEDOSDADOS_CREDENTIALS_{mode.upper()} env var not set!")
-    info: dict = json.loads(base64.b64decode(env))
-    cred: service_account.Credentials = service_account.Credentials.from_service_account_info(info)
-    if scopes:
-        cred = cred.with_scopes(scopes)
-    return cred
->>>>>>> b49740547b100a54f29f4f7635a21625a54be3b6
