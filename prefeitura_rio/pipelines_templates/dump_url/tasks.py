@@ -4,26 +4,21 @@
 General purpose tasks for dumping data from URLs.
 """
 
+import base64
 import io
+import json
 from datetime import datetime, timedelta
-import io, base64
+from os import getenv
 from pathlib import Path
 from typing import List
 
 import gspread
 import pandas as pd
 import requests
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
-import gspread
-import pandas as pd
-from prefect import task
-import requests
-from google.oauth2 import service_account
-from os import getenv
-import json
-
 from pipelines.constants import constants
 
 # FALTA ESSE
@@ -34,9 +29,8 @@ from prefeitura_rio.pipelines_utils.logging import log
 from prefeitura_rio.pipelines_utils.pandas import (
     handle_dataframe_chunk,
     remove_columns_accents,
-    handle_dataframe_chunk
 )
-from prefeitura_rio.pipelines_utils.logging import log
+
 
 @task(
     checkpoint=False,
@@ -310,6 +304,7 @@ def dump_files(
             build_json_dataframe=build_json_dataframe,
             dataframe_key_column=dataframe_key_column,
         )
+
 
 def get_credentials_from_env(
     mode: str = "prod", scopes: List[str] = None
@@ -323,9 +318,7 @@ def get_credentials_from_env(
     if env == "":
         raise ValueError(f"BASEDOSDADOS_CREDENTIALS_{mode.upper()} env var not set!")
     info: dict = json.loads(base64.b64decode(env))
-    cred: service_account.Credentials = (
-        service_account.Credentials.from_service_account_info(info)
-    )
+    cred: service_account.Credentials = service_account.Credentials.from_service_account_info(info)
     if scopes:
         cred = cred.with_scopes(scopes)
     return cred
