@@ -132,12 +132,20 @@ class Settings:
         return "EMD: template - Ingerir tabela zipada para GCS"
     
     @property
-    def GCS_FLOWS_BUCKET (self) -> str:
+    def GCS_FLOWS_BUCKET(self) -> str:
         return "datario-public"
     
     @property
     def PREFECT_DEFAULT_PROJECT(self) -> str:
         return "main"
+    
+    @property
+    def TASK_MAX_RETRIES(self) -> int:
+        return 5
+    
+    @property
+    def TASK_RETRY_DELAY(self) -> int:
+        return 10
 
 
 settings = Settings()
