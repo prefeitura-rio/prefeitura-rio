@@ -93,3 +93,24 @@ def parse_blobs_to_partition_list(blobs: List[Blob]) -> List[str]:
                 if key == "data_particao":
                     partitions.append(value)
     return partitions
+
+
+def upload_file_to_bucket(
+    bucket_name: str, file_path: str, destination_blob_name: str, mode: str = None
+) -> None:
+    """
+    Uploads a file to the bucket.
+    Mode needs to be "prod" or "staging"
+
+    Args:
+        bucket_name (str): The name of the bucket.
+        file_path (str): The path of the file to upload.
+        destination_blob_name (str): The name of the blob.
+        mode (str): The mode to filter by (prod or staging).
+    """
+    if not mode:
+        mode = get_flow_run_mode()
+    storage_client = get_gcs_client(mode=mode)
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(destination_blob_name)
+    blob.upload_from_filename(file_path)
