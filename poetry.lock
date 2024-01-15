@@ -3910,11 +3910,11 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [extras]
 all = ["aiohttp", "basedosdados", "croniter", "cx-oracle", "dask", "earthengine-api", "geojsplit", "geopandas", "geopy", "google-cloud-storage", "gspread", "infisical", "jinja2", "numpy", "pandas", "pendulum", "prefect", "pymongo", "pymysql", "pyodbc", "pytz", "redis-pal", "requests", "scikit-learn", "sentry-sdk", "shapely"]
 metrics = ["numpy", "scikit-learn"]
-pipelines = ["basedosdados", "dask", "google-cloud-storage", "gspread", "infisical", "jinja2", "pandas", "prefect", "sentry-sdk"]
-pipelines-templates = ["croniter", "cx-oracle", "earthengine-api", "geojsplit", "geopandas", "geopy", "jinja2", "pymongo", "pymysql", "pyodbc", "redis-pal", "requests", "shapely"]
+pipelines = ["basedosdados", "dask", "google-cloud-storage", "infisical", "jinja2", "pandas", "prefect", "sentry-sdk"]
+pipelines-templates = ["croniter", "cx-oracle", "earthengine-api", "geojsplit", "geopandas", "geopy", "gspread", "jinja2", "pymongo", "pymysql", "pyodbc", "redis-pal", "requests", "shapely"]
 sgrc = ["aiohttp", "pendulum", "pytz", "requests"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "94833845007150621e782900ab39dec6072ee1a7461f1e65d5b56bbb2d9e0251"
+content-hash = "d3b5444d90e9983a50eee5f46d5b5a86acc50d1efa6014137b527552699906e2"
