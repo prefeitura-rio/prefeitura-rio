@@ -125,8 +125,8 @@ with Flow(
     with case(materialize_after_dump, True):
         # Trigger DBT flow run
         materialization_flow = create_flow_run(
-            flow_name=settings.FLOW_EXECUTE_DBT_MODEL_NAME.value,
-            project_name=settings.PREFECT_DEFAULT_PROJECT.value,
+            flow_name=settings.FLOW_EXECUTE_DBT_MODEL_NAME,
+            project_name=settings.PREFECT_DEFAULT_PROJECT,
             parameters={
                 "dataset_id": dataset_id,
                 "table_id": table_id,
@@ -145,18 +145,18 @@ with Flow(
             raise_final_state=True,
         )
         wait_for_materialization.max_retries = (
-            settings.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS.value
+            settings.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS
         )
 
         wait_for_materialization.retry_delay = timedelta(
-            seconds=settings.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL.value
+            seconds=settings.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL
         )
 
         with case(dump_to_gcs, True):
             # Trigger Dump to GCS flow run with project id as datario
             dump_to_gcs_flow = create_flow_run(
-                flow_name=settings.FLOW_DUMP_TO_GCS_NAME.value,
-                project_name=settings.PREFECT_DEFAULT_PROJECT.value,
+                flow_name=settings.FLOW_DUMP_TO_GCS_NAME,
+                project_name=settings.PREFECT_DEFAULT_PROJECT,
                 parameters={
                     "project_id": "datario",
                     "dataset_id": dataset_id,
@@ -177,4 +177,4 @@ with Flow(
                 raise_final_state=True,
             )
 
-dump_url_flow.storage = GCS(settings.GCS_FLOWS_BUCKET.value)
+dump_url_flow.storage = GCS(settings.GCS_FLOWS_BUCKET)
