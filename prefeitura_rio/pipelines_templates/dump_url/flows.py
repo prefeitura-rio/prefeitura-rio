@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=E1101
 """
-Dumping  data from URLs
+Dumping  data from URLs.
 """
 from datetime import timedelta
 
