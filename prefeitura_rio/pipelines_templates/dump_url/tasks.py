@@ -32,8 +32,8 @@ from prefeitura_rio.pipelines_utils.pandas import (
 
 @task(
     checkpoint=False,
-    max_retries=constants.TASK_MAX_RETRIES.value,
-    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+    max_retries=settings.TASK_MAX_RETRIES,
+    retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY),
 )
 # pylint: disable=R0912,R0914,R0915
 def download_url(  # pylint: disable=too-many-arguments
@@ -169,8 +169,8 @@ def dump_files(
 
 @task(
     checkpoint=False,
-    max_retries=constants.TASK_MAX_RETRIES.value,
-    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+    max_retries=settings.TASK_MAX_RETRIES,
+    retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY),
 )
 # pylint: disable=R0912,R0914,R0915
 def download_url(  # pylint: disable=too-many-arguments
@@ -275,8 +275,8 @@ def download_url(  # pylint: disable=too-many-arguments
 
 @task(
     checkpoint=False,
-    max_retries=constants.TASK_MAX_RETRIES.value,
-    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+    max_retries=settings.TASK_MAX_RETRIES,
+    retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY),
 )
 # pylint: disable=R0913
 def dump_files(

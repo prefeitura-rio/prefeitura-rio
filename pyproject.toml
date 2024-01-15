@@ -37,6 +37,7 @@ scikit-learn = { version = "^1.1.2", optional = true }
 sentry-sdk = { version = "^1.29.2", optional = true }
 shapely = { version = "^2.0.2", optional = true }
 jinja2 = "^3.1.2"
+gspread = "^5.12.4"
 
 [tool.poetry.extras]
 all = [
@@ -47,6 +48,7 @@ all = [
     "dask",
     "earthengine-api",
     "geojsplit",
+    "gspread",
     "geopandas",
     "geopy",
     "google-cloud-storage",

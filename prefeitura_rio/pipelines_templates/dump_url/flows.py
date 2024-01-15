@@ -21,7 +21,7 @@ from prefeitura_rio.pipelines_utils.tasks import (
 )
 
 with Flow(
-    name=settings.FLOW_DUMP_URL_NAME.value,
+    name=settings.FLOW_DUMP_URL_NAME,
     code_owners=[
         "diego",
         "gabriel",
@@ -53,7 +53,7 @@ with Flow(
     maximum_bytes_processed = Parameter(
         "maximum_bytes_processed",
         required=False,
-        default=settings.MAX_BYTES_PROCESSED_PER_TABLE.value,
+        default=settings.GCS_DUMP_MAX_BYTES_PROCESSED_PER_TABLE,
     )
 
     # BigQuery parameters
@@ -183,4 +183,3 @@ with Flow(
             )
 
 dump_url_flow.storage = GCS(settings.GCS_FLOWS_BUCKET.value)
-dump_url_flow.run_config = KubernetesRun(image=constants.DOCKER_IMAGE.value)
