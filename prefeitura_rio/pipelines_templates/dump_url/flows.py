@@ -6,7 +6,6 @@ Dumping  data from URLs
 from datetime import timedelta
 
 from prefect import Parameter, case
-from prefect.run_configs import KubernetesRun
 from prefect.storage import GCS
 from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
 
