@@ -21,10 +21,6 @@ from prefeitura_rio.pipelines_utils.tasks import (
 
 with Flow(
     name=settings.FLOW_DUMP_URL_NAME,
-    code_owners=[
-        "diego",
-        "gabriel",
-    ],
 ) as dump_url_flow:
     #####################################
     #
