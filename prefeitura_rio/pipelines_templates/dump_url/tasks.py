@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=E1101
 """
-General purpose tasks for dumping data from URLs.
+General purpose tasks for dumping data from URLs
 """
 
 import base64
