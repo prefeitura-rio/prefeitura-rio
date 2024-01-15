@@ -97,7 +97,7 @@ def parse_blobs_to_partition_list(blobs: List[Blob]) -> List[str]:
 
 def upload_file_to_bucket(
     bucket_name: str, file_path: str, destination_blob_name: str, mode: str = None
-) -> None:
+) -> "Blob":
     """
     Uploads a file to the bucket.
     Mode needs to be "prod" or "staging"
@@ -114,3 +114,4 @@ def upload_file_to_bucket(
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(destination_blob_name)
     blob.upload_from_filename(file_path)
+    return blob
