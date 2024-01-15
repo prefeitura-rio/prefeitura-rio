@@ -126,7 +126,7 @@ class Settings:
     @property
     def FLOW_DUMP_DB_NAME(self) -> str:
         return "EMD: template - Ingerir tabela de banco SQL"
-    
+
     @property
     def FLOW_DUMP_URL_NAME(self) -> str:
         return "EMD: template - Ingerir tabela de URL"
@@ -150,7 +150,6 @@ class Settings:
     @property
     def TASK_RETRY_DELAY(self) -> int:
         return 10
-    
 
 
 settings = Settings()
