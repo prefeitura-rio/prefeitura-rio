@@ -138,11 +138,11 @@ class Settings:
     @property
     def PREFECT_DEFAULT_PROJECT(self) -> str:
         return "main"
-    
+
     @property
     def TASK_MAX_RETRIES(self) -> int:
         return 5
-    
+
     @property
     def TASK_RETRY_DELAY(self) -> int:
         return 10
