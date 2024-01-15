@@ -144,9 +144,7 @@ with Flow(
             stream_logs=True,
             raise_final_state=True,
         )
-        wait_for_materialization.max_retries = (
-            settings.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS
-        )
+        wait_for_materialization.max_retries = settings.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS
 
         wait_for_materialization.retry_delay = timedelta(
             seconds=settings.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL
