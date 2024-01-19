@@ -102,7 +102,8 @@ with Flow(
 
     # Get current flow labels
     current_flow_labels = task_get_current_flow_run_labels()
-
+    current_flow_project_name = get_current_flow_project_name()
+    current_flow_project_name.set_upstream(current_flow_labels)
     # Parse partition columns
     partition_columns = parse_comma_separated_string_to_list(text=partition_columns)
 
@@ -156,7 +157,7 @@ with Flow(
         # Trigger DBT flow run
         materialization_flow = create_flow_run(
             flow_name=settings.FLOW_NAME_EXECUTE_DBT_MODEL,
-            project_name=get_current_flow_project_name(),
+            project_name=current_flow_project_name,
             parameters={
                 "dataset_id": dataset_id,
                 "table_id": table_id,
@@ -182,7 +183,7 @@ with Flow(
             # Trigger Dump to GCS flow run with project id as datario
             dump_to_gcs_flow = create_flow_run(
                 flow_name=settings.FLOW_NAME_DUMP_TO_GCS,
-                project_name=get_current_flow_project_name(),
+                project_name=current_flow_project_name,
                 parameters={
                     "project_id": "datario",
                     "dataset_id": dataset_id,

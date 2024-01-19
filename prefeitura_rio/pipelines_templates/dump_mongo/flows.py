@@ -87,6 +87,9 @@ with Flow(
         prefix="Dump: ", dataset_id=bq_dataset_id, table_id=bq_table_id
     )
 
+    current_flow_project_name = get_current_flow_project_name()
+    current_flow_project_name.set_upstream(rename_flow_run)
+
     #####################################
     #
     # Tasks section #0 - Get credentials
@@ -140,7 +143,7 @@ with Flow(
             # Trigger DBT flow run
             materialization_flow = create_flow_run(
                 flow_name=settings.FLOW_NAME_EXECUTE_DBT_MODEL,
-                project_name=get_current_flow_project_name(),
+                project_name=current_flow_project_name,
                 parameters={
                     "dataset_id": bq_dataset_id,
                     "table_id": bq_table_id,
@@ -168,7 +171,7 @@ with Flow(
                 # Trigger Dump to GCS flow run with project id as datario
                 dump_to_gcs_flow = create_flow_run(
                     flow_name=settings.FLOW_NAME_DUMP_TO_GCS,
-                    project_name=get_current_flow_project_name(),
+                    project_name=current_flow_project_name,
                     parameters={
                         "project_id": "datario",
                         "dataset_id": bq_dataset_id,

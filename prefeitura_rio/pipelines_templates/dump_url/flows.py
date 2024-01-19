@@ -6,7 +6,6 @@ Dumping  data from URLs.
 from datetime import timedelta
 
 from prefect import Parameter, case
-from prefect.storage import GCS
 from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
 
 from prefeitura_rio.core import settings
@@ -15,12 +14,13 @@ from prefeitura_rio.pipelines_utils.custom import Flow
 from prefeitura_rio.pipelines_utils.tasks import (
     create_table_and_upload_to_gcs,
     get_current_flow_labels,
+    get_current_flow_project_name,
     parse_comma_separated_string_to_list,
     rename_current_flow_run_dataset_table,
 )
 
 with Flow(
-    name=settings.FLOW_DUMP_URL_NAME,
+    name=settings.FLOW_NAME_DUMP_URL,
 ) as dump_url_flow:
     #####################################
     #
@@ -74,6 +74,9 @@ with Flow(
     current_flow_labels = get_current_flow_labels()
     current_flow_labels.set_upstream(rename_flow_run)
 
+    current_flow_project_name = get_current_flow_project_name()
+    current_flow_project_name.set_upstream(current_flow_labels)
+
     #####################################
     #
     # Tasks section #1 - Get data
@@ -90,7 +93,7 @@ with Flow(
         gsheets_sheet_name=gsheets_sheet_name,
         gsheets_sheet_range=gsheets_sheet_range,
     )
-    DOWNLOAD_URL_TASK.set_upstream(rename_flow_run)
+    DOWNLOAD_URL_TASK.set_upstream(current_flow_project_name)
 
     partition_columns = parse_comma_separated_string_to_list(text=partition_columns)
 
@@ -125,8 +128,8 @@ with Flow(
     with case(materialize_after_dump, True):
         # Trigger DBT flow run
         materialization_flow = create_flow_run(
-            flow_name=settings.FLOW_EXECUTE_DBT_MODEL_NAME,
-            project_name=settings.PREFECT_DEFAULT_PROJECT,
+            flow_name=settings.FLOW_NAME_EXECUTE_DBT_MODEL,
+            project_name=current_flow_project_name,
             parameters={
                 "dataset_id": dataset_id,
                 "table_id": table_id,
@@ -153,8 +156,8 @@ with Flow(
         with case(dump_to_gcs, True):
             # Trigger Dump to GCS flow run with project id as datario
             dump_to_gcs_flow = create_flow_run(
-                flow_name=settings.FLOW_DUMP_TO_GCS_NAME,
-                project_name=settings.PREFECT_DEFAULT_PROJECT,
+                flow_name=settings.FLOW_NAME_DUMP_TO_GCS,
+                project_name=current_flow_project_name,
                 parameters={
                     "project_id": "datario",
                     "dataset_id": dataset_id,
@@ -174,5 +177,3 @@ with Flow(
                 stream_logs=True,
                 raise_final_state=True,
             )
-
-dump_url_flow.storage = GCS(settings.GCS_FLOWS_BUCKET)

@@ -25,6 +25,7 @@ from prefeitura_rio.pipelines_utils.prefect import (
 )
 from prefeitura_rio.pipelines_utils.tasks import (
     create_table_and_upload_to_gcs,
+    get_current_flow_project_name,
     task_dataframe_to_csv,
 )
 
@@ -85,6 +86,9 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
     current_flow_labels = task_get_current_flow_run_labels()
     current_flow_labels.set_upstream(georef_mode_valid)
 
+    current_flow_project_name = get_current_flow_project_name()
+    current_flow_project_name.set_upstream(current_flow_labels)
+
     # Checks if there are new addresses
     new_addresses, exists_new_addresses = get_new_addresses(
         source_dataset_id=source_dataset_id,
@@ -97,7 +101,7 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
         georef_mode=georeference_mode,
         current_flow_labels=current_flow_labels,
     )
-    new_addresses.set_upstream(current_flow_labels)
+    new_addresses.set_upstream(current_flow_project_name)
     with case(exists_new_addresses, True):
         # Georeference the table
         georeferenced_table = georeference_dataframe(
@@ -131,7 +135,7 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
             # Trigger DBT flow run
             materialization_flow = create_flow_run(
                 flow_id=materialization_flow_id,
-                project_name=settings.PREFECT_DEFAULT_PROJECT,
+                project_name=current_flow_project_name,
                 parameters={
                     "dataset_id": destination_dataset_id,
                     "table_id": destination_table_id,
@@ -159,7 +163,7 @@ with Flow(settings.FLOW_NAME_GEOLOCATE) as utils_geolocate_flow:
                 # Trigger Dump to GCS flow run with project id as datario
                 dump_to_gcs_flow = create_flow_run(
                     flow_name=settings.FLOW_NAME_DUMP_TO_GCS,
-                    project_name=settings.PREFECT_DEFAULT_PROJECT,
+                    project_name=current_flow_project_name,
                     parameters={
                         "project_id": "datario",
                         "dataset_id": destination_dataset_id,

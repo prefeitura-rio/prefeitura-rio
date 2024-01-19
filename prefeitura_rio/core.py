@@ -100,6 +100,10 @@ class Settings:
         return "[TEMPLATE] Geolocalizar tabela"
 
     @property
+    def FLOW_NAME_DUMP_URL(self) -> str:
+        return "[TEMPLATE] Ingerir tabela de URL"
+
+    @property
     def GCS_DUMP_MAX_BYTES_PROCESSED_PER_TABLE(self) -> int:
         return 5 * 1024 * 1024 * 1024  # 5GB
 
@@ -118,38 +122,6 @@ class Settings:
     @property
     def WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL(self) -> int:
         return 5
-
-    @property
-    def FLOW_EXECUTE_DBT_MODEL_NAME(self) -> str:
-        return "EMD: template - Executa DBT model"
-
-    @property
-    def FLOW_DUMP_DB_NAME(self) -> str:
-        return "EMD: template - Ingerir tabela de banco SQL"
-
-    @property
-    def FLOW_DUMP_URL_NAME(self) -> str:
-        return "EMD: template - Ingerir tabela de URL"
-
-    @property
-    def FLOW_DUMP_TO_GCS_NAME(self) -> str:
-        return "EMD: template - Ingerir tabela zipada para GCS"
-
-    @property
-    def GCS_FLOWS_BUCKET(self) -> str:
-        return "datario-public"
-
-    @property
-    def PREFECT_DEFAULT_PROJECT(self) -> str:
-        return "main"
-
-    @property
-    def TASK_MAX_RETRIES(self) -> int:
-        return 5
-
-    @property
-    def TASK_RETRY_DELAY(self) -> int:
-        return 10
 
 
 settings = Settings()

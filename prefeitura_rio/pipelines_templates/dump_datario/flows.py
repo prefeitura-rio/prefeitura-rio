@@ -63,6 +63,8 @@ with Flow(name=settings.FLOW_NAME_DUMP_DATARIO) as flow:
         prefix="Dump: ", dataset_id=dataset_id, table_id=table_id
     )
 
+    current_flow_project_name = get_current_flow_project_name()
+    current_flow_project_name.set_upstream(rename_flow_run)
     #####################################
     #
     # Tasks section #1 - Create table
@@ -73,7 +75,7 @@ with Flow(name=settings.FLOW_NAME_DUMP_DATARIO) as flow:
         url=url,
         path=f"data/{uuid4()}/",
     )
-    file_path.set_upstream(rename_flow_run)
+    file_path.set_upstream(current_flow_project_name)
 
     datario_path = transform_geodataframe(
         file_path=file_path,
@@ -98,7 +100,7 @@ with Flow(name=settings.FLOW_NAME_DUMP_DATARIO) as flow:
         current_flow_labels = task_get_current_flow_run_labels()
         materialization_flow = create_flow_run(
             flow_name=settings.FLOW_NAME_EXECUTE_DBT_MODEL,
-            project_name=get_current_flow_project_name(),
+            project_name=current_flow_project_name,
             parameters={
                 "dataset_id": dataset_id,
                 "table_id": table_id,
@@ -121,7 +123,7 @@ with Flow(name=settings.FLOW_NAME_DUMP_DATARIO) as flow:
             # Trigger Dump to GCS flow run with project id as datario
             dump_to_gcs_flow = create_flow_run(
                 flow_name=settings.FLOW_NAME_DUMP_TO_GCS,
-                project_name=get_current_flow_project_name(),
+                project_name=current_flow_project_name,
                 parameters={
                     "project_id": "datario",
                     "dataset_id": dataset_id,
