@@ -280,15 +280,11 @@ def get_current_flow_project_name() -> str:
     """
     Get the project name of the current flow.
     """
-    flow_run_id = prefect.context.get("flow_run_id")
+    project_name = prefect.context.get("project_name")
     # debug
-    log(f"flow_run_id: {flow_run_id}")
+    log(f"project_name: {project_name}")
 
-    flow_run_view = FlowRunView.from_flow_run_id(flow_run_id)
-    # debug
-    log(f"flow_run_view: {flow_run_view}")
-
-    return flow_run_view._flow.project_name
+    return project_name
 
 
 @task(
