@@ -287,7 +287,7 @@ def get_current_flow_project_name() -> str:
     flow_run_view = FlowRunView.from_flow_run_id(flow_run_id)
     # debug
     log(f"flow_run_view: {flow_run_view}")
-    
+
     return flow_run_view._flow.project_name
 
 
