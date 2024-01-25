@@ -20,6 +20,9 @@ from prefeitura_rio.pipelines_utils.geo import load_wkt, remove_third_dimension
 from prefeitura_rio.pipelines_utils.logging import log, log_mod
 from prefeitura_rio.pipelines_utils.pandas import remove_columns_accents
 
+from typing import List
+from prefect.schedules.clocks import IntervalClock
+
 
 @task(
     max_retries=settings.TASK_MAX_RETRIES_DEFAULT,
@@ -133,3 +136,51 @@ def transform_geodataframe(
         count += 1
     log(f"{count} x {batch_size} DATA TRANSFORMED!!!")
     return save_path
+
+
+def generate_dump_datario_schedules(  # pylint: disable=too-many-arguments,too-many-locals
+    interval: timedelta,
+    start_date: datetime,
+    labels: List[str],
+    table_parameters: dict,
+    runs_interval_minutes: int = 15,
+) -> List[IntervalClock]:
+    """
+    Generates multiple schedules for dumping datario tables.
+    """
+    clocks = []
+    for count, (table_id, parameters) in enumerate(table_parameters.items()):
+        parameter_defaults = {
+            "url": parameters["url"],
+            "dataset_id": parameters["dataset_id"],
+            "dump_mode": parameters["dump_mode"],
+            "table_id": table_id,
+        }
+        if "materialize_after_dump" in parameters:
+            parameter_defaults["materialize_after_dump"] = parameters[
+                "materialize_after_dump"
+            ]
+        if "materialization_mode" in parameters:
+            parameter_defaults["materialization_mode"] = parameters[
+                "materialization_mode"
+            ]
+        if "geometry_column" in parameters:
+            parameter_defaults["geometry_column"] = parameters["geometry_column"]
+        if "convert_to_crs_4326" in parameters:
+            parameter_defaults["convert_to_crs_4326"] = parameters[
+                "convert_to_crs_4326"
+            ]
+        if "geometry_3d_to_2d" in parameters:
+            parameter_defaults["geometry_3d_to_2d"] = parameters["geometry_3d_to_2d"]
+
+        new_interval = parameters["interval"] if "interval" in parameters else interval
+        clocks.append(
+            IntervalClock(
+                interval=new_interval,
+                start_date=start_date
+                + timedelta(minutes=runs_interval_minutes * count),
+                labels=labels,
+                parameter_defaults=parameter_defaults,
+            )
+        )
+    return clocks
