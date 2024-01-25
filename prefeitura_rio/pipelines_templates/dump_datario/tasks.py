@@ -15,13 +15,14 @@ try:
 except ImportError:
     pass
 
+from typing import List
+
+from prefect.schedules.clocks import IntervalClock
+
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.geo import load_wkt, remove_third_dimension
 from prefeitura_rio.pipelines_utils.logging import log, log_mod
 from prefeitura_rio.pipelines_utils.pandas import remove_columns_accents
-
-from typing import List
-from prefect.schedules.clocks import IntervalClock
 
 
 @task(
@@ -157,19 +158,13 @@ def generate_dump_datario_schedules(  # pylint: disable=too-many-arguments,too-m
             "table_id": table_id,
         }
         if "materialize_after_dump" in parameters:
-            parameter_defaults["materialize_after_dump"] = parameters[
-                "materialize_after_dump"
-            ]
+            parameter_defaults["materialize_after_dump"] = parameters["materialize_after_dump"]
         if "materialization_mode" in parameters:
-            parameter_defaults["materialization_mode"] = parameters[
-                "materialization_mode"
-            ]
+            parameter_defaults["materialization_mode"] = parameters["materialization_mode"]
         if "geometry_column" in parameters:
             parameter_defaults["geometry_column"] = parameters["geometry_column"]
         if "convert_to_crs_4326" in parameters:
-            parameter_defaults["convert_to_crs_4326"] = parameters[
-                "convert_to_crs_4326"
-            ]
+            parameter_defaults["convert_to_crs_4326"] = parameters["convert_to_crs_4326"]
         if "geometry_3d_to_2d" in parameters:
             parameter_defaults["geometry_3d_to_2d"] = parameters["geometry_3d_to_2d"]
 
@@ -177,8 +172,7 @@ def generate_dump_datario_schedules(  # pylint: disable=too-many-arguments,too-m
         clocks.append(
             IntervalClock(
                 interval=new_interval,
-                start_date=start_date
-                + timedelta(minutes=runs_interval_minutes * count),
+                start_date=start_date + timedelta(minutes=runs_interval_minutes * count),
                 labels=labels,
                 parameter_defaults=parameter_defaults,
             )
