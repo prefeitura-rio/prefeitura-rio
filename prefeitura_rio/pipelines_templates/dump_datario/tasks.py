@@ -2,11 +2,11 @@
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from prefeitura_rio.utils import base_assert_dependencies
+
 try:
     from prefect import task
 except ImportError:
-    from prefeitura_rio.utils import base_assert_dependencies
-
     base_assert_dependencies(["prefect"], extras=["pipelines"])
 
 try:
