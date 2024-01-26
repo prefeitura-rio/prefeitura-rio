@@ -78,6 +78,19 @@ class Flow(PrefectFlow):
                 self.run_config.env["PREFECT__CLOUD__HEARTBEAT_MODE"] = "thread"
 
 
+def assert_connected(func):
+    """
+    Decorator that asserts that the FTP client is connected before executing the decorated method
+    """
+
+    def wrapper(self, *args, **kwargs):
+        if not self._connected:  # pylint: disable=protected-access
+            raise RuntimeError("FTP client is not connected")
+        return func(self, *args, **kwargs)
+
+    return wrapper
+
+
 class FTPClient:  # pylint: disable=too-many-instance-attributes
     """
     FTP client implementation
