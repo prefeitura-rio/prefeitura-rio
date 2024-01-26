@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import ftplib
 import re
-from typing import Any, Callable, Iterable, List, Set, Optional
+from typing import Any, Callable, Iterable, List, Optional, Set
 
 try:
     from prefect import Flow
