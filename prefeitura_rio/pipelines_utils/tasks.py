@@ -4,6 +4,7 @@ from pathlib import Path
 from time import sleep
 from typing import Dict, List, Union
 from uuid import uuid4
+
 from prefect.triggers import all_successful
 
 try:
@@ -654,6 +655,7 @@ def save_on_redis(
     files.sort()
     files = files[-keep_last:]
     redis_client.set(key, files)
+
 
 def build_redis_key(dataset_id: str, table_id: str, name: str, mode: str = "prod"):
     """
