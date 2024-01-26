@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Any, Callable, Iterable, List, Set
+from typing import Any, Callable, Iterable, List, Set, Optional
 import optional as Optional
 import ftplib
 import re
