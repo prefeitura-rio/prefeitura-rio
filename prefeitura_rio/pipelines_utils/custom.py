@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from typing import Any, Callable, Iterable, List, Set
-import optional as Optional
 import ftplib
 import re
+from typing import Any, Callable, Iterable, List, Set
+
+import optional as Optional
 
 try:
     from prefect import Flow
