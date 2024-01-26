@@ -4,29 +4,25 @@
 Flow for generating policy matrix
 """
 
+from pipelines.constants import constants
 from prefect import Parameter
 from prefect.run_configs import KubernetesRun
 from prefect.storage import GCS
 
-from pipelines.constants import constants
-
-from prefeitura_rio.pipelines_utils.custom import Flow
-
 from prefeitura_rio.pipelines_templates.policy_matrix.tasks import (
+    generate_roles_matrix,
     get_discovery_api,
     get_iam_policy,
     merge_iam_policies,
-    generate_roles_matrix,
     roles_matrix_to_pandas_dataframe,
 )
-
+from prefeitura_rio.pipelines_utils.custom import Flow
 from prefeitura_rio.pipelines_utils.tasks import (
     create_table_and_upload_to_gcs,
-    parse_comma_separated_string_to_list,
     get_now_time,
+    parse_comma_separated_string_to_list,
     rename_current_flow_run_now_time,
 )
-
 
 with Flow(
     "EMD: utils - Gerar matriz de políticas de acesso",
@@ -52,9 +48,7 @@ with Flow(
     policies = get_iam_policy(project_ids=project_ids_list, discovery_api=discovery_api)
     policies.set_upstream(project_ids_list)
 
-    merged_policies = merge_iam_policies(
-        project_ids=project_ids_list, policies=policies
-    )
+    merged_policies = merge_iam_policies(project_ids=project_ids_list, policies=policies)
     merged_policies.set_upstream(policies)
 
     role_matrix = generate_roles_matrix(policies=merged_policies)
