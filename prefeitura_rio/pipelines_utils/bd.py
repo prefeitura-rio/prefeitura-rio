@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
-from typing import Union
+from typing import Union, List
+from google.cloud import storage
 
 try:
     import basedosdados as bd
@@ -10,9 +11,11 @@ except ImportError:
 
     base_assert_dependencies(["basedosdados"], extras=["pipelines"])
 
+from prefeitura_rio.pipelines_utils.env import get_bd_credentials_from_env
 from prefeitura_rio.pipelines_utils.io import dump_header_to_file
 from prefeitura_rio.pipelines_utils.logging import log
 from prefeitura_rio.pipelines_utils.prefect import get_flow_run_mode
+from google.cloud.storage.blob import Blob
 
 
 def create_table_and_upload_to_gcs(
@@ -180,3 +183,20 @@ def get_storage_blobs(dataset_id: str, table_id: str, mode: str = "staging") -> 
         .bucket(bd_storage.bucket_name)
         .list_blobs(prefix=f"{mode}/{bd_storage.dataset_id}/{bd_storage.table_id}/")
     )
+
+def list_blobs_with_prefix(
+    bucket_name: str, prefix: str, mode: str = "prod"
+) -> List[Blob]:
+    """
+    Lists all the blobs in the bucket that begin with the prefix.
+    This can be used to list all blobs in a "folder", e.g. "public/".
+    Mode needs to be "prod" or "staging"
+    """
+
+    credentials = get_bd_credentials_from_env(mode=mode)
+    storage_client = storage.Client(credentials=credentials)
+
+    # Note: Client.list_blobs requires at least package version 1.17.0.
+    blobs = storage_client.list_blobs(bucket_name, prefix=prefix)
+
+    return list(blobs)

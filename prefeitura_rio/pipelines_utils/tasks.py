@@ -4,6 +4,7 @@ from pathlib import Path
 from time import sleep
 from typing import Dict, List, Union
 from uuid import uuid4
+from prefect.triggers import all_successful
 
 try:
     import basedosdados as bd
@@ -613,3 +614,50 @@ def get_current_flow_labels() -> List[str]:
     flow_run_id = prefect.context.get("flow_run_id")
     flow_run_view = FlowRunView.from_flow_run_id(flow_run_id)
     return flow_run_view.labels
+
+
+@task
+def get_on_redis(
+    dataset_id: str,
+    table_id: str,
+    mode: str = "prod",
+    wait=None,
+) -> list:
+    """
+    Get filenames saved on Redis.
+    """
+    redis_client = get_redis_client()
+    key = build_redis_key(dataset_id, table_id, "files", mode)
+    files_on_redis = redis_client.get(key)
+    files_on_redis = [] if files_on_redis is None else files_on_redis
+    files_on_redis = list(set(files_on_redis))
+    files_on_redis.sort()
+    return files_on_redis
+
+
+@task(trigger=all_successful)
+def save_on_redis(
+    dataset_id: str,
+    table_id: str,
+    mode: str = "prod",
+    files: list = [],
+    keep_last: int = 50,
+    wait=None,
+) -> None:
+    """
+    Set the last updated time on Redis.
+    """
+    redis_client = get_redis_client()
+    key = build_redis_key(dataset_id, table_id, "files", mode)
+    files = list(set(files))
+    print(">>>> save on redis files ", files)
+    files.sort()
+    files = files[-keep_last:]
+    redis_client.set(key, files)
+
+def build_redis_key(dataset_id: str, table_id: str, name: str, mode: str = "prod"):
+    """
+    Helper function for building a key where to store the last updated time
+    """
+    key = mode + "." + dataset_id + "." + table_id + "." + name
+    return key
