@@ -2165,6 +2165,16 @@ signals = ["blinker (>=1.4.0)"]
 signedtoken = ["cryptography (>=3.0.0)", "pyjwt (>=2.0.0,<3)"]
 
 [[package]]
+name = "optional"
+version = "0.0.1"
+description = "Optional Class for Python2/3"
+optional = false
+python-versions = "*"
+files = [
+    {file = "optional-0.0.1.tar.gz", hash = "sha256:2d8532e9f688b936be1ae13f81e57347631017831fc49f358e8f3de975d353eb"},
+]
+
+[[package]]
 name = "packaging"
 version = "23.2"
 description = "Core utilities for Python packages"
@@ -4020,4 +4030,4 @@ sgrc = ["aiohttp", "pendulum", "pytz", "requests"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "05e4a406bc54ce67604e3bf8b44560cd3263d3bc09ad4745cf40490bc408bba7"
+content-hash = "370787468fd3e6d52b7e3e4e74404d5adc56f12201d5698b875ff79ee447706b"
