@@ -4,6 +4,7 @@ from pathlib import Path
 from time import sleep
 from typing import Dict, List, Union
 from uuid import uuid4
+import pendulum
 
 from prefect.triggers import all_successful
 
@@ -663,3 +664,21 @@ def build_redis_key(dataset_id: str, table_id: str, name: str, mode: str = "prod
     """
     key = mode + "." + dataset_id + "." + table_id + "." + name
     return key
+
+@prefect.task(checkpoint=False)
+def get_now_time():
+    """
+    Returns the HH:MM.
+    """
+    now = pendulum.now(pendulum.timezone("America/Sao_Paulo"))
+
+    return f"{now.hour}:{f'0{now.minute}' if len(str(now.minute))==1 else now.minute}"
+
+@task
+def rename_current_flow_run_now_time(prefix: str, now_time=None, wait=None) -> None:
+    """
+    Rename the current flow run.
+    """
+    flow_run_id = prefect.context.get("flow_run_id")
+    client = Client()
+    return client.set_flow_run_name(flow_run_id, f"{prefix}{now_time}")
