@@ -3,6 +3,7 @@ import base64
 import json
 from os import getenv
 from typing import List
+
 import hvac
 
 try:
@@ -70,12 +71,14 @@ def get_bd_credentials_from_env(
         cred = cred.with_scopes(scopes)
     return cred
 
+
 def get_vault_secret(secret_path: str, client: hvac.Client = None) -> dict:
     """
     Returns a secret from Vault.
     """
     vault_client = client or get_vault_client()
     return vault_client.secrets.kv.read_secret_version(secret_path)["data"]
+
 
 def get_vault_client() -> hvac.Client:
     """
