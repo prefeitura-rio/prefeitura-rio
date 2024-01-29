@@ -1,6 +1,5 @@
 
 from typing import Union, List
-from datetime import datetime
 
 from prefect import task
 

@@ -10,21 +10,27 @@ from time import sleep
 import yaml
 
 import google.api_core.exceptions
-from google.cloud.dataplex_v1 import (
-    DataScanJob,
-    DataScan,
-    DataProfileSpec,
-    DataQualitySpec,
-    DataQualityRule,
-    CreateDataScanRequest,
-    GetDataScanJobRequest,
-    UpdateDataScanRequest,
-    DataScanServiceClient,
-    GetDataScanRequest,
-    RunDataScanRequest,
-)
-from google.oauth2 import service_account
 
+try:
+    from google.cloud.dataplex_v1 import (
+        DataScanJob,
+        DataScan,
+        DataProfileSpec,
+        DataQualitySpec,
+        DataQualityRule,
+        CreateDataScanRequest,
+        GetDataScanJobRequest,
+        UpdateDataScanRequest,
+        DataScanServiceClient,
+        GetDataScanRequest,
+        RunDataScanRequest,
+    )
+    from google.oauth2 import service_account
+
+except ImportError:
+    from prefeitura_rio.utils import base_assert_dependencies
+    
+    base_assert_dependencies(['google.cloud.dataplex_v1'], extras=['pipelines'])
 
 class Dataplex:
     """
