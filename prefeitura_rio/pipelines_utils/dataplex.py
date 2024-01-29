@@ -1,36 +1,37 @@
 # -*- coding: utf-8 -*-
 
+import base64
 import json
 import os
 import re
-import base64
 from pathlib import Path
-from typing import Union, List
 from time import sleep
-import yaml
+from typing import List, Union
 
 import google.api_core.exceptions
+import yaml
 
 try:
     from google.cloud.dataplex_v1 import (
-        DataScanJob,
-        DataScan,
-        DataProfileSpec,
-        DataQualitySpec,
-        DataQualityRule,
         CreateDataScanRequest,
-        GetDataScanJobRequest,
-        UpdateDataScanRequest,
+        DataProfileSpec,
+        DataQualityRule,
+        DataQualitySpec,
+        DataScan,
+        DataScanJob,
         DataScanServiceClient,
+        GetDataScanJobRequest,
         GetDataScanRequest,
         RunDataScanRequest,
+        UpdateDataScanRequest,
     )
     from google.oauth2 import service_account
 
 except ImportError:
     from prefeitura_rio.utils import base_assert_dependencies
-    
-    base_assert_dependencies(['google.cloud.dataplex_v1'], extras=['pipelines'])
+
+    base_assert_dependencies(["google.cloud.dataplex_v1"], extras=["pipelines"])
+
 
 class Dataplex:
     """
@@ -95,9 +96,7 @@ class Dataplex:
             stream = self._decode_env("BASEDOSDADOS_CREDENTIALS_PROD")
             json_acct_info = json.loads(stream, strict=False)
 
-        credentials = service_account.Credentials.from_service_account_info(
-            json_acct_info
-        )
+        credentials = service_account.Credentials.from_service_account_info(json_acct_info)
         return credentials
 
     def _get_scan(self):
@@ -147,7 +146,7 @@ class Dataplex:
             job = self.client.get_data_scan_job(request=request)
         return job
 
-    def run(self, wait_run_completion:bool=False):
+    def run(self, wait_run_completion: bool = False):
         """
         _summary_
 
@@ -194,9 +193,7 @@ class DataQuality(Dataplex):
             raise ValueError("You must set one of `to_file` or `to_dir`")
         if not to_file and not Path(to_dir).is_dir():
             raise TypeError("`to_dir` must be a directory")
-        rules = [
-            DataQualityRule.to_dict(rule) for rule in self.scan.data_quality_spec.rules
-        ]
+        rules = [DataQualityRule.to_dict(rule) for rule in self.scan.data_quality_spec.rules]
         dump_data = {"rules": rules}
         if not to_file and to_dir:
             to_file = f"{to_dir}/{self.id}.yaml"
@@ -221,9 +218,7 @@ class DataQuality(Dataplex):
             "dataQualitySpec.rowFilter",
             # "dataQualitySpec.samplingPercent", #TODO: patching sampling percent goes to 0.0
         ]
-        request = UpdateDataScanRequest(
-            data_scan=self.scan, update_mask=",".join(update_mask)
-        )
+        request = UpdateDataScanRequest(data_scan=self.scan, update_mask=",".join(update_mask))
         # Make the request
         operation = self.client.update_data_scan(request=request)
 
@@ -294,9 +289,7 @@ class DataQuality(Dataplex):
 
         return response
 
-    def run_parameterized(
-        self, row_filters: Union[list, str], wait_run_completion: bool = False
-    ):
+    def run_parameterized(self, row_filters: Union[list, str], wait_run_completion: bool = False):
         """
         Run a data quality scan with row filters instead of the entire table data
 
@@ -400,8 +393,8 @@ class DataProfile(Dataplex):
         data_profile.data.resource = f"{base_url}/{dataset_id}/tables/{table_id}"
 
         if exclude_columns:
-            data_profile.data_profile_spec.exclude_fields = (
-                DataProfileSpec.SelectedFields(field_names=exclude_columns)
+            data_profile.data_profile_spec.exclude_fields = DataProfileSpec.SelectedFields(
+                field_names=exclude_columns
             )
 
         if export_table_id and export_dataset_id:
