@@ -26,10 +26,6 @@ from prefeitura_rio.pipelines_utils.tasks import (
 
 with Flow(
     "EMD: utils - Gerar matriz de políticas de acesso",
-    code_owners=[
-        "gabriel",
-        "diego",
-    ],
 ) as utils_policy_matrix_flow:
     # Parameters
     project_ids = Parameter("project_ids", default="rj-escritorio,rj-escritorio-dev")
