@@ -14,7 +14,7 @@ python = ">=3.9,<3.11"
 aiohttp = { version = "^3.8.5", optional = true }
 basedosdados = { version = "2.0.0b13", extras = ["upload"], optional = true }
 google-cloud-storage = { version = "^2.10.0", optional = true }
-infisical = { version = "^1.4.2", optional = true }
+infisical = { version = "^1.4.2, <1.6", optional = true }
 loguru = "^0.7.0"
 numpy = { version = "^1.23.3", optional = true }
 pandas = { version = "^2.0.3", optional = true }
@@ -61,6 +61,10 @@ pdoc3 = "^0.10.0"
 pre-commit = "^2.18.1"
 pytest-cov = "^3.0.0"
 taskipy = "^1.12.0"
+
+
+[tool.poetry.group.extras.dependencies]
+google-cloud-dataplex = "^1.11.0"
 
 [tool.black]
 line-length = 100
