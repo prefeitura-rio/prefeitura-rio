@@ -5,9 +5,9 @@ Tasks for the policy matrix generation.
 from pathlib import Path
 from typing import Dict, List, Union
 
-from basedosdados.upload.base import Base
 import googleapiclient.discovery
 import pandas as pd
+from basedosdados.upload.base import Base
 from prefect import task
 
 
@@ -18,9 +18,7 @@ def get_discovery_api(mode: str = "prod") -> googleapiclient.discovery.Resource:
     """
     base = Base()
     credentials = base._load_credentials(mode=mode)  # pylint: disable=W0212
-    return googleapiclient.discovery.build(
-        "cloudresourcemanager", "v1", credentials=credentials
-    )
+    return googleapiclient.discovery.build("cloudresourcemanager", "v1", credentials=credentials)
 
 
 @task(checkpoint=False)
@@ -73,10 +71,7 @@ def merge_iam_policies(
         ...
     }
     """
-    return {
-        project_id: policy["bindings"]
-        for project_id, policy in zip(project_ids, policies)
-    }
+    return {project_id: policy["bindings"] for project_id, policy in zip(project_ids, policies)}
 
 
 @task(checkpoint=False)
@@ -105,9 +100,7 @@ def generate_roles_matrix(
 
 
 @task(checkpoint=False)
-def roles_matrix_to_pandas_dataframe(
-    roles_matrix: Dict[str, Dict[str, List[str]]]
-) -> pd.DataFrame:
+def roles_matrix_to_pandas_dataframe(roles_matrix: Dict[str, Dict[str, List[str]]]) -> pd.DataFrame:
     """
     Converts the roles matrix to a pandas dataframe with the following format:
     project_id | member | role
