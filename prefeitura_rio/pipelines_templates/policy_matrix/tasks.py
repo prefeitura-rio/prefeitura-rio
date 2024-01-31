@@ -76,7 +76,7 @@ def merge_iam_policies(
         bindings = policy.get("bindings", [])
         merged_policies[project_id] = bindings
     return merged_policies
-    #return {project_id: policy["bindings"] for project_id, policy in zip(project_ids, policies)}
+    # return {project_id: policy["bindings"] for project_id, policy in zip(project_ids, policies)}
 
 
 @task(checkpoint=False)
