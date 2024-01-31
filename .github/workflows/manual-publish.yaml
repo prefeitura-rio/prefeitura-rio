@@ -1,0 +1,38 @@
+name: Manual Publish to PyPI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: ${{ matrix.os }}${{ matrix.arch }} - Python ${{ matrix.python-version }} - tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        arch: [x64]
+        python-version: ["3.9.x", "3.10.x"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.arch }}
+      - name: Install dependencies
+        run: pip install poetry && poetry install --extras all
+      - name: Run tests
+        run: |
+          poetry run pytest
+
+  build_and_publish:
+    needs: tests
+    name: Build and publish to PyPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build and publish to PyPI
+        uses: JRubics/poetry-publish@v1.10
+        with:
+          pypi_token: ${{ secrets.PYPI_API_TOKEN }}
+
