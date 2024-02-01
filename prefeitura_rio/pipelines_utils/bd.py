@@ -26,6 +26,7 @@ def create_table_and_upload_to_gcs(
     table_id: str,
     dump_mode: str,
     biglake_table: bool = True,
+    source_format: str = "csv",
 ) -> None:
     """
     Create table using BD+ and upload to GCS.
@@ -58,7 +59,7 @@ def create_table_and_upload_to_gcs(
         else:
             # the header is needed to create a table when doesn't exist
             log("MODE APPEND: Table DOESN'T EXISTS\nStart to CREATE HEADER file")
-            header_path = dump_header_to_file(data_path=data_path)
+            header_path = dump_header_to_file(data_path=data_path, data_type=source_format)
             log("MODE APPEND: Created HEADER file:\n" f"{header_path}")
 
             tb.create(
@@ -67,6 +68,7 @@ def create_table_and_upload_to_gcs(
                 if_table_exists="replace",
                 biglake_table=biglake_table,
                 dataset_is_public=dataset_is_public,
+                source_format=source_format,
             )
 
             log(
@@ -113,6 +115,7 @@ def create_table_and_upload_to_gcs(
             if_table_exists="replace",
             biglake_table=biglake_table,
             dataset_is_public=dataset_is_public,
+            source_format=source_format,
         )
 
         log(
