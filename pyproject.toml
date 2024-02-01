@@ -12,7 +12,14 @@ keywords = ["python", "utilities", "government"]
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
 aiohttp = { version = "^3.8.5", optional = true }
-basedosdados = { version = "2.0.0b13", extras = ["upload"], optional = true }
+basedosdados = {version = "2.0.0b15", extras = ["upload"]}
+croniter = { version = "^2.0.1", optional = true }
+cx-oracle = { version = "^8.3.0", optional = true }
+dask = { version = "^2023.11.0", optional = true }
+earthengine-api = { version = "^0.1.379", optional = true }
+geojsplit = { version = "^0.1.2", optional = true }
+geopandas = { version = "^0.14.1", optional = true }
+geopy = { version = "^2.4.1", optional = true }
 google-cloud-storage = { version = "^2.10.0", optional = true }
 hvac = "0.11.2"
 infisical = { version = "^1.4.2, <1.6", optional = true }
@@ -21,34 +28,73 @@ numpy = { version = "^1.23.3", optional = true }
 pandas = { version = "^2.0.3", optional = true }
 pendulum = { version = "^2.1.2", optional = true }
 prefect = { version = "1.4.1", optional = true }
+pymongo = { version = "^4.6.0", optional = true }
+pymysql = { version = "^1.1.0", optional = true }
+pyodbc = { version = "^5.0.1", optional = true }
 pytz = { version = "^2023.3", optional = true }
+redis-pal = { version = "^1.0.0", optional = true }
 requests = { version = "^2.31.0", optional = true }
 scikit-learn = { version = "^1.1.2", optional = true }
 sentry-sdk = { version = "^1.29.2", optional = true }
+shapely = { version = "^2.0.2", optional = true }
+jinja2 = { version = "^3.1.2", optional = true }
+gspread = { version = "^5.12.4", optional = true }
 
 [tool.poetry.extras]
 all = [
     "aiohttp",
     "basedosdados",
+    "croniter",
+    "cx-oracle",
+    "dask",
+    "earthengine-api",
+    "geojsplit",
+    "gspread",
+    "geopandas",
+    "geopy",
     "google-cloud-storage",
     "infisical",
     "numpy",
     "pandas",
     "pendulum",
     "prefect",
+    "pymongo",
+    "pymysql",
+    "pyodbc",
     "pytz",
+    "redis-pal",
     "requests",
     "scikit-learn",
+    "shapely",
     "sentry-sdk",
+    "jinja2"
 ]
 metrics = ["numpy", "scikit-learn"]
 pipelines = [
     "basedosdados",
+    "dask",
     "google-cloud-storage",
     "infisical",
+    "jinja2",
     "pandas",
     "prefect",
     "sentry-sdk",
+]
+pipelines-templates = [
+    "croniter",
+    "cx-oracle",
+    "earthengine-api",
+    "geojsplit",
+    "geopandas",
+    "geopy",
+    "gspread",
+    "pymongo",
+    "pymysql",
+    "pyodbc",
+    "redis-pal",
+    "requests",
+    "shapely",
+    "jinja2",
 ]
 sgrc = ["aiohttp", "pendulum", "pytz", "requests"]
 
