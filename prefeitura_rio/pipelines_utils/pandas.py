@@ -1,49 +1,65 @@
 # -*- coding: utf-8 -*-
 import re
-import textwrap
-from datetime import datetime
 from os import walk
 from os.path import join
 from pathlib import Path
-from typing import List, Union
+from typing import List, Tuple, Union
 from uuid import uuid4
 
 try:
-    import croniter
+    import numpy as np
     import pandas as pd
 except ImportError:
-    pass
+    from prefeitura_rio.utils import base_assert_dependencies
+
+    base_assert_dependencies(["pandas"], extras=["pipelines"])
 
 from prefeitura_rio.pipelines_utils.logging import log
-from prefeitura_rio.utils import assert_dependencies
 
 
-@assert_dependencies(["pandas"], extras=["pipelines"])
-def dataframe_to_csv(
-    dataframe: "pd.DataFrame",
-    filepath: Union[str, Path],
-    build_json_dataframe: bool = False,
-    dataframe_key_column: str = None,
-) -> None:
+def batch_to_dataframe(batch: Tuple[Tuple], columns: List[str]) -> pd.DataFrame:
     """
-    Writes a dataframe to CSV file.
+    Converts a batch of rows to a dataframe.
     """
-    if build_json_dataframe:
-        dataframe = to_json_dataframe(dataframe, key_column=dataframe_key_column)
-
-    # Remove filename from path
-    filepath = Path(filepath)
-    # Create directory if it doesn't exist
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-
-    # Write dataframe to CSV
-    dataframe.to_csv(filepath, index=False, encoding="utf-8")
+    return pd.DataFrame(batch, columns=columns)
 
 
-@assert_dependencies(["pandas"], extras=["pipelines"])
+def build_query_new_columns(table_columns: List[str]) -> List[str]:
+    """ "
+    Creates the query without accents.
+    """
+    new_cols = remove_columns_accents(pd.DataFrame(columns=table_columns))
+    return "\n".join(
+        [f"{old_col} AS {new_col}," for old_col, new_col in zip(table_columns, new_cols)]
+    )
+
+
+def clean_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
+    """
+    Cleans a dataframe.
+    """
+    for col in dataframe.columns.tolist():
+        if dataframe[col].dtype == object:
+            try:
+                dataframe[col] = (
+                    dataframe[col].astype(str).str.replace("\x00", "").replace("None", np.nan)
+                )
+            except Exception as exc:
+                print(
+                    "Column: ",
+                    col,
+                    "\nData: ",
+                    dataframe[col].tolist(),
+                    "\n",
+                    exc,
+                )
+                raise
+    return dataframe
+
+
 def dataframe_to_parquet(
-    dataframe: "pd.DataFrame",
-    path: Union[str, Path],
+    dataframe: pd.DataFrame,
+    path: str | Path,
     build_json_dataframe: bool = False,
     dataframe_key_column: str = None,
 ):
@@ -69,28 +85,7 @@ def dataframe_to_parquet(
     dataframe.to_parquet(path, engine="pyarrow")
 
 
-@assert_dependencies(["croniter"], extras=["pipelines-templates"])
-def determine_whether_to_execute_or_not(
-    cron_expression: str, datetime_now: datetime, datetime_last_execution: datetime
-) -> bool:
-    """
-    Determines whether the cron expression is currently valid.
-
-    Args:
-        cron_expression: The cron expression to check.
-        datetime_now: The current datetime.
-        datetime_last_execution: The last datetime the cron expression was executed.
-
-    Returns:
-        True if the cron expression should trigger, False otherwise.
-    """
-    cron_expression_iterator = croniter.croniter(cron_expression, datetime_last_execution)
-    next_cron_expression_time = cron_expression_iterator.get_next(datetime)
-    return next_cron_expression_time <= datetime_now
-
-
-@assert_dependencies(["pandas"], extras=["pipelines"])
-def dump_header_to_file(data_path: Union[str, Path], data_type: str = "csv"):
+def dump_header_to_file(data_path: str | Path, data_type: str = "csv"):
     """
     Writes a header to a CSV file.
     """
@@ -132,7 +127,7 @@ def dump_header_to_file(data_path: Union[str, Path], data_type: str = "csv"):
     # Read just first row and write dataframe to file
     if data_type == "csv":
         dataframe = pd.read_csv(file, nrows=1)
-        dataframe_to_csv(dataframe=dataframe, filepath=save_header_file_path)
+        dataframe.to_csv(save_header_file_path, index=False, encoding="utf-8")
     elif data_type == "parquet":
         dataframe = pd.read_parquet(file)[:1]
         dataframe_to_parquet(dataframe=dataframe, path=save_header_file_path)
@@ -142,99 +137,82 @@ def dump_header_to_file(data_path: Union[str, Path], data_type: str = "csv"):
     return save_header_path
 
 
-def extract_last_partition_date(partitions_dict: dict, date_format: str):
+def final_column_treatment(column: str) -> str:
     """
-    Extract last date from partitions folders
-    """
-    last_partition_date = None
-    for partition, values in partitions_dict.items():
-        new_values = [date for date in values if is_date(date_string=date, date_format=date_format)]
-        try:
-            last_partition_date = datetime.strptime(max(new_values), date_format).strftime(
-                date_format
-            )
-            log(
-                f"last partition from {partition} is in date format "
-                f"{date_format}: {last_partition_date}"
-            )
-        except ValueError:
-            log(f"partition {partition} is not a date or not in correct format {date_format}")
-    return last_partition_date
-
-
-def get_root_path() -> Path:
-    """
-    Returns the root path of the project.
+    Adds an underline before column name if it only has numbers or remove all non alpha numeric
+    characters besides underlines ("_").
     """
     try:
-        import pipelines
-    except ImportError as exc:
-        raise ImportError("pipelines package not found") from exc
-    root_path = Path(pipelines.__file__).parent.parent
-    # If the root path is site-packages, we're running in a Docker container. Thus, we
-    # need to change the root path to /app
-    if str(root_path).endswith("site-packages"):
-        root_path = Path("/app")
-    return root_path
+        int(column)
+        return f"_{column}"
+    except ValueError:  # pylint: disable=bare-except
+        non_alpha_removed = re.sub(r"[\W]+", "", column)
+        return non_alpha_removed
 
 
-def human_readable(
-    value: Union[int, float],
-    unit: str = "",
-    unit_prefixes: List[str] = None,
-    unit_divider: int = 1000,
-    decimal_places: int = 2,
-):
+def parse_date_columns(
+    dataframe: pd.DataFrame, partition_date_column: str
+) -> Tuple[pd.DataFrame, List[str]]:
     """
-    Formats a value in a human readable way.
+    Parses the date columns to the partition format.
     """
-    if unit_prefixes is None:
-        unit_prefixes = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"]
-    if value == 0:
-        return f"{value}{unit}"
-    unit_prefix = unit_prefixes[0]
-    for prefix in unit_prefixes[1:]:
-        if value < unit_divider:
-            break
-        unit_prefix = prefix
-        value /= unit_divider
-    return f"{value:.{decimal_places}f}{unit_prefix}{unit}"
+    ano_col = "ano_particao"
+    mes_col = "mes_particao"
+    data_col = "data_particao"
+    cols = [ano_col, mes_col, data_col]
+    for col in cols:
+        if col in dataframe.columns:
+            raise ValueError(f"Column {col} already exists, please review your model.")
+
+    dataframe[partition_date_column] = dataframe[partition_date_column].astype(str)
+    dataframe[data_col] = pd.to_datetime(dataframe[partition_date_column], errors="coerce")
+
+    dataframe[ano_col] = (
+        dataframe[data_col].dt.year.fillna(-1).astype(int).astype(str).replace("-1", np.nan)
+    )
+
+    dataframe[mes_col] = (
+        dataframe[data_col].dt.month.fillna(-1).astype(int).astype(str).replace("-1", np.nan)
+    )
+
+    dataframe[data_col] = dataframe[data_col].dt.date
+
+    return dataframe, [ano_col, mes_col, data_col]
 
 
-def is_date(date_string: str, date_format: str = "%Y-%m-%d") -> Union[datetime, bool]:
+def remove_columns_accents(dataframe: pd.DataFrame) -> list:
     """
-    Checks whether a string is a valid date.
+    Remove accents from dataframe columns.
     """
-    try:
-        return datetime.strptime(date_string, date_format).strftime(date_format)
-    except ValueError:
-        return False
+    columns = [str(column) for column in dataframe.columns]
+    dataframe.columns = columns
+    return list(
+        dataframe.columns.str.normalize("NFKD")
+        .str.encode("ascii", errors="ignore")
+        .str.decode("utf-8")
+        .map(lambda x: x.strip())
+        .str.replace(" ", "_")
+        .str.replace("/", "_")
+        .str.replace("-", "_")
+        .str.replace("\a", "_")
+        .str.replace("\b", "_")
+        .str.replace("\n", "_")
+        .str.replace("\t", "_")
+        .str.replace("\v", "_")
+        .str.replace("\f", "_")
+        .str.replace("\r", "_")
+        .str.lower()
+        .map(final_column_treatment)
+    )
 
 
-def query_to_line(query: str) -> str:
-    """
-    Converts a query to a line.
-    """
-    query = textwrap.dedent(query)
-    return " ".join([line.strip() for line in query.split("\n")])
-
-
-def remove_tabs_from_query(query: str) -> str:
-    """
-    Removes tabs from a query.
-    """
-    query = query_to_line(query)
-    return re.sub(r"\s+", " ", query).strip()
-
-
-@assert_dependencies(["pandas"], extras=["pipelines"])
 def to_json_dataframe(
-    dataframe: "pd.DataFrame" = None,
-    csv_path: Union[str, Path] = None,
+    dataframe: pd.DataFrame = None,
+    csv_path: str | Path = None,
     key_column: str = None,
     read_csv_kwargs: dict = None,
-    save_to: Union[str, Path] = None,
-) -> "pd.DataFrame":
+    save_to: str | Path = None,
+) -> pd.DataFrame:
     """
     Manipulates a dataframe by keeping key_column and moving every other column
     data to a "content" column in JSON format. Example:
@@ -260,6 +238,64 @@ def to_json_dataframe(
     return dataframe
 
 
+# pylint: disable=R0913
+def handle_dataframe_chunk(
+    dataframe: pd.DataFrame,
+    save_path: str,
+    partition_columns: List[str],
+    event_id: str,
+    idx: int,
+    build_json_dataframe: bool = False,
+    dataframe_key_column: str = None,
+):
+    """
+    Handles a chunk of dataframe.
+    """
+    if not partition_columns or partition_columns[0] == "":
+        partition_column = None
+    else:
+        partition_column = partition_columns[0]
+
+    old_columns = dataframe.columns.tolist()
+    dataframe.columns = remove_columns_accents(dataframe)
+    new_columns_dict = dict(zip(old_columns, dataframe.columns.tolist()))
+    if idx == 0:
+        if partition_column:
+            log(f"Partition column: {partition_column} FOUND!! Write to partitioned files")
+
+        else:
+            log("NO partition column specified! Writing unique files")
+
+        log(f"New columns without accents: {new_columns_dict}")
+
+    dataframe = clean_dataframe(dataframe)
+
+    if partition_column:
+        dataframe, date_partition_columns = parse_date_columns(
+            dataframe, new_columns_dict[partition_column]
+        )
+
+        partitions = date_partition_columns + [
+            new_columns_dict[col] for col in partition_columns[1:]
+        ]
+        to_partitions(
+            data=dataframe,
+            partition_columns=partitions,
+            savepath=save_path,
+            data_type="csv",
+            build_json_dataframe=build_json_dataframe,
+            dataframe_key_column=dataframe_key_column,
+        )
+    else:
+        dataframe_to_csv(
+            dataframe=dataframe,
+            path=Path(save_path) / f"{event_id}-{idx}.csv",
+            build_json_dataframe=build_json_dataframe,
+            dataframe_key_column=dataframe_key_column,
+        )
+
+
+# pylint: disable=R0913
 def to_partitions(
     data: pd.DataFrame,
     partition_columns: List[str],
@@ -341,8 +377,50 @@ def to_partitions(
     return saved_files
 
 
-def untuple_clocks(clocks):
+def dataframe_to_csv(
+    dataframe: pd.DataFrame,
+    path: Union[str, Path],
+    build_json_dataframe: bool = False,
+    dataframe_key_column: str = None,
+) -> None:
     """
-    Converts a list of tuples to a list of clocks.
+    Writes a dataframe to CSV file.
     """
-    return [clock[0] if isinstance(clock, tuple) else clock for clock in clocks]
+    if build_json_dataframe:
+        dataframe = to_json_dataframe(dataframe, key_column=dataframe_key_column)
+
+    # Remove filename from path
+    path = Path(path)
+    # Create directory if it doesn't exist
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Write dataframe to CSV
+    dataframe.to_csv(path, index=False, encoding="utf-8")
+
+
+def dataframe_to_parquet(
+    dataframe: pd.DataFrame,
+    path: Union[str, Path],
+    build_json_dataframe: bool = False,
+    dataframe_key_column: str = None,
+):
+    """
+    Writes a dataframe to Parquet file with Schema as STRING.
+    """
+    # Code adapted from
+    # https://stackoverflow.com/a/70817689/9944075
+
+    if build_json_dataframe:
+        dataframe = to_json_dataframe(dataframe, key_column=dataframe_key_column)
+
+    # If the file already exists, we:
+    # - Load it
+    # - Merge the new dataframe with the existing one
+    if Path(path).exists():
+        # Load it
+        original_df = pd.read_parquet(path)
+        # Merge the new dataframe with the existing one
+        dataframe = pd.concat([original_df, dataframe], sort=False)
+
+    # Write dataframe to Parquet
+    dataframe.to_parquet(path, engine="pyarrow")
