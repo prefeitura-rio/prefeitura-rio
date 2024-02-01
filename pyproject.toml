@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "prefeitura-rio"
-version = "1.1.3"
+version = "1.1.3a2"
 description = "Pacote Python que implementa utilidades para nossos projetos!"
 authors = ["Gabriel Gazola Milan <gabriel.gazola@poli.ufrj.br>"]
 license = "GPL-3.0-only"
@@ -14,6 +14,7 @@ python = ">=3.9,<3.11"
 aiohttp = { version = "^3.8.5", optional = true }
 basedosdados = { version = "2.0.0b13", extras = ["upload"], optional = true }
 google-cloud-storage = { version = "^2.10.0", optional = true }
+hvac = "0.11.2"
 infisical = { version = "^1.4.2, <1.6", optional = true }
 loguru = "^0.7.0"
 numpy = { version = "^1.23.3", optional = true }
