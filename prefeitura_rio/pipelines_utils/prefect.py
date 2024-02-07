@@ -175,7 +175,6 @@ def generate_dump_db_schedules(  # pylint: disable=too-many-arguments,too-many-l
     return clocks
 
 
-@task
 def generate_dump_url_schedules(  # pylint: disable=too-many-arguments,too-many-locals
     interval: timedelta,
     start_date: datetime,
