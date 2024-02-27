@@ -74,7 +74,10 @@ def fetch_metadata(initial_dict: dict) -> dict:
             # Iterate over datasets' tables
             for table_id in initial_dict[dataset_id]:
                 # Fetch metadata from meta.dados.rio
-                url = f"https://meta.dados.rio/api/tables/?dataset={dataset_id}&name={table_id}"
+                table_id_without_prefix = (
+                    table_id if "__" not in table_id else table_id.split("__")[-1]
+                )
+                url = f"https://meta.dados.rio/api/tables/?dataset={dataset_id}&name={table_id_without_prefix}"  # noqa
                 response = requests.get(url)
                 # Asserts that the response is ok
                 response.raise_for_status()
@@ -134,11 +137,19 @@ def save_metadata(metadata_dict: dict, path: Union[Path, str]) -> None:
         json.dump(metadata_dict, f, indent=4, ensure_ascii=False)
 
 
-def fetch_metadata_and_save() -> None:
+def fetch_metadata_and_save(dataset_ids: list = None) -> None:
     """
     Fetches metadata from meta.dados.rio and saves it to a JSON file.
     """
-    sql_files = get_all_sql_files("./queries/models")
+    sql_files_all = get_all_sql_files("./queries/models")
+
+    if dataset_ids is not None:
+        sql_files = [
+            sql_file for sql_file in sql_files_all if str(sql_file.parent.name) in dataset_ids
+        ]
+    else:
+        sql_files = sql_files_all
+
     initial_dict = build_initial_dict(sql_files)
     metadata_dict = fetch_metadata(initial_dict)
     save_metadata(metadata_dict, "./queries/metadata.json")

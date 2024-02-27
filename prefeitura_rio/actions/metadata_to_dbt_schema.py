@@ -15,7 +15,7 @@ def dump_metadata_into_schema_yaml(dataset_id: str, table_id: str, metadata: dic
     """
     Dumps the metadata into the schema.yaml file.
     """
-    schema_yaml_path = f"models/{dataset_id}/schema.yml"
+    schema_yaml_path = f"./queries/models/{dataset_id}/schema.yml"
 
     schema = (
         load_yaml_file(schema_yaml_path)
@@ -113,20 +113,21 @@ def load_yaml_file(filepath: str) -> dict:
     return ruamel.load((Path(filepath)).open(encoding="utf-8"))
 
 
-def metadata_to_dbt_schema() -> None:
+def metadata_to_dbt_schema(dataset_ids: list = None) -> None:
     # Load the metadata file
     metadata: dict = load_metadata_file(METADATA_FILE_PATH)
 
     # Iterate over datasets
     for dataset_id in metadata:
+        if dataset_ids is not None and dataset_id not in dataset_ids:
+            print(f"- {dataset_id} skipped")
+            continue
 
-        print(f"Ingesting metadata for dataset {dataset_id}")
-
+        print(f"- {dataset_id} ingest")
         # Iterate over tables
         for table_id in metadata[dataset_id]:
 
             if metadata[dataset_id][table_id].get("columns") is not None:
-                print(f"  - Table {table_id}")
 
                 table_metadata = {
                     "name": table_id,
@@ -134,5 +135,6 @@ def metadata_to_dbt_schema() -> None:
                     "columns": metadata[dataset_id][table_id]["columns"],
                 }
                 dump_metadata_into_schema_yaml(dataset_id, table_id, table_metadata)
+                print(f"  - {dataset_id}.{table_id} ingested")
             else:
-                print(f"No columns for {table_id} in dataset {dataset_id}")
+                print(f"  - {dataset_id}.{table_id} has no columns")
