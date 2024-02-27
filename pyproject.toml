@@ -68,7 +68,8 @@ all = [
     "scikit-learn",
     "shapely",
     "sentry-sdk",
-    "jinja2"
+    "jinja2",
+    "ruamel-yaml"
 ]
 metrics = ["numpy", "scikit-learn"]
 pipelines = [

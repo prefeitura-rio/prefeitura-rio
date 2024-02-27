@@ -4100,7 +4100,7 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 
 [extras]
 actions = ["ruamel-yaml"]
-all = ["aiohttp", "basedosdados", "croniter", "cx-oracle", "dask", "earthengine-api", "geojsplit", "geopandas", "geopy", "google-cloud-storage", "gspread", "infisical", "jinja2", "numpy", "pandas", "pendulum", "prefect", "pymongo", "pymysql", "pyodbc", "pytz", "redis-pal", "requests", "scikit-learn", "sentry-sdk", "shapely"]
+all = ["aiohttp", "basedosdados", "croniter", "cx-oracle", "dask", "earthengine-api", "geojsplit", "geopandas", "geopy", "google-cloud-storage", "gspread", "infisical", "jinja2", "numpy", "pandas", "pendulum", "prefect", "pymongo", "pymysql", "pyodbc", "pytz", "redis-pal", "requests", "ruamel-yaml", "scikit-learn", "sentry-sdk", "shapely"]
 metrics = ["numpy", "scikit-learn"]
 pipelines = ["basedosdados", "dask", "google-cloud-storage", "infisical", "jinja2", "pandas", "prefect", "sentry-sdk"]
 pipelines-templates = ["croniter", "cx-oracle", "earthengine-api", "geojsplit", "geopandas", "geopy", "gspread", "jinja2", "pymongo", "pymysql", "pyodbc", "redis-pal", "requests", "shapely"]
@@ -4109,4 +4109,4 @@ sgrc = ["aiohttp", "pendulum", "pytz", "requests"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "31e145a0870e88fe48c833db071c3f023b8ee93fff0e4c95e8a76950e9a5cbba"
+content-hash = "2d94068b36591e90b342838add8db44c1a4afc42ad165d9e1257d97884934af8"
