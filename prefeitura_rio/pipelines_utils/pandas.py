@@ -15,6 +15,7 @@ except ImportError:
     base_assert_dependencies(["pandas"], extras=["pipelines"])
 
 from prefeitura_rio.pipelines_utils.logging import log
+from prefeitura_rio.utils import assert_dependencies
 
 
 def batch_to_dataframe(batch: Tuple[Tuple], columns: List[str]) -> pd.DataFrame:
@@ -57,35 +58,8 @@ def clean_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     return dataframe
 
 
-def dataframe_to_parquet(
-    dataframe: pd.DataFrame,
-    path: str | Path,
-    build_json_dataframe: bool = False,
-    dataframe_key_column: str = None,
-):
-    """
-    Writes a dataframe to Parquet file with Schema as STRING.
-    """
-    # Code adapted from
-    # https://stackoverflow.com/a/70817689/9944075
-
-    if build_json_dataframe:
-        dataframe = to_json_dataframe(dataframe, key_column=dataframe_key_column)
-
-    # If the file already exists, we:
-    # - Load it
-    # - Merge the new dataframe with the existing one
-    if Path(path).exists():
-        # Load it
-        original_df = pd.read_parquet(path)
-        # Merge the new dataframe with the existing one
-        dataframe = pd.concat([original_df, dataframe], sort=False)
-
-    # Write dataframe to Parquet
-    dataframe.to_parquet(path, engine="pyarrow")
-
-
-def dump_header_to_file(data_path: str | Path, data_type: str = "csv"):
+@assert_dependencies(["pandas"], extras=["pipelines"])
+def dump_header_to_file(data_path: Union[str, Path], data_type: str = "csv"):
     """
     Writes a header to a CSV file.
     """
@@ -127,7 +101,7 @@ def dump_header_to_file(data_path: str | Path, data_type: str = "csv"):
     # Read just first row and write dataframe to file
     if data_type == "csv":
         dataframe = pd.read_csv(file, nrows=1)
-        dataframe.to_csv(save_header_file_path, index=False, encoding="utf-8")
+        dataframe_to_csv(dataframe=dataframe, filepath=save_header_file_path)
     elif data_type == "parquet":
         dataframe = pd.read_parquet(file)[:1]
         dataframe_to_parquet(dataframe=dataframe, path=save_header_file_path)
@@ -206,13 +180,14 @@ def remove_columns_accents(dataframe: pd.DataFrame) -> list:
     )
 
 
+@assert_dependencies(["pandas"], extras=["pipelines"])
 def to_json_dataframe(
-    dataframe: pd.DataFrame = None,
-    csv_path: str | Path = None,
+    dataframe: "pd.DataFrame" = None,
+    csv_path: Union[str, Path] = None,
     key_column: str = None,
     read_csv_kwargs: dict = None,
-    save_to: str | Path = None,
-) -> pd.DataFrame:
+    save_to: Union[str, Path] = None,
+) -> "pd.DataFrame":
     """
     Manipulates a dataframe by keeping key_column and moving every other column
     data to a "content" column in JSON format. Example:
@@ -377,9 +352,10 @@ def to_partitions(
     return saved_files
 
 
+@assert_dependencies(["pandas"], extras=["pipelines"])
 def dataframe_to_csv(
-    dataframe: pd.DataFrame,
-    path: Union[str, Path],
+    dataframe: "pd.DataFrame",
+    filepath: Union[str, Path],
     build_json_dataframe: bool = False,
     dataframe_key_column: str = None,
 ) -> None:
@@ -390,14 +366,15 @@ def dataframe_to_csv(
         dataframe = to_json_dataframe(dataframe, key_column=dataframe_key_column)
 
     # Remove filename from path
-    path = Path(path)
+    filepath = Path(filepath)
     # Create directory if it doesn't exist
-    path.parent.mkdir(parents=True, exist_ok=True)
+    filepath.parent.mkdir(parents=True, exist_ok=True)
 
     # Write dataframe to CSV
-    dataframe.to_csv(path, index=False, encoding="utf-8")
+    dataframe.to_csv(filepath, index=False, encoding="utf-8")
 
 
+@assert_dependencies(["pandas"], extras=["pipelines"])
 def dataframe_to_parquet(
     dataframe: pd.DataFrame,
     path: Union[str, Path],

@@ -93,3 +93,46 @@ def run_dbt_model(
     dbt_logs = dbt_task.run()
 
     log("\n".join(dbt_logs))
+
+
+def get_basic_treated_query(table):
+    """
+    generates a basic treated query
+    """
+
+    originais = table["original_name"].tolist()
+    nomes = table["name"].tolist()
+    tipos = table["type"].tolist()
+
+    project_id = table["project_id"].unique()[0]
+    dataset_id = table["dataset_id"].unique()[0]
+    table_id = table["table_id"].unique()[0]
+
+    indent_space = 4 * " "
+    query = "SELECT \n"
+    for original, nome, tipo in zip(originais, nomes, tipos):
+        if tipo == "GEOGRAPHY":
+            query += indent_space + f"ST_GEOGFROMTEXT({original}) AS {nome},\n"
+        elif "id_" in nome or tipo == "INT64":
+            query += (
+                indent_space
+                + f"SAFE_CAST(REGEXP_REPLACE(TRIM({original}), r'\.0$', '') AS {tipo}) AS {nome},\n"  # noqa
+            )
+        elif tipo == "DATETIME":
+            query += (
+                indent_space
+                + f"SAFE_CAST(SAFE.PARSE_TIMESTAMP('%Y-%m-%d %H:%M:%S', {original}) AS {tipo}) AS {nome},\n"  # noqa
+            )
+        elif tipo == "DATE":
+            query += indent_space + f"SAFE_CAST(DATE({original}) AS {tipo}) AS {nome},\n"
+        elif tipo == "FLOAT64":
+            query += (
+                indent_space
+                + f"SAFE_CAST(REGEXP_REPLACE({original}, r',', '.') AS {tipo}) AS {nome},\n"
+            )
+        else:
+            query += indent_space + f"SAFE_CAST(TRIM({original}) AS {tipo}) AS {nome},\n"
+
+    query += f"FROM {project_id}.{dataset_id}_staging.{table_id} AS t"
+
+    return query

@@ -15,8 +15,8 @@ except ImportError:
 from google.cloud.storage.blob import Blob
 
 from prefeitura_rio.pipelines_utils.env import get_bd_credentials_from_env
-from prefeitura_rio.pipelines_utils.io import dump_header_to_file
 from prefeitura_rio.pipelines_utils.logging import log
+from prefeitura_rio.pipelines_utils.pandas import dump_header_to_file
 from prefeitura_rio.pipelines_utils.prefect import get_flow_run_mode
 
 

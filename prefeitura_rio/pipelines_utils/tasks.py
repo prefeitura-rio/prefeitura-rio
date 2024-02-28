@@ -38,18 +38,18 @@ from prefeitura_rio.pipelines_utils.infisical import (
     get_database_username_and_password_from_secret,
 )
 from prefeitura_rio.pipelines_utils.io import (
-    dataframe_to_csv,
-    dataframe_to_parquet,
     determine_whether_to_execute_or_not,
     human_readable,
-    to_partitions,
 )
 from prefeitura_rio.pipelines_utils.logging import log
 from prefeitura_rio.pipelines_utils.pandas import (
     clean_dataframe,
+    dataframe_to_csv,
+    dataframe_to_parquet,
     dump_header_to_file,
     parse_date_columns,
     remove_columns_accents,
+    to_partitions,
 )
 from prefeitura_rio.pipelines_utils.redis_pal import get_redis_client
 from prefeitura_rio.utils import base_assert_dependencies

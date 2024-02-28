@@ -20,20 +20,20 @@ from prefeitura_rio.pipelines_utils.gcs import (
     parse_blobs_to_partition_dict,
 )
 from prefeitura_rio.pipelines_utils.io import (
-    dataframe_to_csv,
-    dataframe_to_parquet,
     extract_last_partition_date,
     remove_tabs_from_query,
-    to_partitions,
 )
 from prefeitura_rio.pipelines_utils.logging import log, log_mod
 from prefeitura_rio.pipelines_utils.pandas import (
     batch_to_dataframe,
     build_query_new_columns,
     clean_dataframe,
+    dataframe_to_csv,
+    dataframe_to_parquet,
     dump_header_to_file,
     parse_date_columns,
     remove_columns_accents,
+    to_partitions,
 )
 from prefeitura_rio.utils import base_assert_dependencies
 
