@@ -30,7 +30,7 @@ def base_assert_dependencies(dependencies: List[str], extras: Union[str, List[st
 
     Args:
         dependencies (list): A list of dependencies to be checked.
-        extras (list): A list of extras to warn about.
+        extras (list): A list of extras to warn about
 
     Raises:
         ImportError: If any of the dependencies or extras is not installed.
