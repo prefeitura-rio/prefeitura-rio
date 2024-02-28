@@ -106,6 +106,7 @@ def get_basic_treated_query(table):
 
     project_id = table["project_id"].unique()[0]
     dataset_id = table["dataset_id"].unique()[0]
+    dataset_id = dataset_id.replace("_staging", "")
     table_id = table["table_id"].unique()[0]
 
     indent_space = 4 * " "
@@ -133,6 +134,31 @@ def get_basic_treated_query(table):
         else:
             query += indent_space + f"SAFE_CAST(TRIM({original}) AS {tipo}) AS {nome},\n"
 
-    query += f"FROM {project_id}.{dataset_id}_staging.{table_id} AS t"
+    query += f"FROM `{project_id}.{dataset_id}_staging.{table_id}` AS t"
 
     return query
+
+
+def generate_basic_treated_queries(dataframe, save=False):
+    """
+    generates a basic treated queries
+    """
+
+    cols_to_rename = {
+        "project_id": "project_id",
+        "dataset_id": "dataset_id",
+        "table_id_x": "table_id",
+        "column_name": "original_name",
+        "nome_da_coluna": "name",
+        "tipo_da_coluna": "type",
+    }
+    dataframe = dataframe[list(cols_to_rename.keys())]
+    dataframe = dataframe.rename(columns=cols_to_rename)
+    for table_id in dataframe["table_id"].unique().tolist():
+        table = dataframe[dataframe["table_id"] == table_id]
+        query = get_basic_treated_query(table)
+        print(query)
+        print("\n\n")
+        if save:
+            with open(f"./{table_id}.sql", "w") as f:
+                f.write(query)
