@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta
 from pathlib import Path
 from time import sleep
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 from uuid import uuid4
 
 import pendulum
@@ -684,3 +684,23 @@ def rename_current_flow_run_now_time(prefix: str, now_time=None, wait=None) -> N
     flow_run_id = prefect.context.get("flow_run_id")
     client = Client()
     return client.set_flow_run_name(flow_run_id, f"{prefix}{now_time}")
+
+
+@task
+def is_valid_dictionary(dictionary: Dict[Any, Any]) -> Dict[str, Any]:
+    """
+    Checks whether the dictionary is in the format Dict[str, str].
+    """
+    if not isinstance(dictionary, dict):
+        raise ValueError("The dictionary is not a dictionary.")
+    if not all(isinstance(key, str) for key in dictionary.keys()):
+        raise ValueError("The dictionary keys are not strings.")
+    return dictionary
+
+
+@task
+def merge_dictionaries(dict1: Dict[str, Any], dict2: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Merge dictionaries.
+    """
+    return {**dict1, **dict2}

@@ -71,8 +71,9 @@ with Flow(
     dump_mode = Parameter("dump_mode", default="append", required=False)  # overwrite or append
     batch_data_type = Parameter("batch_data_type", default="csv", required=False)  # csv or parquet
     dbt_model_secret_parameters = Parameter(
-        "dbt_model_secret_parameters", default={}, required=False
+        "dbt_model_secret_parameters", default=[], required=False
     )
+    dbt_model_parameters = Parameter("dbt_model_parameters", default={}, required=False)
     dbt_alias = Parameter("dbt_alias", default=False, required=False)
     biglake_table = Parameter("biglake_table", default=False, required=False)
     log_number_of_batches = Parameter("log_number_of_batches", default=100, required=False)
@@ -163,6 +164,7 @@ with Flow(
                 "table_id": table_id,
                 "mode": materialization_mode,
                 "materialize_to_datario": materialize_to_datario,
+                "dbt_model_parameters": dbt_model_parameters,
                 "dbt_model_secret_parameters": dbt_model_secret_parameters,
                 "dbt_alias": dbt_alias,
             },

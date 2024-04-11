@@ -66,7 +66,7 @@ with Flow(
     materialize_mode = Parameter("materialize_mode", default="dev", required=False)  # dev or prod
     materialize_to_datario = Parameter("materialize_to_datario", default=False, required=False)
     materialize_dbt_model_secret_parameters = Parameter(
-        "materialize_dbt_model_secret_parameters", default={}, required=False
+        "materialize_dbt_model_secret_parameters", default=[], required=False
     )
     materialize_dbt_alias = Parameter("materialize_dbt_alias", default=False, required=False)
 
