@@ -1,23 +1,38 @@
 # -*- coding: utf-8 -*-
 import base64
+from typing import Dict
 
 
-def secret_to_base64(secret_dict):
+def secret_to_base64(secret_dict: Dict) -> str:
+    """
+    Converts a dictionary to a JSON-formatted string, encodes it in Base64,
+    and returns the Base64-encoded string.
 
+    Args:
+    secret_dict (Dict): A dictionary to be encoded.
+
+    Returns:
+    str: A Base64-encoded string.
+    """
     input_string = str(secret_dict).replace("'", '"')
-    # Encode the string to bytes
     bytes_data = input_string.encode("utf-8")
-
-    # Encode the bytes in Base64
     base64_data = base64.b64encode(bytes_data)
-
-    # Convert the bytes to a string
     base64_string = base64_data.decode("utf-8")
-
     return base64_string
 
 
-def get_base64_bd_config(projec_id):
+def get_base64_bd_config(projec_id: str) -> str:
+    """
+    Generates a Base64-encoded configuration string for a project ID,
+    formatted for use with a data bucket and Google Cloud configurations.
+
+    Args:
+    projec_id (str): The project ID used in the configuration.
+
+    Returns:
+    str: A Base64-encoded configuration string.
+    """
+
     string = f"""# What is the bucket that you are saving all the data? It should be
                 # an unique name.
                 bucket_name = "{projec_id}"
@@ -45,8 +60,17 @@ def get_base64_bd_config(projec_id):
     return encoded_string
 
 
-def base64_to_string(base_64):
-    base_64_bytes = base_64.encode("utf-8")
-    message_bytes = base64.b64decode(base_64_bytes)
+def base64_to_string(base64_string: str) -> str:
+    """
+    Decodes a Base64-encoded string back to a regular string.
+
+    Args:
+    base_64 (str): The Base64 string to be decoded.
+
+    Returns:
+    str: The decoded string.
+    """
+    base64_bytes = base64_string.encode("utf-8")
+    message_bytes = base64.b64decode(base64_bytes)
     message = message_bytes.decode("utf-8")
     return message
