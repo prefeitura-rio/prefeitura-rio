@@ -40,21 +40,22 @@ def clean_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
     Cleans a dataframe.
     """
     for col in dataframe.columns.tolist():
-        if dataframe[col].dtype == object:
-            try:
+        try:
+            if dataframe[col].dtype == object:
                 dataframe[col] = (
                     dataframe[col].astype(str).str.replace("\x00", "").replace("None", np.nan)
                 )
-            except Exception as exc:
-                print(
-                    "Column: ",
-                    col,
-                    "\nData: ",
-                    dataframe[col].tolist(),
-                    "\n",
-                    exc,
-                )
-                raise
+        except Exception as exc:
+            print(
+                "Column: ",
+                col,
+                "\nData: ",
+                dataframe[col].tolist(),
+                "\n",
+                exc,
+            )
+            print("dataframe:\n", dataframe.head(42))
+            raise
     return dataframe
 
 
