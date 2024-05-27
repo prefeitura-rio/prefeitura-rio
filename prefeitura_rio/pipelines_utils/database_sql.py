@@ -29,6 +29,7 @@ class Database(ABC):
         user: str,
         password: str,
         database: str,
+        **kwargs,
     ) -> None:
         """
         Initializes the database.
@@ -101,6 +102,7 @@ class SqlServer(Database):
         password: str,
         database: str,
         port: int = 1433,
+        **kwargs,
     ) -> None:
         """
         Initializes the SQL Server database.
@@ -182,6 +184,8 @@ class MySql(Database):
         password: str,
         database: str,
         port: int = 3306,
+        charset: str = None,
+        **kwargs,
     ) -> None:
         """
         Initializes the MySQL database.
@@ -192,8 +196,10 @@ class MySql(Database):
             user: The username of the database.
             password: The password of the database.
             database: The database name.
+            charset: The charset of the database. Default is utf8mb4.
         """
         port = port if isinstance(port, int) else int(port)
+        self._charset = charset or "utf8mb4"
         super().__init__(
             hostname,
             port,
@@ -213,6 +219,7 @@ class MySql(Database):
             user=self._user,
             password=self._password,
             database=self._database,
+            charset=self._charset,
         )
 
     def get_cursor(self):
@@ -262,6 +269,7 @@ class Oracle(Database):
         password: str,
         database: str,
         port: int = 1521,
+        **kwargs,
     ) -> None:
         """
         Initializes the Oracle database.

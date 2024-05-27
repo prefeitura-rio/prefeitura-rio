@@ -90,6 +90,7 @@ def database_get(
     user: str,
     password: str,
     database: str,
+    charset: str = None,
 ):
     """
     Returns a database object.
@@ -120,6 +121,7 @@ def database_get(
         user=user,
         password=password,
         database=database,
+        charset=charset,
     )
 
 
