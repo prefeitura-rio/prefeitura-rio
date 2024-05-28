@@ -131,7 +131,7 @@ def generate_dump_db_schedules(  # pylint: disable=too-many-arguments,too-many-l
     dataset_id: str,
     infisical_secret_path: str,
     table_parameters: dict,
-    database_charset: str = None,
+    db_charset: str = None,
     batch_size: int = 50000,
     runs_interval_minutes: int = 15,
 ) -> List[IntervalClock]:
@@ -150,7 +150,7 @@ def generate_dump_db_schedules(  # pylint: disable=too-many-arguments,too-many-l
             "db_type": db_type,
             "dataset_id": dataset_id,
             "table_id": table_id,
-            "database_charset": database_charset,
+            "db_charset": db_charset,
             "dump_mode": parameters["dump_mode"],
             "execute_query": query_to_line(parameters["execute_query"]),
         }

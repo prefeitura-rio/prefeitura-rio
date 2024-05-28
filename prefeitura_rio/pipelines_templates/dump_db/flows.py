@@ -41,7 +41,7 @@ with Flow(
     port = Parameter("db_port")
     database = Parameter("db_database")
     database_type = Parameter("db_type")
-    database_charset = Parameter("db_charset", default=None, required=False)
+    db_charset = Parameter("db_charset", default=None, required=False)
     query = Parameter("execute_query")
     partition_columns = Parameter("partition_columns", required=False, default="")
     partition_date_format = Parameter("partition_date_format", required=False, default="%Y-%m-%d")
@@ -117,7 +117,7 @@ with Flow(
         user=user,
         password=password,
         database=database,
-        charset=database_charset,
+        charset=db_charset,
     )
 
     # Format partitioned query if required
