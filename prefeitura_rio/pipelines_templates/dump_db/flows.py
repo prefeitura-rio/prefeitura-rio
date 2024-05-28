@@ -76,7 +76,7 @@ with Flow(
     )
     dbt_model_parameters = Parameter("dbt_model_parameters", default={}, required=False)
     dbt_alias = Parameter("dbt_alias", default=False, required=False)
-    biglake_table = Parameter("biglake_table", default=False, required=False)
+    biglake_table = Parameter("biglake_table", default=True, required=False)
     log_number_of_batches = Parameter("log_number_of_batches", default=100, required=False)
 
     #####################################
