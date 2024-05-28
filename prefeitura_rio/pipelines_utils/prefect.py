@@ -131,9 +131,9 @@ def generate_dump_db_schedules(  # pylint: disable=too-many-arguments,too-many-l
     dataset_id: str,
     infisical_secret_path: str,
     table_parameters: dict,
+    database_charset: str,
     batch_size: int = 50000,
     runs_interval_minutes: int = 15,
-    database_charset: str = "utf8",
 ) -> List[IntervalClock]:
     """
     Generates multiple schedules for database dumping.
@@ -164,8 +164,6 @@ def generate_dump_db_schedules(  # pylint: disable=too-many-arguments,too-many-l
             parameter_defaults["dbt_alias"] = parameters["dbt_alias"]
         if "dataset_id" in parameters:
             parameter_defaults["dataset_id"] = parameters["dataset_id"]
-        if "database_charset" in parameters:
-            parameter_defaults["database_charset"] = parameters["database_charset"]
         new_interval = parameters["interval"] if "interval" in parameters else interval
 
         clocks.append(
