@@ -56,7 +56,7 @@ with Flow(
     bq_dataset_id = Parameter("bq_dataset_id")
     bq_table_id = Parameter("bq_table_id")
     bq_upload_mode = Parameter("bq_upload_mode", default="append", required=False)
-    bq_biglake_table = Parameter("bq_biglake_table", default=False, required=False)
+    bq_biglake_table = Parameter("bq_biglake_table", default=True, required=False)
     bq_batch_data_type = Parameter(
         "bq_batch_data_type", default="csv", required=False
     )  # csv or parquet

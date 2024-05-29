@@ -60,7 +60,7 @@ with Flow(
     # JSON dataframe parameters
     dataframe_key_column = Parameter("dataframe_key_column", default=None, required=False)
     build_json_dataframe = Parameter("build_json_dataframe", default=False, required=False)
-    biglake_table = Parameter("biglake_table", default=False, required=False)
+    biglake_table = Parameter("biglake_table", default=True, required=False)
     #####################################
     #
     # Rename flow run
