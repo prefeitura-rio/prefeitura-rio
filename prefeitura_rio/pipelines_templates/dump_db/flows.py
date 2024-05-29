@@ -18,6 +18,7 @@ from prefeitura_rio.pipelines_templates.dump_db.tasks import (
     dump_upload_batch,
     format_partitioned_query,
 )
+from prefeitura_rio.pipelines_utils.constants import NOT_SET
 from prefeitura_rio.pipelines_utils.custom import Flow
 from prefeitura_rio.pipelines_utils.prefect import task_get_current_flow_run_labels
 from prefeitura_rio.pipelines_utils.tasks import (
@@ -41,7 +42,7 @@ with Flow(
     port = Parameter("db_port")
     database = Parameter("db_database")
     database_type = Parameter("db_type")
-    databaset_charset = Parameter("db_charset", default=None, required=False)
+    databaset_charset = Parameter("db_charset", default=NOT_SET, required=False)
     query = Parameter("execute_query")
     partition_columns = Parameter("partition_columns", required=False, default="")
     partition_date_format = Parameter("partition_date_format", required=False, default="%Y-%m-%d")

@@ -14,6 +14,7 @@ except ImportError:
 
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_utils.bd import get_storage_blobs
+from prefeitura_rio.pipelines_utils.constants import NOT_SET
 from prefeitura_rio.pipelines_utils.gcs import (
     delete_blobs_list,
     list_blobs_with_prefix,
@@ -90,7 +91,7 @@ def database_get(
     user: str,
     password: str,
     database: str,
-    charset: str = None,
+    charset: str = NOT_SET,
 ):
     """
     Returns a database object.
@@ -121,7 +122,7 @@ def database_get(
         user=user,
         password=password,
         database=database,
-        charset=charset,
+        charset=charset if charset != NOT_SET else None,
     )
 
 
