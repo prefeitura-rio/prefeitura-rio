@@ -12,6 +12,7 @@ except ImportError:
 
     base_assert_dependencies(["prefect"], extras=["pipelines"])
 
+from prefeitura_rio.pipelines_utils.constants import NOT_SET
 from prefeitura_rio.pipelines_utils.io import query_to_line
 
 
@@ -132,7 +133,7 @@ def generate_dump_db_schedules(  # pylint: disable=too-many-arguments,too-many-l
     infisical_secret_path: str,
     table_parameters: dict,
     biglake_table: bool = True,
-    db_charset: str = None,
+    db_charset: str = NOT_SET,
     batch_size: int = 50000,
     runs_interval_minutes: int = 15,
 ) -> List[IntervalClock]:
