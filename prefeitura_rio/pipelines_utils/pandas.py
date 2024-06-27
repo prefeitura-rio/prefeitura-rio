@@ -265,7 +265,7 @@ def handle_dataframe_chunk(
     else:
         dataframe_to_csv(
             dataframe=dataframe,
-            path=Path(save_path) / f"{event_id}-{idx}.csv",
+            filepath=Path(save_path) / f"{event_id}-{idx}.csv",
             build_json_dataframe=build_json_dataframe,
             dataframe_key_column=dataframe_key_column,
         )
