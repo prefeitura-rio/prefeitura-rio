@@ -484,23 +484,43 @@ def format_partitioned_query(
     # get last partition date
     last_partition_date = extract_last_partition_date(storage_partitions_dict, date_format)
 
-    if lower_bound_date == "current_year":
-        lower_bound_date = datetime.now().replace(month=1, day=1).strftime("%Y-%m-%d")
-        log(f"Using lower_bound_date current_year: {lower_bound_date}")
-    elif lower_bound_date == "current_month":
-        lower_bound_date = datetime.now().replace(day=1).strftime("%Y-%m-%d")
-        log(f"Using lower_bound_date current_month: {lower_bound_date}")
-    elif lower_bound_date == "current_day":
-        lower_bound_date = datetime.now().strftime("%Y-%m-%d")
-        log(f"Using lower_bound_date current_day: {lower_bound_date}")
+    def get_last_date(lower_bound_date, date_format, last_partition_date):
+        now = datetime.now()
+        if lower_bound_date == "current_year":
+            last_date = now.replace(month=1, day=1).strftime(date_format)
+            log(f"Using lower_bound_date current_year: {last_date}")
+            return last_date
 
-    if lower_bound_date:
-        last_date = min(str(lower_bound_date), str(last_partition_date))
-        log(f"Using lower_bound_date: {last_date}")
+        elif lower_bound_date == "current_month":
+            last_date = now.replace(day=1).strftime(date_format)
+            log(f"Using lower_bound_date current_month: {last_date}")
+            return last_date
 
-    else:
-        last_date = str(last_partition_date)
-        log(f"Using last_date from storage: {last_date}")
+        elif lower_bound_date == "current_day":
+            last_date = now.strftime(date_format)
+            log(f"Using lower_bound_date current_day: {last_date}")
+            return last_date
+
+        elif lower_bound_date:
+            last_date = min(
+                datetime.strptime(lower_bound_date, date_format),
+                datetime.strptime(last_partition_date, date_format),
+            ).strftime(date_format)
+            log(f"Using lower_bound_date: {last_date}")
+            return last_date
+
+        else:
+            last_date = datetime.strptime(str(last_partition_date), date_format).strftime(
+                date_format
+            )
+            log(f"Using last_date from storage: {last_date}")
+            return last_date
+
+    last_date = get_last_date(
+        lower_bound_date=lower_bound_date,
+        date_format=date_format,
+        last_partition_date=last_partition_date,
+    )
 
     # Using the last partition date, get the partitioned query.
     # `aux_name` must be unique and start with a letter, for better compatibility with
