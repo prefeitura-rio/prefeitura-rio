@@ -160,7 +160,7 @@ def generate_dump_db_schedules(  # pylint: disable=too-many-arguments,too-many-l
 
         # Add remaining parameters if value is not None
         for key, value in parameters.items():
-            if value is not None and key not in ["interval"]:
+            if value is not None and key not in ["interval", "start_date"]:
                 parameter_defaults[key] = value
 
         if "dbt_alias" in parameters:
@@ -173,7 +173,6 @@ def generate_dump_db_schedules(  # pylint: disable=too-many-arguments,too-many-l
             if "start_date" in parameters
             else start_date + timedelta(minutes=runs_interval_minutes * count)
         )
-
         clocks.append(
             IntervalClock(
                 interval=new_interval,
