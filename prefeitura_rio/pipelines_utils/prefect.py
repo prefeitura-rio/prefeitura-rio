@@ -168,11 +168,16 @@ def generate_dump_db_schedules(  # pylint: disable=too-many-arguments,too-many-l
         if "dataset_id" in parameters:
             parameter_defaults["dataset_id"] = parameters["dataset_id"]
         new_interval = parameters["interval"] if "interval" in parameters else interval
+        new_start_date = (
+            parameters["start_date"]
+            if "start_date" in parameters
+            else start_date + timedelta(minutes=runs_interval_minutes * count)
+        )
 
         clocks.append(
             IntervalClock(
                 interval=new_interval,
-                start_date=start_date + timedelta(minutes=runs_interval_minutes * count),
+                start_date=new_start_date,
                 labels=labels,
                 parameter_defaults=parameter_defaults,
             )
