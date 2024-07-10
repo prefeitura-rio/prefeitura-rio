@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List
@@ -435,23 +434,30 @@ def dump_upload_batch(
                 index=idx,
                 mod=log_number_of_batches,
             )
+        #         # Get next batch.
+        batch = database.fetch_batch(batch_size)
 
-        attempts = 10
-        wait_seconds = 30
-        while attempts >= 0:
-            try:
-                # Get next batch.
-                batch = database.fetch_batch(batch_size)
-                idx += 1
-                attempts = -1
-            except Exception as e:
-                if attempts == 0:
-                    raise e
-                else:
-                    log(f"Remaning Attempts: {attempts}. Retry in {wait_seconds}s", level="error")
-                    log(e, level="error")
-                    attempts -= 1
-                    time.sleep(wait_seconds)  # wait 30 secondds
+    # TODO: Find a way to save the state of the database and cursor
+    # Retry attempts did not work because the connection is lost
+    # Saving the object with pickle or dill also does not work; error: cannot pickle 'pyodbc.Connection' object # noqa
+    # Using paginated queries with offset would be a slow solution because each iteration requires sorting the query, which is a slow operation in the database # noqa
+
+    # attempts = 10
+    # wait_seconds = 30
+    # while attempts >= 0:
+    #     try:
+    #         # Get next batch.
+    #         batch = database.fetch_batch(batch_size)
+    #         idx += 1
+    #         attempts = -1
+    #     except Exception as e:
+    #         if attempts == 0:
+    #             raise e
+    #         else:
+    #             log(f"Remaning Attempts: {attempts}. Retry in {wait_seconds}s", level="error")
+    #             log(e, level="error")
+    #             attempts -= 1
+    #             time.sleep(wait_seconds)  # wait 30 secondds
 
     log(
         msg=f"Successfully dumped {idx} batches with size {len(batch)}, total of {idx*batch_size}",
