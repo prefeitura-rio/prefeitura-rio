@@ -443,7 +443,7 @@ def dump_upload_batch(
         database_state_file = "/tmp/database_state.plk"
         while attempts >= 0:
             try:
-                dill.dump_module(database_state_file, module=database, refimported=True)
+                dill.dump(obj=database, file=open(database_state_file, "w"))
                 # Get next batch.
                 batch = database.fetch_batch(batch_size)
                 idx += 1
@@ -456,7 +456,7 @@ def dump_upload_batch(
                     log(e, level="error")
                     attempts -= 1
                     time.sleep(wait_seconds)
-                    database = dill.load_module(database_state_file)
+                    database = dill.load(open(database_state_file, "r"))
 
     log(
         msg=f"Successfully dumped {idx} batches with size {len(batch)}, total of {idx*batch_size}",
