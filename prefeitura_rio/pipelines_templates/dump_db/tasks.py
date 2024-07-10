@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-import pickle
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List
 from uuid import uuid4
+
+import dill
 
 try:
     import basedosdados as bd
@@ -439,11 +440,11 @@ def dump_upload_batch(
 
         attempts = 10
         wait_seconds = 30
-        database_state_file = "/tmp/database_state.pkl"
+        database_state_file = "/tmp/database_state"
         while attempts >= 0:
             try:
                 with open(database_state_file, "wb") as f:
-                    pickle.dump(database, f)
+                    dill.dump(database, f)
 
                 # Get next batch.
                 batch = database.fetch_batch(batch_size)
@@ -459,7 +460,7 @@ def dump_upload_batch(
                     time.sleep(wait_seconds)  # wait 30 secondds
 
                     with open(database_state_file, "rb") as f:
-                        database = pickle.load(f)
+                        database = dill.load(f)
 
     log(
         msg=f"Successfully dumped {idx} batches with size {len(batch)}, total of {idx*batch_size}",
