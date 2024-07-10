@@ -440,7 +440,7 @@ def dump_upload_batch(
 
         attempts = 10
         wait_seconds = 10
-        database_state_file = "/tmp/database_state.plk"
+        database_state_file = "/tmp/database_state.pkl"
         while attempts >= 0:
             try:
                 dill.dump(obj=database, file=open(database_state_file, "w"))
