@@ -54,19 +54,9 @@ except ImportError:
     pass
 
 
-@task(
-    checkpoint=False,
-    max_retries=settings.TASK_MAX_RETRIES_DEFAULT,
-    retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY_DEFAULT),
-)
 def database_execute(
     database,
     query: str,
-    wait=None,  # pylint: disable=unused-argument
-    flow_name: str = None,
-    labels: List[str] = None,
-    dataset_id: str = None,
-    table_id: str = None,
 ) -> None:
     """
     Executes a query on the database.
@@ -82,18 +72,13 @@ def database_execute(
     database.execute_query(query)
 
 
-@task(
-    checkpoint=False,
-    max_retries=settings.TASK_MAX_RETRIES_DEFAULT,
-    retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY_DEFAULT),
-)
 def database_get(
     database_type: str,
     hostname: str,
     port: int,
     user: str,
     password: str,
-    database: str,
+    database_name: str,
     charset: str = NOT_SET,
 ):
     """
@@ -124,14 +109,20 @@ def database_get(
         port=port,
         user=user,
         password=password,
-        database=database,
+        database=database_name,
         charset=charset if charset != NOT_SET else None,
     )
 
 
 @task
 def dump_upload_batch(
-    database,
+    database_type: str,
+    hostname: str,
+    port: int,
+    user: str,
+    password: str,
+    database_name: str,
+    formated_query: str,
     batch_size: int,
     dataset_id: str,
     table_id: str,
@@ -140,6 +131,7 @@ def dump_upload_batch(
     batch_data_type: str = "csv",
     biglake_table: bool = True,
     log_number_of_batches: int = 100,
+    databaset_charset: str = NOT_SET,
 ):
     """
     This task will dump and upload batches of data, sequentially.
@@ -152,6 +144,22 @@ def dump_upload_batch(
     prepath = f"data/{uuid4()}/"
     cleared_partitions = set()
     cleared_table = False
+
+    # Execute query on SQL Server
+    database = database_get(
+        database_type=database_type,
+        hostname=hostname,
+        port=port,
+        user=user,
+        password=password,
+        database_name=database_name,
+        charset=databaset_charset,
+    )
+
+    database_execute(  # pylint: disable=invalid-name
+        database=database,
+        query=formated_query,
+    )
 
     # Get data columns
     columns = database.get_columns()
@@ -438,16 +446,26 @@ def dump_upload_batch(
                 mod=log_number_of_batches,
             )
 
+        # Get next batch.
+        batch = database.fetch_batch(batch_size)
+
+        # TODO: Find a way to save the state of the database and cursor
+        # Retry attempts did not work because the connection is lost
+        # Saving the object with pickle or dill also does not work; error: cannot pickle 'pyodbc.Connection' object # noqa
+        # Using paginated queries with offset would be a slow solution because each iteration requires sorting the query, which is a slow operation in the database # noqa
+
         attempts = 10
         wait_seconds = 10
-        database_state_file = "/tmp/database_state.pkl"
         while attempts >= 0:
             try:
-                dill.dump(obj=database, file=open(database_state_file, "w"))
+                dill.dump(
+                    obj=database._cursor, file=open(file="/tmp/database_cursor.pkl", mode="wb")
+                )
                 # Get next batch.
                 batch = database.fetch_batch(batch_size)
                 idx += 1
                 attempts = -1
+
             except Exception as e:
                 if attempts == 0:
                     raise e
@@ -455,8 +473,26 @@ def dump_upload_batch(
                     log(f"Remaning Attempts: {attempts}. Retry in {wait_seconds}s", level="error")
                     log(e, level="error")
                     attempts -= 1
-                    time.sleep(wait_seconds)
-                    database = dill.load(open(database_state_file, "r"))
+                    time.sleep(wait_seconds)  # wait N secondds
+
+                    log("Geting database")
+                    database = database_get(
+                        database_type=database_type,
+                        hostname=hostname,
+                        port=port,
+                        user=user,
+                        password=password,
+                        database_name=database_name,
+                        charset=databaset_charset,
+                    )
+                    log("Executing query")
+                    database_execute(  # pylint: disable=invalid-name
+                        database=database,
+                        query=formated_query,
+                    )
+                    log("Get cursor from dill")
+                    cursor = dill.load(file=open(file="/tmp/database_cursor.pkl", mode="wb"))
+                    database._cursor = cursor
 
     log(
         msg=f"Successfully dumped {idx} batches with size {len(batch)}, total of {idx*batch_size}",

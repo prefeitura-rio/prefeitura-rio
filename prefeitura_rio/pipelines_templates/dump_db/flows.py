@@ -13,8 +13,6 @@ except ImportError:
 
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_templates.dump_db.tasks import (
-    database_execute,
-    database_get,
     dump_upload_batch,
     format_partitioned_query,
 )
@@ -40,7 +38,7 @@ with Flow(
     # DBMS parameters
     hostname = Parameter("db_host")
     port = Parameter("db_port")
-    database = Parameter("db_database")
+    database_name = Parameter("db_database")
     database_type = Parameter("db_type")
     databaset_charset = Parameter("db_charset", default=NOT_SET, required=False)
     query = Parameter("execute_query")
@@ -110,17 +108,6 @@ with Flow(
     # Parse partition columns
     partition_columns = parse_comma_separated_string_to_list(text=partition_columns)
 
-    # Execute query on SQL Server
-    db_object = database_get(
-        database_type=database_type,
-        hostname=hostname,
-        port=port,
-        user=user,
-        password=password,
-        database=database,
-        charset=databaset_charset,
-    )
-
     # Format partitioned query if required
     formated_query = format_partitioned_query(
         query=query,
@@ -131,21 +118,10 @@ with Flow(
         lower_bound_date=lower_bound_date,
         date_format=partition_date_format,
     )
-    formated_query.set_upstream(db_object)
-
-    db_execute = database_execute(  # pylint: disable=invalid-name
-        database=db_object,
-        query=formated_query,
-        flow_name="dump_db",
-        labels=current_flow_labels,
-        dataset_id=dataset_id,
-        table_id=table_id,
-    )
-    db_execute.set_upstream(formated_query)
+    formated_query.set_upstream(partition_columns)
 
     # Dump batches to files
     dump_upload = dump_upload_batch(
-        database=db_object,
         batch_size=batch_size,
         dataset_id=dataset_id,
         table_id=table_id,
@@ -154,8 +130,16 @@ with Flow(
         batch_data_type=batch_data_type,
         biglake_table=biglake_table,
         log_number_of_batches=log_number_of_batches,
+        formated_query=formated_query,
+        database_type=database_type,
+        hostname=hostname,
+        port=port,
+        user=user,
+        password=password,
+        database_name=database_name,
+        databaset_charset=databaset_charset,
     )
-    dump_upload.set_upstream(db_execute)
+    dump_upload.set_upstream(formated_query)
 
     with case(materialize_after_dump, True):
         # Trigger DBT flow run
