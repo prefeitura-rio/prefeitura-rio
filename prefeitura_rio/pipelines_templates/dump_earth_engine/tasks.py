@@ -10,8 +10,7 @@ except ImportError:
     pass
 
 try:
-    from basedosdados.download.base import google_client
-    from basedosdados.upload.base import Base
+    from basedosdados import Base
     from google.cloud import bigquery
     from prefect import task
 except ImportError:
@@ -140,10 +139,10 @@ def download_data_to_gcs(  # pylint: disable=R0912,R0913,R0914,R0915
     Get data from BigQuery.
     """
     # Try to get project_id from environment variable
+    bd_base = Base()
     if not project_id:
         log("Project ID was not provided, trying to get it from environment variable")
         try:
-            bd_base = Base()
             project_id = bd_base.config["gcloud-projects"][bd_project_mode]["name"]
         except KeyError:
             pass
@@ -162,7 +161,6 @@ def download_data_to_gcs(  # pylint: disable=R0912,R0913,R0914,R0915
     if not billing_project_id:
         log("Billing project ID was not provided, trying to get it from environment variable")
         try:
-            bd_base = Base()
             billing_project_id = bd_base.config["gcloud-projects"][bd_project_mode]["name"]
         except KeyError:
             pass
@@ -173,7 +171,7 @@ def download_data_to_gcs(  # pylint: disable=R0912,R0913,R0914,R0915
         log(f"Billing project ID was inferred from environment variables: {billing_project_id}")
 
     # pylint: disable=E1124
-    client = google_client(project_id, billing_project_id, from_file=True, reauth=False)
+    client = bd_base.client()
     job_config = bigquery.QueryJobConfig()
     job_config.dry_run = True
     job = client["bigquery"].query(query, job_config=job_config)

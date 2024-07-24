@@ -6,7 +6,7 @@ from google.cloud import storage
 
 try:
     import basedosdados as bd
-    from basedosdados.upload.base import Base
+    from basedosdados import Base
 except ImportError:
     from prefeitura_rio.utils import base_assert_dependencies
 

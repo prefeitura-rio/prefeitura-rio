@@ -7,7 +7,7 @@ from typing import Dict, List, Union
 
 import googleapiclient.discovery
 import pandas as pd
-from basedosdados.upload.base import Base
+from basedosdados import Base
 from prefect import task
 
 

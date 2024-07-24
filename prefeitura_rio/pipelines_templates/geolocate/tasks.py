@@ -5,7 +5,7 @@ from typing import List, Tuple
 try:
     import basedosdados as bd
     import pandas as pd
-    from basedosdados.upload.base import Base
+    from basedosdados import Base
     from prefect import task
 except ImportError:
     from prefeitura_rio.utils import base_assert_dependencies
