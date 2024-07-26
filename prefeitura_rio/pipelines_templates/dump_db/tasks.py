@@ -434,8 +434,9 @@ def dump_upload_batch(
                 index=idx,
                 mod=log_number_of_batches,
             )
-        #         # Get next batch.
+        # Get next batch.
         batch = database.fetch_batch(batch_size)
+        idx += 1
 
     # TODO: Find a way to save the state of the database and cursor
     # Retry attempts did not work because the connection is lost
