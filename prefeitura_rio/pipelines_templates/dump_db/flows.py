@@ -39,89 +39,54 @@ with Flow(
 
     # DBMS parameters
     hostname = Parameter("db_host")
-
     port = Parameter("db_port")
-    port.set_upstream(hostname)
-
     database = Parameter("db_database")
-    database.set_upstream(port)
-
     database_type = Parameter("db_type")
-    database_type.set_upstream(database)
-
     databaset_charset = Parameter("db_charset", default=NOT_SET, required=False)
-    databaset_charset.set_upstream(database_type)
-
     query = Parameter("execute_query")
-    query.set_upstream(databaset_charset)
-
     partition_columns = Parameter("partition_columns", required=False, default="")
-    partition_columns.set_upstream(query)
-
     partition_date_format = Parameter("partition_date_format", required=False, default="%Y-%m-%d")
-    partition_date_format.set_upstream(partition_columns)
-
     lower_bound_date = Parameter("lower_bound_date", required=False)
-    lower_bound_date.set_upstream(partition_date_format)
 
     # Materialization parameters
     materialize_after_dump = Parameter("materialize_after_dump", default=False, required=False)
-    materialize_after_dump.set_upstream(lower_bound_date)
-
     materialization_mode = Parameter("materialization_mode", default="dev", required=False)
-    materialization_mode.set_upstream(materialize_after_dump)
-
     materialize_to_datario = Parameter("materialize_to_datario", default=False, required=False)
-    materialize_to_datario.set_upstream(materialization_mode)
 
     # Dump to GCS after? Should only dump to GCS if materializing to datario
     dump_to_gcs = Parameter("dump_to_gcs", default=False, required=False)
-    dump_to_gcs.set_upstream(materialize_to_datario)
-
     maximum_bytes_processed = Parameter(
         "maximum_bytes_processed",
         required=False,
         default=settings.GCS_DUMP_MAX_BYTES_PROCESSED_PER_TABLE,
     )
-    maximum_bytes_processed.set_upstream(dump_to_gcs)
 
     # Use Infisical for credentials
     infisical_secret_path = Parameter("infisical_secret_path", default="/")
-    infisical_secret_path.set_upstream(maximum_bytes_processed)
 
     # Data file parameters
     batch_size = Parameter("batch_size", default=50000, required=False)
-    batch_size.set_upstream(infisical_secret_path)
 
     # BigQuery parameters
     dataset_id = Parameter("dataset_id")
-    dataset_id.set_upstream(batch_size)
 
     table_id = Parameter("table_id")
-    table_id.set_upstream(dataset_id)
 
     dump_mode = Parameter("dump_mode", default="append", required=False)  # overwrite or append
-    dump_mode.set_upstream(table_id)
 
     batch_data_type = Parameter("batch_data_type", default="csv", required=False)  # csv or parquet
-    batch_data_type.set_upstream(dump_mode)
 
     dbt_model_secret_parameters = Parameter(
         "dbt_model_secret_parameters", default=[], required=False
     )
-    dbt_model_secret_parameters.set_upstream(batch_data_type)
 
     dbt_model_parameters = Parameter("dbt_model_parameters", default={}, required=False)
-    dbt_model_parameters.set_upstream(dbt_model_secret_parameters)
 
     dbt_alias = Parameter("dbt_alias", default=False, required=False)
-    dbt_alias.set_upstream(dbt_model_parameters)
 
     biglake_table = Parameter("biglake_table", default=True, required=False)
-    biglake_table.set_upstream(dbt_alias)
 
     log_number_of_batches = Parameter("log_number_of_batches", default=100, required=False)
-    log_number_of_batches.set_upstream(biglake_table)
 
     #####################################
     #
