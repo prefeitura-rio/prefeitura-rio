@@ -42,25 +42,26 @@ def download_url(  # pylint: disable=too-many-arguments
     gsheets_sheet_order: int = 0,
     gsheets_sheet_name: str = None,
     gsheets_sheet_range: str = None,
+    gdrive_folder_prefix: str = None,
 ) -> None:
     """
     Downloads a file from a URL and saves it to a local file.
     Try to do it without using lots of RAM.
     It is not optimized for Google Sheets downloads.
-
+    If a Google Drive folder URL is provided, it downloads all files with the specified prefix.
+    
     Args:
         url: URL to download from.
         fname: Name of the file to save to.
-        url_type: Type or URL that is being passed.
-            `direct`-> common URL to download directly;
-            `google_drive`-> Google Drive URL;
-            `google_sheet`-> Google Sheet URL.
-        gsheets_sheet_order: Worksheet index, in the case you want to select it by index. \
-            Worksheet indexes start from zero.
-        gsheets_sheet_name: Worksheet name, in the case you want to select it by name.
-        gsheets_sheet_range: Range in selected worksheet to get data from. Defaults to entire \
-            worksheet.
-
+        url_type: Type of URL that is being passed.
+            `direct` -> common URL to download directly;
+            `google_drive` -> Google Drive URL or folder URL;
+            `google_sheet` -> Google Sheet URL.
+        gsheets_sheet_order: Worksheet index for Google Sheets.
+        gsheets_sheet_name: Worksheet name for Google Sheets.
+        gsheets_sheet_range: Range in selected worksheet to get data from.
+        gdrive_folder_prefix: Prefix to filter files in Google Drive folder.
+    
     Returns:
         None.
     """
@@ -107,30 +108,62 @@ def download_url(  # pylint: disable=too-many-arguments
                     file.flush()
     elif url_type == "google_drive":
         log(">>>>> URL is a Google Drive URL, downloading from Google Drive")
-        # URL is in format
-        # https://drive.google.com/file/d/<FILE_ID>/...
-        # We want to extract the FILE_ID
-        log(">>>>> Extracting FILE_ID from URL")
-        url_prefix = "https://drive.google.com/file/d/"
-        if not url.startswith(url_prefix):
-            raise ValueError(
-                "URL must start with https://drive.google.com/file/d/." f"Invalid URL: {url}"
-            )
-        file_id = url.removeprefix(url_prefix).split("/")[0]
-        log(f">>>>> FILE_ID: {file_id}")
         creds = get_credentials_from_env(scopes=["https://www.googleapis.com/auth/drive"])
-        try:
-            service = build("drive", "v3", credentials=creds)
-            request = service.files().get_media(fileId=file_id)  # pylint: disable=E1101
-            fh = io.FileIO(fname, mode="wb")  # pylint: disable=C0103
-            downloader = MediaIoBaseDownload(fh, request)
-            done = False
-            while done is False:
-                status, done = downloader.next_chunk()
-                log(f"Downloading file... {int(status.progress() * 100)}%.")
-        except HttpError as error:
-            log(f"HTTPError: {error}", "error")
-            raise error
+        service = build("drive", "v3", credentials=creds)
+
+        if "folders" in url:  # This is a folder URL
+            folder_id = url.split('/')[-1]
+            log(f">>>>> FOLDER_ID: {folder_id}")
+            query = f"'{folder_id}' in parents and trashed=false"
+            if gdrive_folder_prefix:
+                query += f" and name contains '{gdrive_folder_prefix}'"
+            results = service.files().list(q=query).execute()
+            items = results.get('files', [])
+
+            all_dataframes = []
+            for item in items:
+                file_id = item['id']
+                file_name = item['name']
+                log(f"Downloading file: {file_name}")
+                request = service.files().get_media(fileId=file_id)
+                fh = io.BytesIO()
+                downloader = MediaIoBaseDownload(fh, request)
+                done = False
+                while done is False:
+                    status, done = downloader.next_chunk()
+                    log(f"Downloading file... {int(status.progress() * 100)}%.")
+                fh.seek(0)
+                temp_df = pd.read_csv(fh)  # Assuming CSV, adjust if needed
+                all_dataframes.append(temp_df)
+
+            combined_df = pd.concat(all_dataframes, ignore_index=True)
+            combined_df.to_csv(filepath, index=False)
+        else:
+            log(">>>>> URL is a Google Drive URL, downloading from Google Drive")
+            # URL is in format
+            # https://drive.google.com/file/d/<FILE_ID>/...
+            # We want to extract the FILE_ID
+            log(">>>>> Extracting FILE_ID from URL")
+            url_prefix = "https://drive.google.com/file/d/"
+            if not url.startswith(url_prefix):
+                raise ValueError(
+                    "URL must start with https://drive.google.com/file/d/." f"Invalid URL: {url}"
+                )
+            file_id = url.removeprefix(url_prefix).split("/")[0]
+            log(f">>>>> FILE_ID: {file_id}")
+            creds = get_credentials_from_env(scopes=["https://www.googleapis.com/auth/drive"])
+            try:
+                service = build("drive", "v3", credentials=creds)
+                request = service.files().get_media(fileId=file_id)  # pylint: disable=E1101
+                fh = io.FileIO(fname, mode="wb")  # pylint: disable=C0103
+                downloader = MediaIoBaseDownload(fh, request)
+                done = False
+                while done is False:
+                    status, done = downloader.next_chunk()
+                    log(f"Downloading file... {int(status.progress() * 100)}%.")
+            except HttpError as error:
+                log(f"HTTPError: {error}", "error")
+                raise error
     else:
         raise ValueError("Invalid URL type. Please set values to `url_type` parameter")
 
