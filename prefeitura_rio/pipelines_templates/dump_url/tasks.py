@@ -47,7 +47,7 @@ def download_url(  # pylint: disable=too-many-arguments
     """
     Downloads files from a URL and saves them to a local file.
     If a Google Drive folder URL is provided, it downloads all files with the specified prefix.
-    
+
     Args:
         url: URL to download from.
         fname: Name of the file to save to.
@@ -108,20 +108,20 @@ def download_url(  # pylint: disable=too-many-arguments
         log(">>>>> URL is a Google Drive URL, downloading from Google Drive")
         creds = get_credentials_from_env(scopes=["https://www.googleapis.com/auth/drive"])
         service = build("drive", "v3", credentials=creds)
-        
+
         if "folders" in url:  # This is a folder URL
-            folder_id = url.split('/')[-1]
+            folder_id = url.split("/")[-1]
             log(f">>>>> FOLDER_ID: {folder_id}")
             query = f"'{folder_id}' in parents and trashed=false"
             if gdrive_folder_prefix:
                 query += f" and name contains '{gdrive_folder_prefix}'"
             results = service.files().list(q=query).execute()
-            items = results.get('files', [])
-            
+            items = results.get("files", [])
+
             all_dataframes = []
             for item in items:
-                file_id = item['id']
-                file_name = item['name']
+                file_id = item["id"]
+                file_name = item["name"]
                 log(f"Downloading file: {file_name}")
                 request = service.files().get_media(fileId=file_id)
                 fh = io.BytesIO()
@@ -133,7 +133,7 @@ def download_url(  # pylint: disable=too-many-arguments
                 fh.seek(0)
                 temp_df = pd.read_csv(fh)  # Assuming CSV, adjust if needed
                 all_dataframes.append(temp_df)
-            
+
             combined_df = pd.concat(all_dataframes, ignore_index=True)
             combined_df.to_csv(filepath, index=False)
         else:
