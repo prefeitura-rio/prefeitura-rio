@@ -34,6 +34,7 @@ with Flow(
     gsheets_sheet_order = Parameter("gsheets_sheet_order", default=0, required=False)
     gsheets_sheet_name = Parameter("gsheets_sheet_name", default=None, required=False)
     gsheets_sheet_range = Parameter("gsheets_sheet_range", default=None, required=False)
+    gdrive_folder_prefix = Parameter("gdrive_folder_prefix", default=None, required=False)
 
     # Table parameters
     partition_columns = Parameter("partition_columns", required=False, default="")
@@ -92,6 +93,7 @@ with Flow(
         gsheets_sheet_order=gsheets_sheet_order,
         gsheets_sheet_name=gsheets_sheet_name,
         gsheets_sheet_range=gsheets_sheet_range,
+        gdrive_folder_prefix=gdrive_folder_prefix,
     )
     DOWNLOAD_URL_TASK.set_upstream(current_flow_project_name)
 
