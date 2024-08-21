@@ -45,10 +45,7 @@ def clean_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
                 dataframe[col] = (
                     dataframe[col]
                     .astype(str)
-                    .str.replace("\x00", "")
-                    .replace("None", np.nan)
-                    .str.replace("\n", " ")
-                    .str.replace("\r", " ")
+                    .replace({"\x00": "", "None": np.nan, "\n": " ", "\r": " "}, regex=True)
                 )
         except Exception as exc:
             print(
