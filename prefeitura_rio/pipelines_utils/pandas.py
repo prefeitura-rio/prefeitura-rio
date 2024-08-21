@@ -43,7 +43,12 @@ def clean_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
         try:
             if dataframe[col].dtype == object:
                 dataframe[col] = (
-                    dataframe[col].astype(str).str.replace("\x00", "").replace("None", np.nan)
+                    dataframe[col]
+                    .astype(str)
+                    .str.replace("\x00", "")
+                    .replace("None", np.nan)
+                    .str.replace("\n", " ")
+                    .str.replace("\r", " ")
                 )
         except Exception as exc:
             print(
