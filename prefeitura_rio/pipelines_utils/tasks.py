@@ -59,7 +59,7 @@ from prefeitura_rio.utils import base_assert_dependencies
     retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY_DEFAULT),
 )
 def create_table_and_upload_to_gcs(
-    data_path: str | Path,
+    data_path: Union[str, Path],
     dataset_id: str,
     table_id: str,
     dump_mode: str,
@@ -190,7 +190,9 @@ def create_table_and_upload_to_gcs(
 
 
 @task
-def task_dataframe_to_csv(dataframe: pd.DataFrame, base_path: str | Path, unique_file: bool = True):
+def task_dataframe_to_csv(
+    dataframe: pd.DataFrame, base_path: Union[str, Path], unique_file: bool = True
+):
     if unique_file:
         now = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
         filepath = str(Path(base_path) / f"data_{now}.csv")
@@ -210,7 +212,7 @@ def task_dataframe_to_csv(dataframe: pd.DataFrame, base_path: str | Path, unique
 def dump_batches_to_file(
     database,
     batch_size: int,
-    prepath: str | Path,
+    prepath: Union[str, Path],
     date_field: str = None,
     date_lower_bound: str = None,
     date_format: str = None,
@@ -295,7 +297,7 @@ def get_current_flow_project_name() -> str:
 )
 def get_datario_geodataframe(
     url: str,  # URL of the data.rio API
-    path: str | Path,
+    path: Union[str, Path],
 ):
     """ "
     Save a CSV from data.rio API
@@ -421,7 +423,7 @@ def task_run_dbt_model_task(
     downstream: bool = None,
     exclude: str = None,
     flags: str = None,
-    _vars: dict | List[Dict] = None,
+    _vars: Union[dict, List[Dict]] = None,
 ) -> None:
     run_dbt_model(
         dataset_id=dataset_id,

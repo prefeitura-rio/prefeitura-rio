@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import ftplib
 import re
-from typing import Any, Callable, Iterable, List, Optional, Set
+from typing import Any, Callable, Iterable, List, Optional, Set, Union
 
 try:
     from prefect import Flow
@@ -36,10 +36,12 @@ class Flow(PrefectFlow):
         state_handlers: List[Callable[..., Any]] = None,
         on_failure: Callable[..., Any] = None,
         validate: bool = None,
-        result: Result | None = None,
-        terminal_state_handler: Callable[[Flow, State, Set[State]], State | None] | None = None,
+        result: Union[Result, None] = None,
+        terminal_state_handler: Union[
+            Callable[[Flow, State, Set[State]], Union[State, None]], None
+        ] = None,
         skip_if_running: bool = False,
-        parallelism: int | None = None,
+        parallelism: Union[int, None] = None,
         threaded_heartbeat: bool = True,
     ):
         if skip_if_running:

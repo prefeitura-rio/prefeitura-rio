@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Union
 
 from prefeitura_rio.utils import base_assert_dependencies
 
@@ -30,7 +31,7 @@ from prefeitura_rio.pipelines_utils.pandas import remove_columns_accents
     retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY_DEFAULT),
 )
 def transform_geodataframe(
-    file_path: str | Path,
+    file_path: Union[str, Path],
     batch_size: int = 50000,
     geometry_column: str = "geometry",
     convert_to_crs_4326: bool = False,

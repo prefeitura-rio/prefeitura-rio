@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Dict, List
+from typing import Dict, List, Union
 
 try:
     from prefect.tasks.dbt.dbt import DbtShellTask
@@ -20,7 +20,7 @@ def run_dbt_model(
     downstream: bool = None,
     exclude: str = None,
     flags: str = None,
-    _vars: dict | List[Dict] = None,
+    _vars: Union[dict, List[Dict]] = None,
 ):
     """
     Runs a DBT model.
