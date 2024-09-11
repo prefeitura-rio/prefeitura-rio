@@ -584,10 +584,13 @@ def get_last_date(
     elif lower_bound_date == "current_day":
         return now.strftime(date_format)
     elif lower_bound_date:
-        return min(
-            datetime.strptime(lower_bound_date, date_format),
-            datetime.strptime(last_partition_date, date_format),
-        ).strftime(date_format)
+        if last_partition_date:
+            return min(
+                datetime.strptime(lower_bound_date, date_format),
+                datetime.strptime(last_partition_date, date_format),
+            ).strftime(date_format)
+        else:
+            return datetime.strptime(lower_bound_date, date_format).strftime(date_format)
     return datetime.strptime(last_partition_date, date_format).strftime(date_format)
 
 
@@ -635,26 +638,38 @@ def build_chunked_queries(
     lower_bound_date: Optional[str],
     last_partition_date: str,
 ) -> List[str]:
-    log(f"Breaking query into multiple chunks based on frequency: {break_query_frequency}")
 
-    if lower_bound_date:
-        last_date = get_last_date(
-            lower_bound_date=lower_bound_date,
-            date_format=date_format,
-            last_partition_date=last_partition_date,
-        )
-        end_date_str = max(break_query_end, last_date)
-        break_query_start = min(break_query_start, last_date)
-    else:
-        end_date_str = break_query_end
-        break_query_start = break_query_start
+    start_date_str = get_last_date(
+        lower_bound_date=break_query_start,
+        date_format=date_format,
+        last_partition_date=None,
+    )
+    end_date_str = get_last_date(
+        lower_bound_date=break_query_end,
+        date_format=date_format,
+        last_partition_date=None,
+    )
+    end_date = datetime.strptime(end_date_str, date_format)
+
+    if break_query_end == "current_month":
+        end_date = get_last_day_of_month(date=end_date)
+        end_date_str = end_date.strftime(date_format)
+    elif break_query_end == "current_year":
+        end_date = get_last_day_of_year(year=end_date.year)
+        end_date_str = end_date.strftime(date_format)
 
     log("Breaking query into multiple chunks based on frequency")
-    log(f"break_query_frequency: {break_query_frequency}")
-    log(f"break_query_start: {break_query_start}")
-    log(f"break_query_end: {end_date_str}")
+    log(f"    break_query_frequency: {break_query_frequency}")
+    log(f"    break_query_start: {start_date_str}")
 
-    current_start = datetime.strptime(break_query_start, date_format)
+    if break_query_end != "current_day":
+        log(f"    break_query_end: {end_date_str}")
+    else:
+        end_date_day = end_date + timedelta(1)
+        end_date_str_day = datetime.strftime(end_date_day, date_format)
+        log(f"    break_query_end: {end_date_str_day}")
+
+    current_start = datetime.strptime(start_date_str, date_format)
     end_date = datetime.strptime(end_date_str, date_format)
     queries = []
 
