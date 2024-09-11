@@ -165,6 +165,7 @@ def dump_upload_batch(
                 log(f"New query columns without accents: {new_query_cols}")
 
                 prepath = Path(prepath)
+                prepath.mkdir(parents=True, exist_ok=True)
                 log(f"Got prepath: {prepath}")
 
                 if not partition_columns or partition_columns[0] == "":
