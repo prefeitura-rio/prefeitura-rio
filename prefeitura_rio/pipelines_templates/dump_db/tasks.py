@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import shutil
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -478,6 +479,9 @@ def dump_upload_batch(
                 log(
                     msg=f"Successfully dumped {idx} batches with size {batch_size}, total of {idx*batch_size}",  # noqa
                 )
+                # delete data from prepath
+                shutil.rmtree(prepath)
+
                 total_idx += idx
 
         except Exception as e:
