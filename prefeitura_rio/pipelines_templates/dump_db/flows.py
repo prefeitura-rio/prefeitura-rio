@@ -46,9 +46,9 @@ with Flow(
     partition_columns = Parameter("partition_columns", required=False, default="")
     partition_date_format = Parameter("partition_date_format", required=False, default="%Y-%m-%d")
     lower_bound_date = Parameter("lower_bound_date", required=False, default=None)
-    frequency_break_query = Parameter("frequency_break_query", required=False, default=None)
-    start_break_query = Parameter("start_break_query", required=False, default=None)
-    end_break_query = Parameter("end_break_query", required=False, default=None)
+    break_query_frequency = Parameter("break_query_frequency", required=False, default=None)
+    break_query_start = Parameter("break_query_start", required=False, default=None)
+    break_query_end = Parameter("break_query_end", required=False, default=None)
 
     # Materialization parameters
     materialize_after_dump = Parameter("materialize_after_dump", default=False, required=False)
@@ -145,9 +145,9 @@ with Flow(
         partition_columns=partition_columns,
         lower_bound_date=lower_bound_date,
         date_format=partition_date_format,
-        start_break_query=start_break_query,
-        end_break_query=end_break_query,
-        frequency_break_query=frequency_break_query,
+        break_query_start=break_query_start,
+        break_query_end=break_query_end,
+        break_query_frequency=break_query_frequency,
     )
     formated_query.set_upstream(db_object)
 
