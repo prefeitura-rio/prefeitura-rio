@@ -13,7 +13,6 @@ except ImportError:
 
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_templates.dump_db.tasks import (
-    database_execute,
     database_get,
     dump_upload_batch,
     format_partitioned_query,
@@ -46,7 +45,10 @@ with Flow(
     query = Parameter("execute_query")
     partition_columns = Parameter("partition_columns", required=False, default="")
     partition_date_format = Parameter("partition_date_format", required=False, default="%Y-%m-%d")
-    lower_bound_date = Parameter("lower_bound_date", required=False)
+    lower_bound_date = Parameter("lower_bound_date", required=False, default=None)
+    frequency_break_query = Parameter("frequency_break_query", required=False, default=None)
+    start_break_query = Parameter("start_break_query", required=False, default=None)
+    end_break_query = Parameter("end_break_query", required=False, default=None)
 
     # Materialization parameters
     materialize_after_dump = Parameter("materialize_after_dump", default=False, required=False)
@@ -143,22 +145,16 @@ with Flow(
         partition_columns=partition_columns,
         lower_bound_date=lower_bound_date,
         date_format=partition_date_format,
+        start_break_query=start_break_query,
+        end_break_query=end_break_query,
+        frequency_break_query=frequency_break_query,
     )
     formated_query.set_upstream(db_object)
 
-    db_execute = database_execute(  # pylint: disable=invalid-name
-        database=db_object,
-        query=formated_query,
-        flow_name="dump_db",
-        labels=current_flow_labels,
-        dataset_id=dataset_id,
-        table_id=table_id,
-    )
-    db_execute.set_upstream(formated_query)
-
     # Dump batches to files
     dump_upload = dump_upload_batch(
-        database=db_object,
+        db_object=db_object,
+        queries=formated_query,
         batch_size=batch_size,
         dataset_id=dataset_id,
         table_id=table_id,
@@ -168,7 +164,7 @@ with Flow(
         biglake_table=biglake_table,
         log_number_of_batches=log_number_of_batches,
     )
-    dump_upload.set_upstream(db_execute)
+    dump_upload.set_upstream(formated_query)
 
     with case(materialize_after_dump, True):
         # Trigger DBT flow run
