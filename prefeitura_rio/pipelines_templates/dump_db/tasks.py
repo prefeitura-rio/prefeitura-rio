@@ -649,6 +649,11 @@ def build_chunked_queries(
         end_date_str = break_query_end
         break_query_start = break_query_start
 
+    log("Breaking query into multiple chunks based on frequency")
+    log(f"break_query_frequency: {break_query_frequency}")
+    log(f"break_query_start: {break_query_start}")
+    log(f"break_query_end: {end_date_str}")
+
     current_start = datetime.strptime(break_query_start, date_format)
     end_date = datetime.strptime(end_date_str, date_format)
     queries = []
