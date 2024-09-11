@@ -3,7 +3,7 @@ import shutil
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 from uuid import uuid4
 
 try:
@@ -510,59 +510,73 @@ def format_partitioned_query(
     dataset_id: str,
     table_id: str,
     database_type: str,
-    partition_columns: List[str] = None,
-    lower_bound_date: str = None,
-    date_format: str = None,
-    break_query_start: str = None,
-    break_query_end: str = None,
-    break_query_frequency: str = None,
-    wait=None,  # pylint: disable=unused-argument
-):
+    partition_columns: Optional[List[str]] = None,
+    lower_bound_date: Optional[str] = None,
+    date_format: Optional[str] = None,
+    break_query_start: Optional[str] = None,
+    break_query_end: Optional[str] = None,
+    break_query_frequency: Optional[str] = None,
+    wait: Optional[str] = None,  # pylint: disable=unused-argument
+) -> List[str]:
     """
     Formats a query for fetching partitioned data.
     """
     if not partition_columns or partition_columns[0] == "":
         log("NO partition column specified. Returning query as is")
-        return query
+        return [query]
 
     partition_column = partition_columns[0]
     last_partition_date = get_last_partition_date(dataset_id, table_id, date_format)
 
     if last_partition_date is None:
-        log("NO partition blob was found. Returning query as is")
-        return query
+        log("NO partition blob was found.")
+
+    # Check if the table already exists in BigQuery.
+    table = bd.Table(dataset_id, table_id)
+
+    # If it doesn't, return the query as is, so we can fetch the whole table.
+    if not table.table_exists(mode="staging"):
+        log("NO tables was found.")
 
     if not break_query_frequency:
         return [
             build_single_partition_query(
-                query,
-                partition_column,
-                lower_bound_date,
-                last_partition_date,
-                date_format,
-                database_type,
+                query=query,
+                partition_column=partition_column,
+                lower_bound_date=lower_bound_date,
+                last_partition_date=last_partition_date,
+                date_format=date_format,
+                database_type=database_type,
             )
         ]
 
     return build_chunked_queries(
-        query,
-        partition_column,
-        date_format,
-        database_type,
-        break_query_start,
-        break_query_end,
-        break_query_frequency,
+        query=query,
+        partition_column=partition_column,
+        date_format=date_format,
+        database_type=database_type,
+        break_query_start=break_query_start,
+        break_query_end=break_query_end,
+        break_query_frequency=break_query_frequency,
+        lower_bound_date=lower_bound_date,
+        last_partition_date=last_partition_date,
     )
 
 
-def get_last_partition_date(dataset_id, table_id, date_format):
-    blobs = get_storage_blobs(dataset_id, table_id)
-    storage_partitions_dict = parse_blobs_to_partition_dict(blobs)
-    return extract_last_partition_date(storage_partitions_dict, date_format)
+def get_last_partition_date(
+    dataset_id: str, table_id: str, date_format: Optional[str]
+) -> Optional[str]:
+    blobs = get_storage_blobs(dataset_id=dataset_id, table_id=table_id)
+    storage_partitions_dict = parse_blobs_to_partition_dict(blobs=blobs)
+    return extract_last_partition_date(
+        partitions_dict=storage_partitions_dict, date_format=date_format
+    )
 
 
-def get_last_date(lower_bound_date, date_format, last_partition_date):
-    now = datetime.now()
+def get_last_date(
+    lower_bound_date: Optional[str], date_format: str, last_partition_date: str
+) -> str:
+    now: datetime = datetime.now()
     if lower_bound_date == "current_year":
         return now.replace(month=1, day=1).strftime(date_format)
     elif lower_bound_date == "current_month":
@@ -578,16 +592,25 @@ def get_last_date(lower_bound_date, date_format, last_partition_date):
 
 
 def build_single_partition_query(
-    query, partition_column, lower_bound_date, last_partition_date, date_format, database_type
-):
-    last_date = get_last_date(lower_bound_date, date_format, last_partition_date)
+    query: str,
+    partition_column: str,
+    lower_bound_date: Optional[str],
+    last_partition_date: str,
+    date_format: str,
+    database_type: str,
+) -> str:
+    last_date: str = get_last_date(
+        lower_bound_date=lower_bound_date,
+        date_format=date_format,
+        last_partition_date=last_partition_date,
+    )
     aux_name = f"a{uuid4().hex}"[:8]
 
     log(
         f"Partitioned DETECTED: {partition_column}, returning a NEW QUERY with partitioned columns and filters"  # noqa
     )
     if database_type == "oracle":
-        oracle_date_format = "YYYY-MM-DD" if date_format == "%Y-%m-%d" else date_format
+        oracle_date_format: str = "YYYY-MM-DD" if date_format == "%Y-%m-%d" else date_format
         return f"""
         with {aux_name} as ({query})
         select * from {aux_name}
@@ -602,67 +625,110 @@ def build_single_partition_query(
 
 
 def build_chunked_queries(
-    query,
-    partition_column,
-    date_format,
-    database_type,
-    break_query_start,
-    break_query_end,
-    break_query_frequency,
-):
-    log(
-        f"Break query in multiple queries\n break_query_frequency:{break_query_frequency}\n break_query_start:{break_query_start}\n break_query_end:{break_query_end}"  # noqa
-    )
-    current_start = datetime.strptime(break_query_start, date_format)
-    end_date = datetime.strptime(break_query_end, date_format)
-    queries = []
+    query: str,
+    partition_column: str,
+    date_format: str,
+    database_type: str,
+    break_query_start: Optional[str],
+    break_query_end: Optional[str],
+    break_query_frequency: Optional[str],
+    lower_bound_date: Optional[str],
+    last_partition_date: str,
+) -> List[str]:
+    log(f"Breaking query into multiple chunks based on frequency: {break_query_frequency}")
+
+    if lower_bound_date:
+        last_date = get_last_date(
+            lower_bound_date=lower_bound_date,
+            date_format=date_format,
+            last_partition_date=last_partition_date,
+        )
+        end_date_str = max(break_query_end, last_date)
+        break_query_start = min(break_query_start, last_date)
+    else:
+        end_date_str = break_query_end
+        break_query_start = break_query_start
+
+    current_start: datetime = datetime.strptime(break_query_start, date_format)
+    end_date: datetime = datetime.strptime(end_date_str, date_format)
+    queries: List[str] = []
 
     while current_start <= end_date:
-        current_end = calculate_end_date(current_start, end_date, break_query_frequency)
+        current_end = calculate_end_date(
+            current_start=current_start,
+            end_date=end_date,
+            break_query_frequency=break_query_frequency,
+        )
         queries.append(
             build_chunk_query(
-                query, partition_column, date_format, database_type, current_start, current_end
+                query=query,
+                partition_column=partition_column,
+                date_format=date_format,
+                database_type=database_type,
+                current_start=current_start,
+                current_end=current_end,
             )
         )
-        current_start = get_next_start_date(current_start, break_query_frequency)
+        current_start = get_next_start_date(
+            current_start=current_start, break_query_frequency=break_query_frequency
+        )
 
     log(f"Total queries created: {len(queries)}")
     return queries
 
 
-def calculate_end_date(current_start, end_date, break_query_frequency):
+def calculate_end_date(
+    current_start: datetime, end_date: datetime, break_query_frequency: Optional[str]
+) -> datetime:
     if break_query_frequency.lower() == "month":
-        return min(get_last_day_of_month(current_start), end_date)
+        return min(get_last_day_of_month(date=current_start), end_date)
     elif break_query_frequency.lower() == "year":
-        return min(get_last_day_of_year(current_start.year), end_date)
+        return min(get_last_day_of_year(year=current_start.year), end_date)
     elif break_query_frequency.lower() == "day":
         return min(current_start, end_date)
     elif break_query_frequency.lower() == "week":
         return min(current_start + timedelta(days=6), end_date)
     elif break_query_frequency.lower() == "bimester":
-        return min(get_last_day_of_month(add_months(current_start, 2)), end_date)
+        return min(
+            get_last_day_of_month(date=add_months(start_date=current_start, months=2)), end_date
+        )
     elif break_query_frequency.lower() == "trimester":
-        return min(get_last_day_of_month(add_months(current_start, 3)), end_date)
+        return min(
+            get_last_day_of_month(date=add_months(start_date=current_start, months=3)), end_date
+        )
     elif break_query_frequency.lower() == "quadrimester":
-        return min(get_last_day_of_month(add_months(current_start, 4)), end_date)
+        return min(
+            get_last_day_of_month(date=add_months(start_date=current_start, months=4)), end_date
+        )
     elif break_query_frequency.lower() == "semester":
-        return min(get_last_day_of_month(add_months(current_start, 6)), end_date)
+        return min(
+            get_last_day_of_month(date=add_months(start_date=current_start, months=6)), end_date
+        )
     else:
-        raise ValueError(f"Unsupported break_query_frequency: {break_query_frequency}")
+        raise ValueError(
+            f"Unsupported break_query_frequency: {break_query_frequency}. Use one of the following: year, month, day, week, bimester, trimester, quadrimester and semester"  # noqa
+        )
 
 
 def build_chunk_query(
-    query, partition_column, date_format, database_type, current_start, current_end
-):
-    aux_name = f"a{uuid4().hex}"[:8]
+    query: str,
+    partition_column: str,
+    date_format: str,
+    database_type: str,
+    current_start: datetime,
+    current_end: datetime,
+) -> str:
+    aux_name: str = f"a{uuid4().hex}"[:8]
+
     if database_type == "oracle":
-        oracle_date_format = "YYYY-MM-DD" if date_format == "%Y-%m-%d" else date_format
+        oracle_date_format: str = "YYYY-MM-DD" if date_format == "%Y-%m-%d" else date_format
         return f"""
         with {aux_name} as ({query})
         select * from {aux_name}
         where {partition_column} >= TO_DATE('{current_start.strftime(date_format)}', '{oracle_date_format}') # noqa
             and {partition_column} < TO_DATE('{(current_end + timedelta(days=1)).strftime(date_format)}', '{oracle_date_format}') # noqa
         """
+
     return f"""
     with {aux_name} as ({query})
     select * from {aux_name}
@@ -671,9 +737,9 @@ def build_chunk_query(
     """
 
 
-def get_next_start_date(current_start, break_query_frequency):
+def get_next_start_date(current_start: datetime, break_query_frequency: Optional[str]) -> datetime:
     if break_query_frequency.lower() == "month":
-        return add_months(current_start, 1)
+        return add_months(start_date=current_start, months=1)
     elif break_query_frequency.lower() == "year":
         return datetime(current_start.year + 1, 1, 1)
     elif break_query_frequency.lower() == "day":
@@ -682,22 +748,24 @@ def get_next_start_date(current_start, break_query_frequency):
         return current_start + timedelta(days=7)
     elif break_query_frequency.lower() in ["bimester", "trimester", "quadrimester", "semester"]:
         months_to_add = {"bimester": 2, "trimester": 3, "quadrimester": 4, "semester": 6}
-        return add_months(current_start, months_to_add[break_query_frequency.lower()])
+        return add_months(
+            start_date=current_start, months=months_to_add[break_query_frequency.lower()]
+        )
     return current_start
 
 
-def get_last_day_of_month(date):
-    next_month = date.replace(day=28) + timedelta(days=4)
+def get_last_day_of_month(date: datetime) -> datetime:
+    next_month: datetime = date.replace(day=28) + timedelta(days=4)
     return next_month - timedelta(days=next_month.day)
 
 
-def get_last_day_of_year(year):
+def get_last_day_of_year(year: int) -> datetime:
     return datetime(year, 12, 31)
 
 
-def add_months(start_date, months):
-    new_month = start_date.month + months
-    year_increment = (new_month - 1) // 12
+def add_months(start_date: datetime, months: int) -> datetime:
+    new_month: int = start_date.month + months
+    year_increment: int = (new_month - 1) // 12
     new_month = (new_month - 1) % 12 + 1
-    new_year = start_date.year + year_increment
+    new_year: int = start_date.year + year_increment
     return datetime(new_year, new_month, start_date.day)
