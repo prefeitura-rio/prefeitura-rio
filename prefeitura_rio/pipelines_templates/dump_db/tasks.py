@@ -119,7 +119,7 @@ def database_execute(
 
 @task
 def dump_upload_batch(
-    db_object,
+    database,
     queries: List[str],
     batch_size: int,
     dataset_id: str,
@@ -151,8 +151,8 @@ def dump_upload_batch(
             for n_query, query in enumerate(queries):
                 log(f"query {n_query} of {len(queries)}")
 
-                database = database_execute(  # pylint: disable=invalid-name
-                    database=db_object,
+                database_execute(  # pylint: disable=invalid-name
+                    database=database,
                     query=query,
                 )
 

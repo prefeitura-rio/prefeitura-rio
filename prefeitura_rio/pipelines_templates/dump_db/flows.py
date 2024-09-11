@@ -153,7 +153,7 @@ with Flow(
 
     # Dump batches to files
     dump_upload = dump_upload_batch(
-        db_object=db_object,
+        database=db_object,
         queries=formated_query,
         batch_size=batch_size,
         dataset_id=dataset_id,
