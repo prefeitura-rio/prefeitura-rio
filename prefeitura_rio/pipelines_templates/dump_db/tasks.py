@@ -599,7 +599,7 @@ def build_single_partition_query(
     date_format: str,
     database_type: str,
 ) -> str:
-    last_date: str = get_last_date(
+    last_date = get_last_date(
         lower_bound_date=lower_bound_date,
         date_format=date_format,
         last_partition_date=last_partition_date,
@@ -610,7 +610,7 @@ def build_single_partition_query(
         f"Partitioned DETECTED: {partition_column}, returning a NEW QUERY with partitioned columns and filters"  # noqa
     )
     if database_type == "oracle":
-        oracle_date_format: str = "YYYY-MM-DD" if date_format == "%Y-%m-%d" else date_format
+        oracle_date_format = "YYYY-MM-DD" if date_format == "%Y-%m-%d" else date_format
         return f"""
         with {aux_name} as ({query})
         select * from {aux_name}
@@ -649,9 +649,9 @@ def build_chunked_queries(
         end_date_str = break_query_end
         break_query_start = break_query_start
 
-    current_start: datetime = datetime.strptime(break_query_start, date_format)
-    end_date: datetime = datetime.strptime(end_date_str, date_format)
-    queries: List[str] = []
+    current_start = datetime.strptime(break_query_start, date_format)
+    end_date = datetime.strptime(end_date_str, date_format)
+    queries = []
 
     while current_start <= end_date:
         current_end = calculate_end_date(
@@ -718,7 +718,7 @@ def build_chunk_query(
     current_start: datetime,
     current_end: datetime,
 ) -> str:
-    aux_name: str = f"a{uuid4().hex}"[:8]
+    aux_name = f"a{uuid4().hex}"[:8]
 
     if database_type == "oracle":
         oracle_date_format: str = "YYYY-MM-DD" if date_format == "%Y-%m-%d" else date_format
@@ -755,7 +755,7 @@ def get_next_start_date(current_start: datetime, break_query_frequency: Optional
 
 
 def get_last_day_of_month(date: datetime) -> datetime:
-    next_month: datetime = date.replace(day=28) + timedelta(days=4)
+    next_month = date.replace(day=28) + timedelta(days=4)
     return next_month - timedelta(days=next_month.day)
 
 
@@ -764,8 +764,8 @@ def get_last_day_of_year(year: int) -> datetime:
 
 
 def add_months(start_date: datetime, months: int) -> datetime:
-    new_month: int = start_date.month + months
-    year_increment: int = (new_month - 1) // 12
+    new_month = start_date.month + months
+    year_increment = (new_month - 1) // 12
     new_month = (new_month - 1) % 12 + 1
-    new_year: int = start_date.year + year_increment
+    new_year = start_date.year + year_increment
     return datetime(new_year, new_month, start_date.day)
