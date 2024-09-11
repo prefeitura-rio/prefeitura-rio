@@ -745,8 +745,8 @@ def build_chunk_query(
         return f"""
         with {aux_name} as ({query})
         select * from {aux_name}
-        where {partition_column} >= TO_DATE('{current_start.strftime(date_format)}', '{oracle_date_format}') # noqa
-            and {partition_column} < TO_DATE('{(current_end + timedelta(days=1)).strftime(date_format)}', '{oracle_date_format}') # noqa
+        where {partition_column} >= TO_DATE('{current_start.strftime(date_format)}', '{oracle_date_format}')
+            and {partition_column} < TO_DATE('{(current_end + timedelta(days=1)).strftime(date_format)}', '{oracle_date_format}')
         """
 
     return f"""
