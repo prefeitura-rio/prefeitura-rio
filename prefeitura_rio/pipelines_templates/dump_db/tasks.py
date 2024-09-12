@@ -130,6 +130,7 @@ def dump_upload_batch(
     batch_data_type: str = "csv",
     biglake_table: bool = True,
     log_number_of_batches: int = 100,
+    retry_dump_upload_attempts: int = 2,
 ):
     """
     This task will dump and upload batches of data, sequentially.
@@ -143,13 +144,14 @@ def dump_upload_batch(
     cleared_partitions = set()
     cleared_table = False
 
-    attempts = 10
+    attempts = retry_dump_upload_attempts
     wait_seconds = 30
+    total_idx = 0
 
     while attempts >= 0:
-        total_idx = 0
         try:
             for n_query, query in enumerate(queries):
+                log(f"Attempt: { retry_dump_upload_attempts - attempts}")
                 log(f"query {n_query} of {len(queries)}")
 
                 database_execute(  # pylint: disable=invalid-name
@@ -485,12 +487,15 @@ def dump_upload_batch(
 
                 total_idx += idx
 
+                attempts = -1
+
         except Exception as e:
             if attempts == 0:
                 log(f"last executed query: {query}")
                 raise e
             else:
                 log(f"Remaning Attempts: {attempts}. Retry in {wait_seconds}s", level="error")
+                log(f"executed query: {query}")
                 log(e, level="error")
                 attempts -= 1
                 time.sleep(wait_seconds)  # wait 30 secondds

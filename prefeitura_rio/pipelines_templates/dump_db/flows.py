@@ -49,6 +49,7 @@ with Flow(
     break_query_frequency = Parameter("break_query_frequency", required=False, default=None)
     break_query_start = Parameter("break_query_start", required=False, default=None)
     break_query_end = Parameter("break_query_end", required=False, default=None)
+    retry_dump_upload_attempts = Parameter("retry_dump_upload_attempts", required=False, default=1)
 
     # Materialization parameters
     materialize_after_dump = Parameter("materialize_after_dump", default=False, required=False)
@@ -163,6 +164,7 @@ with Flow(
         batch_data_type=batch_data_type,
         biglake_table=biglake_table,
         log_number_of_batches=log_number_of_batches,
+        retry_dump_upload_attempts=retry_dump_upload_attempts,
     )
     dump_upload.set_upstream(formated_query)
 
