@@ -195,7 +195,7 @@ def dump_upload_batch(
 
                 # Now loop until we have no more data.
                 batch = db_object.fetch_batch(batch_size)
-                idx = 1
+                idx = 0
                 while len(batch) > 0:
                     prepath.mkdir(parents=True, exist_ok=True)
                     # Log progress each 100 batches.
