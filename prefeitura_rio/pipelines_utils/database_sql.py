@@ -8,12 +8,15 @@ from typing import List
 
 try:
     import cx_Oracle
+    import psycopg2
     import pymysql.cursors
     import pyodbc
 except ImportError:
     from prefeitura_rio.utils import base_assert_dependencies
 
-    base_assert_dependencies(["cx_Oracle", "pymysql", "pyodbc"], extras=["pipelines-templates"])
+    base_assert_dependencies(
+        ["cx_Oracle", "pymysql", "pyodbc", "psycopg2"], extras=["pipelines-templates"]
+    )
 
 
 class Database(ABC):
@@ -330,3 +333,82 @@ class Oracle(Database):
         Fetches all rows from the Oracle.
         """
         return [list(item) for item in self._cursor.fetchall()]
+
+
+class Postgres(Database):
+    """
+    PostgreSQL database.
+    """
+
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self,
+        hostname: str,
+        user: str,
+        password: str,
+        database: str,
+        port: int = 5432,
+        **kwargs,
+    ) -> None:
+        """
+        Initializes the PostgreSQL database.
+
+        Args:
+            hostname: The hostname of the database.
+            port: The port of the database.
+            user: The username of the database.
+            password: The password of the database.
+            database: The database name.
+        """
+        super().__init__(
+            hostname,
+            port,
+            user,
+            password,
+            database,
+        )
+
+    def connect(self):
+        """
+        Connect to the PostgreSQL database.
+        """
+        return psycopg2.connect(
+            host=self._hostname,
+            port=self._port,
+            user=self._user,
+            password=self._password,
+            database=self._database,
+        )
+
+    def get_cursor(self):
+        """
+        Returns a cursor for the PostgreSQL database.
+        """
+        return self._connection.cursor()
+
+    def execute_query(self, query: str) -> None:
+        """
+        Execute query on the PostgreSQL database.
+
+        Args:
+            query: The query to execute.
+        """
+        self._cursor.execute(query)
+
+    def get_columns(self) -> List[str]:
+        """
+        Returns the column names of the PostgreSQL database.
+        """
+        return [desc[0] for desc in self._cursor.description]
+
+    def fetch_batch(self, batch_size: int) -> List[List]:
+        """
+        Fetches a batch of rows from the PostgreSQL database.
+        """
+        return self._cursor.fetchmany(batch_size)
+
+    def fetch_all(self) -> List[List]:
+        """
+        Fetches all rows from the PostgreSQL database.
+        """
+        return self._cursor.fetchall()
