@@ -53,11 +53,6 @@ except ImportError:
     pass
 
 
-@task(
-    checkpoint=False,
-    max_retries=settings.TASK_MAX_RETRIES_DEFAULT,
-    retry_delay=timedelta(seconds=settings.TASK_RETRY_DELAY_DEFAULT),
-)
 def database_get(
     database_type: str,
     hostname: str,
@@ -120,12 +115,18 @@ def database_execute(
 
 @task
 def dump_upload_batch(
-    database,
+    database_type: str,
+    hostname: str,
+    port: int,
+    user: str,
+    password: str,
+    database: str,
     queries: List[str],
     batch_size: int,
     dataset_id: str,
     table_id: str,
     dump_mode: str,
+    charset: str = NOT_SET,
     partition_columns: List[str] = None,
     batch_data_type: str = "csv",
     biglake_table: bool = True,
@@ -150,24 +151,34 @@ def dump_upload_batch(
 
     while attempts >= 0:
         try:
+
             for n_query, query in enumerate(queries):
                 log(f"Attempt: { retry_dump_upload_attempts - attempts}")
                 log(f"query {n_query} of {len(queries)}")
 
-                database_execute(  # pylint: disable=invalid-name
+                db_object = database_get(
+                    database_type=database_type,
+                    hostname=hostname,
+                    port=port,
+                    user=user,
+                    password=password,
                     database=database,
+                    charset=charset,
+                )
+
+                database_execute(  # pylint: disable=invalid-name
+                    database=db_object,
                     query=query,
                 )
 
                 # Get data columns
-                columns = database.get_columns()
+                columns = db_object.get_columns()
                 log(f"Got columns: {columns}")
 
                 new_query_cols = build_query_new_columns(table_columns=columns)
                 log(f"New query columns without accents: {new_query_cols}")
 
                 prepath = Path(prepath)
-                prepath.mkdir(parents=True, exist_ok=True)
                 log(f"Got prepath: {prepath}")
 
                 if not partition_columns or partition_columns[0] == "":
@@ -181,9 +192,10 @@ def dump_upload_batch(
                     log(f"Partition column: {partition_column} FOUND!! Write to partitioned files")
 
                 # Now loop until we have no more data.
-                batch = database.fetch_batch(batch_size)
+                batch = db_object.fetch_batch(batch_size)
                 idx = 1
                 while len(batch) > 0:
+                    prepath.mkdir(parents=True, exist_ok=True)
                     # Log progress each 100 batches.
                     log_mod(
                         msg=f"Dumping batch {idx} with size {len(batch)}",
@@ -454,42 +466,22 @@ def dump_upload_batch(
                             mod=log_number_of_batches,
                         )
                     # Get next batch.
-                    batch = database.fetch_batch(batch_size)
+                    batch = db_object.fetch_batch(batch_size)
                     idx += 1
 
-                # TODO: Find a way to save the state of the database and cursor
-                # Retry attempts did not work because the connection is lost
-                # Saving the object with pickle or dill also does not work; error: cannot pickle 'pyodbc.Connection' object # noqa
-                # Using paginated queries with offset would be a slow solution because each iteration requires sorting the query, which is a slow operation in the database # noqa
-
-                # attempts = 10
-                # wait_seconds = 30
-                # while attempts >= 0:
-                #     try:
-                #         # Get next batch.
-                #         batch = database.fetch_batch(batch_size)
-                #         idx += 1
-                #         attempts = -1
-                #     except Exception as e:
-                #         if attempts == 0:
-                #             raise e
-                #         else:
-                #             log(f"Remaning Attempts: {attempts}. Retry in {wait_seconds}s", level="error") # noqa
-                #             log(e, level="error")
-                #             attempts -= 1
-                #             time.sleep(wait_seconds)  # wait 30 secondds
+                    # delete batch data from prepath
+                    shutil.rmtree(prepath)
+                    # end back while
 
                 log(
                     msg=f"Successfully dumped {idx} batches with size {batch_size}, total of {idx*batch_size}",  # noqa
                 )
-                # delete data from prepath
-                shutil.rmtree(prepath)
 
                 total_idx += idx
-
-                # end of for
+                # end of for queries
 
             attempts = -1
+            # end try
 
         except Exception as e:
             if attempts == 0:
@@ -502,6 +494,7 @@ def dump_upload_batch(
                 attempts -= 1
                 time.sleep(wait_seconds)  # wait 30 secondds
 
+        # end of while attempts
     log(
         msg=f"Successfully dumped {len(queries)} queries, {total_idx} batches with size {batch_size}, total of {total_idx*batch_size}"  # noqa
     )

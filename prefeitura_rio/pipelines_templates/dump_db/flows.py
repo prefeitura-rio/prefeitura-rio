@@ -13,7 +13,6 @@ except ImportError:
 
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_templates.dump_db.tasks import (
-    database_get,
     dump_upload_batch,
     format_partitioned_query,
 )
@@ -126,16 +125,6 @@ with Flow(
     partition_columns = parse_comma_separated_string_to_list(text=partition_columns)
     partition_columns.set_upstream(current_flow_project_name)
     # Execute query on SQL Server
-    db_object = database_get(
-        database_type=database_type,
-        hostname=hostname,
-        port=port,
-        user=user,
-        password=password,
-        database=database,
-        charset=databaset_charset,
-    )
-    db_object.set_upstream(partition_columns)
 
     # Format partitioned query if required
     formated_query = format_partitioned_query(
@@ -150,11 +139,9 @@ with Flow(
         break_query_end=break_query_end,
         break_query_frequency=break_query_frequency,
     )
-    formated_query.set_upstream(db_object)
 
     # Dump batches to files
     dump_upload = dump_upload_batch(
-        database=db_object,
         queries=formated_query,
         batch_size=batch_size,
         dataset_id=dataset_id,
@@ -165,6 +152,13 @@ with Flow(
         biglake_table=biglake_table,
         log_number_of_batches=log_number_of_batches,
         retry_dump_upload_attempts=retry_dump_upload_attempts,
+        database_type=database_type,
+        hostname=hostname,
+        port=port,
+        user=user,
+        password=password,
+        database=database,
+        charset=databaset_charset,
     )
     dump_upload.set_upstream(formated_query)
 
