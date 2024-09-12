@@ -487,7 +487,9 @@ def dump_upload_batch(
 
                 total_idx += idx
 
-                attempts = -1
+                # end of for
+
+            attempts = -1
 
         except Exception as e:
             if attempts == 0:
