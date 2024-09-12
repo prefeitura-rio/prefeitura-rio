@@ -45,6 +45,7 @@ try:
         Database,
         MySql,
         Oracle,
+        Postgres,
         SqlServer,
     )
 except ImportError:
@@ -85,6 +86,7 @@ def database_get(
     DATABASE_MAPPING: Dict[str, Database] = {
         "mysql": MySql,
         "oracle": Oracle,
+        "postgres": Postgres,
         "sql_server": SqlServer,
     }
 
