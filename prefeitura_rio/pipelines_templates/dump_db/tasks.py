@@ -147,17 +147,14 @@ def dump_upload_batch(
     cleared_partitions = set()
     cleared_table = False
 
-    attempts = retry_dump_upload_attempts
     wait_seconds = 30
     total_idx = 0
-
-    while attempts >= 0:
-        try:
-
-            for n_query, query in enumerate(queries):
+    for n_query, query in enumerate(queries):
+        attempts = retry_dump_upload_attempts
+        while attempts >= 0:
+            try:
                 log(f"Attempt: { retry_dump_upload_attempts - attempts}")
                 log(f"query {n_query} of {len(queries)}")
-
                 db_object = database_get_db(
                     database_type=database_type,
                     hostname=hostname,
@@ -473,30 +470,29 @@ def dump_upload_batch(
 
                     # delete batch data from prepath
                     shutil.rmtree(prepath)
-                    # end back while
 
-                log(
-                    msg=f"Successfully dumped {idx} batches with size {batch_size}, total of {idx*batch_size}",  # noqa
-                )
+                # end try
+                attempts = -1
 
-                total_idx += idx
-                # end of for queries
+            except Exception as e:
+                if attempts == 0:
+                    log(f"last executed query: {query}")
+                    raise e
+                else:
+                    log(f"Remaning Attempts: {attempts}. Retry in {wait_seconds}s", level="error")
+                    log(f"executed query: {query}", level="error")
+                    log(e, level="error")
+                    attempts -= 1
+                    time.sleep(wait_seconds)  # wait 30 secondds
 
-            attempts = -1
-            # end try
+            # end back while
 
-        except Exception as e:
-            if attempts == 0:
-                log(f"last executed query: {query}")
-                raise e
-            else:
-                log(f"Remaning Attempts: {attempts}. Retry in {wait_seconds}s", level="error")
-                log(f"executed query: {query}", level="error")
-                log(e, level="error")
-                attempts -= 1
-                time.sleep(wait_seconds)  # wait 30 secondds
+        log(
+            msg=f"Successfully dumped {idx} batches with size {batch_size}, total of {idx*batch_size}",  # noqa
+        )
+        # end of for queries
+        total_idx += idx
 
-        # end of while attempts
     log(
         msg=f"Successfully dumped {len(queries)} queries, {total_idx} batches with size {batch_size}, total of {total_idx*batch_size}"  # noqa
     )
