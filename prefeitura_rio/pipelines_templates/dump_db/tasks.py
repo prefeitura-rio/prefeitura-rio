@@ -54,7 +54,7 @@ except ImportError:
     pass
 
 
-def database_get(
+def database_get_db(
     database_type: str,
     hostname: str,
     port: int,
@@ -158,7 +158,7 @@ def dump_upload_batch(
                 log(f"Attempt: { retry_dump_upload_attempts - attempts}")
                 log(f"query {n_query} of {len(queries)}")
 
-                db_object = database_get(
+                db_object = database_get_db(
                     database_type=database_type,
                     hostname=hostname,
                     port=port,
@@ -491,7 +491,7 @@ def dump_upload_batch(
                 raise e
             else:
                 log(f"Remaning Attempts: {attempts}. Retry in {wait_seconds}s", level="error")
-                log(f"executed query: {query}")
+                log(f"executed query: {query}", level="error")
                 log(e, level="error")
                 attempts -= 1
                 time.sleep(wait_seconds)  # wait 30 secondds
