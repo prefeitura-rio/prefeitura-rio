@@ -182,7 +182,7 @@ def dump_upload_batch(
 
                 # Now loop until we have no more data.
                 batch = database.fetch_batch(batch_size)
-                idx = 0
+                idx = 1
                 while len(batch) > 0:
                     # Log progress each 100 batches.
                     log_mod(
