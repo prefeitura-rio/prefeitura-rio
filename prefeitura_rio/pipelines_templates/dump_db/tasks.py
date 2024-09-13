@@ -200,7 +200,7 @@ def dump_upload_batch(
                     prepath.mkdir(parents=True, exist_ok=True)
                     # Log progress each 100 batches.
                     log_mod(
-                        msg=f"Dumping batch {idx} with size {len(batch)}",
+                        msg=f"Dumping batch {idx+1} with size {len(batch)}",
                         index=idx,
                         mod=log_number_of_batches,
                     )
