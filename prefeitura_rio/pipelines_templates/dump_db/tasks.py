@@ -149,12 +149,15 @@ def dump_upload_batch(
 
     wait_seconds = 30
     total_idx = 0
+    total_batchs_len = 0
+
     for n_query, query in enumerate(queries):
         attempts = retry_dump_upload_attempts
         while attempts >= 0:
             try:
                 log(f"Attempt: { retry_dump_upload_attempts - attempts}")
-                log(f"query {n_query} of {len(queries)}")
+                log(f"query {n_query} of {len(queries)} |{round(n_query / len(queries) * 100, 2)}")
+
                 db_object = database_get_db(
                     database_type=database_type,
                     hostname=hostname,
@@ -178,7 +181,6 @@ def dump_upload_batch(
                 log(f"New query columns without accents: {new_query_cols}")
 
                 prepath = Path(prepath)
-                log(f"Got prepath: {prepath}")
 
                 if not partition_columns or partition_columns[0] == "":
                     partition_column = None
@@ -193,6 +195,7 @@ def dump_upload_batch(
                 # Now loop until we have no more data.
                 batch = db_object.fetch_batch(batch_size)
                 idx = 0
+                batchs_len = 0
                 while len(batch) > 0:
                     prepath.mkdir(parents=True, exist_ok=True)
                     # Log progress each 100 batches.
@@ -201,6 +204,7 @@ def dump_upload_batch(
                         index=idx,
                         mod=log_number_of_batches,
                     )
+                    batchs_len += len(batch)
 
                     # Dump batch to file.
                     dataframe = batch_to_dataframe(batch, columns)
@@ -450,7 +454,7 @@ def dump_upload_batch(
                         # Upload them all at once
                         tb.append(filepath=prepath, if_exists="replace")
                         log_mod(
-                            msg=f"STEP UPLOAD: Sucessfully uploaded batch {idx} file to Storage",
+                            msg=f"STEP UPLOAD: Sucessfully uploaded batch {idx +1} file with size {len(batch)} to Storage",
                             index=idx,
                             mod=log_number_of_batches,
                         )
@@ -488,13 +492,14 @@ def dump_upload_batch(
             # end back while
 
         log(
-            msg=f"Successfully dumped {idx} batches with size {batch_size}, total of {idx*batch_size}",  # noqa
+            msg=f"Successfully dumped {idx} batches, total of  {batchs_len} rows",  # noqa
         )
         # end of for queries
         total_idx += idx
+        total_batchs_len += batchs_len
 
     log(
-        msg=f"Successfully dumped {len(queries)} queries, {total_idx} batches with size {batch_size}, total of {total_idx*batch_size}"  # noqa
+        msg=f"Successfully dumped {len(queries)} queries, {total_idx} batches, total of {total_batchs_len} rows"  # noqa
     )
 
 
