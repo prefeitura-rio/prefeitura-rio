@@ -172,7 +172,7 @@ def inject_env(
 
     if not environment:
         environment = get_flow_run_mode() or environment
-    log(f"Getting secret: {path}{secret_name}  |  {environment}")
+    log(f"Getting secret: {path}{secret_name}")
     secret_value = client.get_secret(
         secret_name=secret_name,
         type=type,
