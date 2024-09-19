@@ -35,7 +35,7 @@ with Flow(
         "dbt_model_secret_parameters", default=[], required=False
     )
     # a dict in the format {"secret_path":"", secret_name:""}
-    infisical_credential_path = Parameter("infisical_bd_path", default=None, required=False)
+    infisical_credential_path = Parameter("infisical_credential_path", default=None, required=False)
     dbt_project_materialization = Parameter(
         "dbt_project_materialization", default=None, required=False
     )
