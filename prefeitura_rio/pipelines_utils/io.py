@@ -10,6 +10,8 @@ try:
 except ImportError:
     pass
 
+import ruamel.yaml as ryaml
+
 from prefeitura_rio.pipelines_utils.logging import log
 from prefeitura_rio.utils import assert_dependencies
 
@@ -124,3 +126,22 @@ def untuple_clocks(clocks):
     Converts a list of tuples to a list of clocks.
     """
     return [clock[0] if isinstance(clock, tuple) else clock for clock in clocks]
+
+
+def load_ruamel():
+    """
+    Loads a YAML file.
+    """
+    ruamel = ryaml.YAML()
+    ruamel.default_flow_style = False
+    ruamel.top_level_colon_align = True
+    ruamel.indent(mapping=2, sequence=4, offset=2)
+    return ruamel
+
+
+def load_yaml_file(filepath: str) -> dict:
+    """
+    Loads the file that contains path to the models' metadata.
+    """
+    ruamel = load_ruamel()
+    return ruamel.load((Path(filepath)).open(encoding="utf-8"))
