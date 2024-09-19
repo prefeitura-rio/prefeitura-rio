@@ -85,6 +85,7 @@ pipelines = [
     "pandas",
     "prefect",
     "sentry-sdk",
+    "ruamel-yaml"
 ]
 pipelines-templates = [
     "croniter",
