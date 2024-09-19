@@ -35,7 +35,7 @@ with Flow(
         "dbt_model_secret_parameters", default=[], required=False
     )
     # a dict in the format {"secret_path":"", secret_name:""}
-    infisical_credential_path = Parameter("infisical_credential_path", default=None, required=False)
+    infisical_credential_dict = Parameter("infisical_credential_dict", default=None, required=False)
     dbt_project_materialization = Parameter(
         "dbt_project_materialization", default=None, required=False
     )
@@ -47,7 +47,7 @@ with Flow(
     )
     rename_flow_run.set_upstream(dbt_project_materialization)
 
-    secret_dict = inject_infisical_dbt_credential(secret_dict=infisical_credential_path)
+    secret_dict = inject_infisical_dbt_credential(secret_dict=infisical_credential_dict)
     secret_dict.set_upstream(rename_flow_run)
 
     project_materialization = inject_dbt_project_materialization(
