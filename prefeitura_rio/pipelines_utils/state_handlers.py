@@ -29,12 +29,14 @@ def handler_initialize_sentry(obj, old_state: State, new_state: State) -> State:
     return new_state
 
 
-def handler_inject_bd_credentials(obj, old_state: State, new_state: State) -> State:
+def handler_inject_bd_credentials(
+    obj, old_state: State, new_state: State, path: str = "/"
+) -> State:
     """
     State handler that will inject BD credentials into the environment.
     """
     if new_state.is_running():
-        inject_bd_credentials()
+        inject_bd_credentials(path=path)
     return new_state
 
 

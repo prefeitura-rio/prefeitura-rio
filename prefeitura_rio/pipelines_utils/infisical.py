@@ -183,7 +183,7 @@ def inject_env(
     environ[secret_name] = secret_value
 
 
-def inject_bd_credentials() -> None:
+def inject_bd_credentials(path: str = "/") -> None:
     """
     Loads Base dos Dados credentials from Infisical into environment variables.
     """
@@ -197,11 +197,7 @@ def inject_bd_credentials() -> None:
         "BASEDOSDADOS_CREDENTIALS_PROD",
         "BASEDOSDADOS_CREDENTIALS_STAGING",
     ]:
-        inject_env(
-            secret_name=secret_name,
-            environment=environment,
-            client=client,
-        )
+        inject_env(secret_name=secret_name, environment=environment, client=client, path=path)
 
     service_account_name = f"BASEDOSDADOS_CREDENTIALS_{environment.upper()}"
     service_account = base64.b64decode(environ[service_account_name])
