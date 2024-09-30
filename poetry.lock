@@ -175,39 +175,34 @@ files = [
 
 [[package]]
 name = "basedosdados"
-version = "2.0.0-beta.21"
+version = "2.0.0b22"
 description = "Organizar e facilitar o acesso a dados brasileiros através de tabelas públicas no BigQuery."
 optional = false
-python-versions = ">=3.8.1,<4"
-files = []
-develop = false
+python-versions = "<4,>=3.8.1"
+files = [
+    {file = "basedosdados-2.0.0b22-py3-none-any.whl", hash = "sha256:1de7a03eacb382fe536956cca8a28b4359d4c9c2007ce7b8e4b7993127cd1c2d"},
+    {file = "basedosdados-2.0.0b22.tar.gz", hash = "sha256:87140b54c334e30dbba9328b591927df5c31f47b49d3749076b54196e833448c"},
+]
 
 [package.dependencies]
-google-api-python-client = "^2.86"
-google-cloud-bigquery = "^3.10"
-google-cloud-bigquery-connection = "^1.12"
-google-cloud-bigquery-storage = "^2.19"
-google-cloud-storage = "^2.9"
-gql = {version = "^3.4", optional = true}
-loguru = "^0.7.0"
-pandas = "^2.0"
-pandas-gbq = "^0.19"
-pydata-google-auth = "^1.8"
-requests-toolbelt = {version = "^1", optional = true}
-tomlkit = "^0.11"
-tqdm = "^4"
+google-api-python-client = ">=2.86,<3.0"
+google-cloud-bigquery = ">=3.10,<4.0"
+google-cloud-bigquery-connection = ">=1.12,<2.0"
+google-cloud-bigquery-storage = ">=2.19,<3.0"
+google-cloud-storage = ">=2.9,<3.0"
+gql = {version = ">=3.4,<4.0", optional = true, markers = "extra == \"all\" or extra == \"upload\""}
+loguru = ">=0.7.0,<0.8.0"
+pandas = ">=2.0,<3.0"
+pandas-gbq = ">=0.19,<0.20"
+pydata-google-auth = ">=1.8,<2.0"
+requests-toolbelt = {version = ">=1,<2", optional = true, markers = "extra == \"all\" or extra == \"upload\""}
+tomlkit = ">=0.11,<0.12"
+tqdm = ">=4,<5"
 
 [package.extras]
 all = ["gql (>=3.4,<4.0)", "pandavro (>=1.7,<2.0)", "requests-toolbelt (>=1,<2)"]
 avro = ["pandavro (>=1.7,<2.0)"]
 upload = ["gql (>=3.4,<4.0)", "requests-toolbelt (>=1,<2)"]
-
-[package.source]
-type = "git"
-url = "https://github.com/basedosdados/mais"
-reference = "abf73f2ec7afb23abf34e9ec5f7d0797c333f8ae"
-resolved_reference = "abf73f2ec7afb23abf34e9ec5f7d0797c333f8ae"
-subdirectory = "python-package"
 
 [[package]]
 name = "black"
@@ -4171,4 +4166,4 @@ sgrc = ["aiohttp", "pendulum", "pytz", "requests"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "f0e0536d0cb04702e9f9018aee82475f1731157b3ca374532e25e36c4469dc99"
+content-hash = "d7f31247fdda10a83e254b30070dbffdae860becb26795e504e61a2f1ae8ca34"
