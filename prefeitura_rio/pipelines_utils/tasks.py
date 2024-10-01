@@ -388,22 +388,16 @@ def download_data_to_gcs(  # pylint: disable=R0912,R0913,R0914,R0915
 
     # Get billing project ID
     if not billing_project_id:
-        log(
-            "Billing project ID was not provided, trying to get it from environment variable"
-        )
+        log("Billing project ID was not provided, trying to get it from environment variable")
         try:
-            billing_project_id = bd_base.config["gcloud-projects"][bd_project_mode][
-                "name"
-            ]
+            billing_project_id = bd_base.config["gcloud-projects"][bd_project_mode]["name"]
         except KeyError:
             pass
         if not billing_project_id:
             raise ValueError(
                 "billing_project_id must be either provided or inferred from environment variables"
             )
-        log(
-            f"Billing project ID was inferred from environment variables: {billing_project_id}"
-        )
+        log(f"Billing project ID was inferred from environment variables: {billing_project_id}")
 
     # Checking if data exceeds the maximum allowed size
     log("Checking if data exceeds the maximum allowed size")
@@ -423,9 +417,7 @@ def download_data_to_gcs(  # pylint: disable=R0912,R0913,R0914,R0915
             unit="B",
             unit_divider=1024,
         )
-        raise ValueError(
-            f"Table size exceeds the maximum allowed size: {max_allowed_size}"
-        )
+        raise ValueError(f"Table size exceeds the maximum allowed size: {max_allowed_size}")
 
     # Get data
     log("Querying data from BigQuery")
@@ -437,9 +429,7 @@ def download_data_to_gcs(  # pylint: disable=R0912,R0913,R0914,R0915
     dest_project_id = dest_table["projectId"]
     dest_dataset_id = dest_table["datasetId"]
     dest_table_id = dest_table["tableId"]
-    log(
-        f"Query results were stored in {dest_project_id}.{dest_dataset_id}.{dest_table_id}"
-    )
+    log(f"Query results were stored in {dest_project_id}.{dest_dataset_id}.{dest_table_id}")
 
     blob_path = f"gs://datario/share/{dataset_id}/{table_id}/data*.csv.gz"
     log(f"Loading data to {blob_path}")
