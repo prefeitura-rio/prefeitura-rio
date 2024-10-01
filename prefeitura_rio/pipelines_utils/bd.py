@@ -55,11 +55,17 @@ def create_table_and_upload_to_gcs(
     log("STARTING TABLE CREATION MANAGEMENT")
     if dump_mode == "append":
         if tb.table_exists(mode="staging"):
-            log(f"MODE APPEND: Table ALREADY EXISTS:" f"\n{table_staging}" f"\n{storage_path_link}")
+            log(
+                f"MODE APPEND: Table ALREADY EXISTS:"
+                f"\n{table_staging}"
+                f"\n{storage_path_link}"
+            )
         else:
             # the header is needed to create a table when doesn't exist
             log("MODE APPEND: Table DOESN'T EXISTS\nStart to CREATE HEADER file")
-            header_path = dump_header_to_file(data_path=data_path, data_type=source_format)
+            header_path = dump_header_to_file(
+                data_path=data_path, data_type=source_format
+            )
             log("MODE APPEND: Created HEADER file:\n" f"{header_path}")
 
             tb.create(
@@ -77,7 +83,9 @@ def create_table_and_upload_to_gcs(
                 f"{storage_path_link}"
             )  # pylint: disable=C0301
 
-            st.delete_table(mode="staging", bucket_name=st.bucket_name, not_found_ok=True)
+            st.delete_table(
+                mode="staging", bucket_name=st.bucket_name, not_found_ok=True
+            )
             log(
                 "MODE APPEND: Sucessfully REMOVED HEADER DATA from Storage:\n"
                 f"{storage_path}\n"
@@ -90,7 +98,9 @@ def create_table_and_upload_to_gcs(
                 f"{storage_path}\n"
                 f"{storage_path_link}"
             )  # pylint: disable=C0301
-            st.delete_table(mode="staging", bucket_name=st.bucket_name, not_found_ok=True)
+            st.delete_table(
+                mode="staging", bucket_name=st.bucket_name, not_found_ok=True
+            )
             log(
                 "MODE OVERWRITE: Sucessfully DELETED OLD DATA from Storage:\n"
                 f"{storage_path}\n"
@@ -106,7 +116,7 @@ def create_table_and_upload_to_gcs(
         # the header is needed to create a table when doesn't exist
         # in overwrite mode the header is always created
         log("MODE OVERWRITE: Table DOESN'T EXISTS\nStart to CREATE HEADER file")
-        header_path = dump_header_to_file(data_path=data_path, source_format=source_format)
+        header_path = dump_header_to_file(data_path=data_path, data_type=source_format)
         log("MODE OVERWRITE: Created HEADER file:\n" f"{header_path}")
 
         tb.create(
@@ -190,7 +200,9 @@ def get_storage_blobs(dataset_id: str, table_id: str, mode: str = "staging") -> 
     )
 
 
-def list_blobs_with_prefix(bucket_name: str, prefix: str, mode: str = "prod") -> List[Blob]:
+def list_blobs_with_prefix(
+    bucket_name: str, prefix: str, mode: str = "prod"
+) -> List[Blob]:
     """
     Lists all the blobs in the bucket that begin with the prefix.
     This can be used to list all blobs in a "folder", e.g. "public/".
