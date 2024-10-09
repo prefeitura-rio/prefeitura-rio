@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from os import getenv
+from pathlib import Path
+from sys import executable
 from typing import Dict, List, Union
 
 try:
@@ -90,7 +93,13 @@ def run_dbt_model(
         return_all=True,
         command=run_command,
     )
-    dbt_logs = dbt_task.run()
+
+    # Add current Python executable's path to the PATH environment variable
+    # to make sure we can find the dbt executable
+    current_path = getenv("PATH")
+    executable_path = Path(executable).parent
+    new_path = f"{current_path}:{executable_path}"
+    dbt_logs = dbt_task.run(env={"PATH": new_path})
 
     log("\n".join(dbt_logs))
 
