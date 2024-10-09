@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "prefeitura-rio"
-version = "1.1.2"
+version = "1.1.3a2"
 description = "Pacote Python que implementa utilidades para nossos projetos!"
 authors = ["Gabriel Gazola Milan <gabriel.gazola@poli.ufrj.br>"]
 license = "GPL-3.0-only"
@@ -12,44 +12,102 @@ keywords = ["python", "utilities", "government"]
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
 aiohttp = { version = "^3.8.5", optional = true }
-basedosdados = { version = "2.0.0b13", extras = ["upload"], optional = true }
+# basedosdados = { git = "https://github.com/basedosdados/mais", rev = "7a91bc3ab9b6d846c2e809129b31994a1a81fc11", subdirectory = "python-package", extras = [
+#     "upload",
+# ] }
+basedosdados = { version = "2.0.0b22", extras = ["upload"] }
+croniter = { version = "^2.0.1", optional = true }
+cx-oracle = { version = "^8.3.0", optional = true }
+dask = { version = "^2023.11.0", optional = true }
+earthengine-api = { version = "^0.1.379", optional = true }
+geojsplit = { version = "^0.1.2", optional = true }
+geopandas = { version = "^0.14.1", optional = true }
+geopy = { version = "^2.4.1", optional = true }
 google-cloud-storage = { version = "^2.10.0", optional = true }
-infisical = { version = "^1.4.2", optional = true }
+hvac = "0.11.2"
+infisical = { version = "^1.4.2, <1.6", optional = true }
 loguru = "^0.7.0"
 numpy = { version = "^1.23.3", optional = true }
 pandas = { version = "^2.0.3", optional = true }
 pendulum = { version = "^2.1.2", optional = true }
 prefect = { version = "1.4.1", optional = true }
+pymongo = { version = "^4.6.0", optional = true }
+pymysql = { version = "^1.1.0", optional = true }
+pyodbc = { version = "^5.0.1", optional = true }
 pytz = { version = "^2023.3", optional = true }
+redis-pal = { version = "^1.0.0", optional = true }
 requests = { version = "^2.31.0", optional = true }
 scikit-learn = { version = "^1.1.2", optional = true }
 sentry-sdk = { version = "^1.29.2", optional = true }
+shapely = { version = "^2.0.2", optional = true }
+jinja2 = { version = "^3.1.2", optional = true }
+gspread = { version = "^5.12.4", optional = true }
+ruamel-yaml = { version = "^0.18.6", optional = true }
+psycopg2-binary = { version = "^2.9.9", optional = true }
 
 [tool.poetry.extras]
 all = [
     "aiohttp",
     "basedosdados",
+    "croniter",
+    "cx-oracle",
+    "dask",
+    "earthengine-api",
+    "geojsplit",
+    "gspread",
+    "geopandas",
+    "geopy",
     "google-cloud-storage",
     "infisical",
     "numpy",
     "pandas",
     "pendulum",
     "prefect",
+    "pymongo",
+    "pymysql",
+    "pyodbc",
     "pytz",
+    "redis-pal",
     "requests",
     "scikit-learn",
+    "shapely",
     "sentry-sdk",
+    "jinja2",
+    "ruamel-yaml",
 ]
 metrics = ["numpy", "scikit-learn"]
 pipelines = [
     "basedosdados",
+    "dask",
     "google-cloud-storage",
     "infisical",
+    "jinja2",
     "pandas",
     "prefect",
     "sentry-sdk",
+    "ruamel-yaml"
+]
+pipelines-templates = [
+    "croniter",
+    "cx-oracle",
+    "earthengine-api",
+    "geojsplit",
+    "geopandas",
+    "geopy",
+    "gspread",
+    "psycopg2-binary",
+    "pymongo",
+    "pymysql",
+    "pyodbc",
+    "redis-pal",
+    "requests",
+    "shapely",
+    "jinja2",
 ]
 sgrc = ["aiohttp", "pendulum", "pytz", "requests"]
+
+actions = ["ruamel-yaml"]
+
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.3.0"

@@ -19,21 +19,24 @@ def handler_initialize_sentry(obj, old_state: State, new_state: State) -> State:
     """
     if new_state.is_running():
         sentry_dsn = get_secret("SENTRY_DSN")
+        sentry_dsn_secret = sentry_dsn.get("SENTRY_DSN")
         environment = get_flow_run_mode()
         sentry_sdk.init(
-            dsn=sentry_dsn,
+            dsn=sentry_dsn_secret,
             traces_sample_rate=0,
             environment=environment,
         )
     return new_state
 
 
-def handler_inject_bd_credentials(obj, old_state: State, new_state: State) -> State:
+def handler_inject_bd_credentials(
+    obj, old_state: State, new_state: State, path: str = "/"
+) -> State:
     """
     State handler that will inject BD credentials into the environment.
     """
     if new_state.is_running():
-        inject_bd_credentials()
+        inject_bd_credentials(path=path)
     return new_state
 
 
