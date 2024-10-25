@@ -486,6 +486,9 @@ def dump_upload_batch(
                     log(f"Remaning Attempts: {attempts}. Retry in {wait_seconds}s", level="error")
                     log(f"executed query: {query}", level="error")
                     log(e, level="error")
+                    # delete batch data from prepath
+                    shutil.rmtree(prepath)
+
                     attempts -= 1
                     time.sleep(wait_seconds)  # wait 30 secondds
 
