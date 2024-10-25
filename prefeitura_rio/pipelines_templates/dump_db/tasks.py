@@ -156,7 +156,9 @@ def dump_upload_batch(
         while attempts >= 0:
             try:
                 log(f"Attempt: { retry_dump_upload_attempts - attempts}")
-                log(f"query {n_query} of {len(queries)} |{round(n_query / len(queries) * 100, 2)}")
+                log(
+                    f"query {n_query+1} of {len(queries)} |{round(n_query+1 / len(queries) * 100, 2)}"
+                )
 
                 db_object = database_get_db(
                     database_type=database_type,
@@ -495,7 +497,7 @@ def dump_upload_batch(
             # end back while
 
         log(
-            msg=f"Successfully dumped {idx} batches, total of  {batchs_len} rows",  # noqa
+            msg=f"Successfully dumped {idx-1} batches, total of  {batchs_len} rows",  # noqa
         )
         # end of for queries
         total_idx += idx
