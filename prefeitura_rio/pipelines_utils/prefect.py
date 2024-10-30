@@ -83,11 +83,14 @@ def set_default_parameters(flow: prefect.Flow, default_parameters: dict) -> pref
 
 
 @task
-def task_get_current_flow_run_labels() -> List[str]:
+def task_get_current_flow_run_labels(agent_label: str = None) -> List[str]:
     """
     Returns the labels of the current flow run.
     """
-    return prefect.context.get("config").get("cloud").get("agent").get("labels")
+    if agent_label:
+        return agent_label
+    else:
+        return prefect.context.get("config").get("cloud").get("agent").get("labels")
 
 
 @task
