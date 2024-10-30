@@ -138,7 +138,7 @@ class SqlServer(Database):
             "Encrypt=no;"
             "TrustServerCertificate=yes;"
         )
-        return pyodbc.connect(conn_str)
+        return pyodbc.connect(conn_str, timeout=300)
 
     def get_cursor(self):
         """
