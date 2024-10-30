@@ -139,6 +139,7 @@ def generate_dump_db_schedules(  # pylint: disable=too-many-arguments,too-many-l
     db_charset: str = NOT_SET,
     batch_size: int = 50000,
     runs_interval_minutes: int = 15,
+    agent_label: str = None,
 ) -> List[IntervalClock]:
     """
     Generates multiple schedules for database dumping.
@@ -159,6 +160,7 @@ def generate_dump_db_schedules(  # pylint: disable=too-many-arguments,too-many-l
             "biglake_table": biglake_table,
             "dump_mode": parameters["dump_mode"],
             "execute_query": query_to_line(parameters["execute_query"]),
+            "agent_label": agent_label,
         }
 
         # Add remaining parameters if value is not None
