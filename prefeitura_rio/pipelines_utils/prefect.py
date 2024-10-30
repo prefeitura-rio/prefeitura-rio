@@ -83,14 +83,15 @@ def set_default_parameters(flow: prefect.Flow, default_parameters: dict) -> pref
 
 
 @task
-def task_get_current_flow_run_labels(agent_label: str = None) -> List[str]:
+def task_get_current_flow_run_labels(agent_label: List[str] = [NOT_SET]) -> List[str]:
     """
     Returns the labels of the current flow run.
     """
-    if agent_label:
-        return agent_label
-    else:
+
+    if agent_label == [NOT_SET]:
         return prefect.context.get("config").get("cloud").get("agent").get("labels")
+    else:
+        return agent_label
 
 
 @task
@@ -139,7 +140,7 @@ def generate_dump_db_schedules(  # pylint: disable=too-many-arguments,too-many-l
     db_charset: str = NOT_SET,
     batch_size: int = 50000,
     runs_interval_minutes: int = 15,
-    agent_label: str = None,
+    agent_label: List[str] = [NOT_SET],
 ) -> List[IntervalClock]:
     """
     Generates multiple schedules for database dumping.

@@ -54,7 +54,7 @@ with Flow(
     materialize_after_dump = Parameter("materialize_after_dump", default=False, required=False)
     materialization_mode = Parameter("materialization_mode", default="dev", required=False)
     materialize_to_datario = Parameter("materialize_to_datario", default=False, required=False)
-    agent_label = Parameter("agent_label", default=None, required=False)
+    agent_label = Parameter("agent_label", default=[NOT_SET], required=False)
 
     # Dump to GCS after? Should only dump to GCS if materializing to datario
     dump_to_gcs = Parameter("dump_to_gcs", default=False, required=False)
