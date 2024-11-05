@@ -249,7 +249,3 @@ def main():
     archive_flow_versions(results, prefect_client)
 
     log("Done!")
-
-
-if __name__ == "__main__":
-    main()
