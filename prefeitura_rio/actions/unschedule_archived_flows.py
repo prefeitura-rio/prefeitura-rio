@@ -18,7 +18,7 @@ try:
     from prefect.utilities.graphql import with_args
 except ImportError:
     from prefeitura_rio.utils import base_assert_dependencies
-    
+
     base_assert_dependencies(["basedosdados", "prefect"], extras=["pipelines"])
 
 
