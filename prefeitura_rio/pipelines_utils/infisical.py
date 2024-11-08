@@ -66,7 +66,7 @@ def get_secret_folder(
     if not secret_path.startswith("/"):
         secret_path = f"/{secret_path}"
     if secret_path and not secret_name:
-        log(msg="Getting Folder: {environment} | {secret_path}")
+        log(msg=f"Getting Folder: {environment} | {secret_path}")
         secrets = client.get_all_secrets(path=secret_path, environment=environment)
         return {s.secret_name: s.secret_value for s in secrets}
 
@@ -180,7 +180,7 @@ def inject_env(
 
     if not environment:
         environment = get_flow_run_mode() or environment
-    log(f"Getting secret: {path}{secret_name}")
+    log(msg=f"Getting secret: {path}{secret_name}")
     secret_value = client.get_secret(
         secret_name=secret_name,
         type=type,
@@ -199,7 +199,7 @@ def inject_bd_credentials(path: str = "/") -> None:
 
     environment = get_flow_run_mode()
     # environment = "staging"
-    log(f"ENVIROMENT: {environment}")
+    log(msg=f"ENVIROMENT: {environment}")
     for secret_name in [
         "BASEDOSDADOS_CONFIG",
         "BASEDOSDADOS_CREDENTIALS_PROD",
