@@ -63,8 +63,6 @@ def get_secret_folder(
     if not environment:
         environment = get_flow_run_mode() or environment
 
-    log(msg="ENVIROMENT: ")
-
     if not secret_path.startswith("/"):
         secret_path = f"/{secret_path}"
     if secret_path and not secret_name:
