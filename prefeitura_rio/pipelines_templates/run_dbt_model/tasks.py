@@ -27,8 +27,6 @@ def inject_infisical_dbt_credential(secret_dict: dict = None) -> None:
         secret_path = secret_dict["secret_path"]
         secret_name = secret_dict["secret_name"]
 
-        log(msg=f"Getting secret: {secret_path}{secret_name}")
-
         service_account_dict_b64 = get_secret(path=secret_path, secret_name=secret_name)
 
         service_account = base64.b64decode(service_account_dict_b64[secret_name])

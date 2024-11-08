@@ -57,15 +57,22 @@ def get_secret_folder(
     Returns:
         _type_: _description_
     """
+
     if client is None:
         client = get_infisical_client()
     if not environment:
         environment = get_flow_run_mode() or environment
+
+    log(msg="ENVIROMENT: ")
+
     if not secret_path.startswith("/"):
         secret_path = f"/{secret_path}"
     if secret_path and not secret_name:
-        secrets = client.get_all_secrets(path=secret_path)
+        log(msg="Getting Folder: {environment} | {secret_path}")
+        secrets = client.get_all_secrets(path=secret_path, environment=environment)
         return {s.secret_name: s.secret_value for s in secrets}
+
+    log(msg=f"Getting secret: {environment} | {secret_path}{secret_name}")
 
     secret = client.get_secret(
         secret_name=secret_name, path=secret_path, type=type, environment=environment
@@ -99,6 +106,9 @@ def get_secret(
 
     if not environment:
         environment = get_flow_run_mode() or environment
+
+    log(msg=f"Getting secret: {environment} | {path}{secret_name}")
+
     secret = client.get_secret(
         secret_name=secret_name,
         type=type,
