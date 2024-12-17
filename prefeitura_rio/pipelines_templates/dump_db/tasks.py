@@ -669,13 +669,7 @@ def build_chunked_queries(
     log("Breaking query into multiple chunks based on frequency")
     log(f"    break_query_frequency: {break_query_frequency}")
     log(f"    break_query_start: {start_date_str}")
-
-    if break_query_end != "current_day":
-        log(f"    break_query_end: {end_date_str}")
-    else:
-        end_date_day = end_date + timedelta(1)
-        end_date_str_day = datetime.strftime(end_date_day, date_format)
-        log(f"    break_query_end: {end_date_str_day}")
+    log(f"    break_query_end: {end_date_str}")
 
     current_start = datetime.strptime(start_date_str, date_format)
     end_date = datetime.strptime(end_date_str, date_format)
@@ -754,14 +748,14 @@ def build_chunk_query(
         with {aux_name} as ({query})
         select * from {aux_name}
         where {partition_column} >= TO_DATE('{current_start.strftime(date_format)}', '{oracle_date_format}')
-            and {partition_column} < TO_DATE('{(current_end + timedelta(days=1)).strftime(date_format)}', '{oracle_date_format}')
+            and {partition_column} <= TO_DATE('{current_end.strftime(date_format)}', '{oracle_date_format}')
         """
 
     return f"""
     with {aux_name} as ({query})
     select * from {aux_name}
     where {partition_column} >= '{current_start.strftime(date_format)}'
-        and {partition_column} < '{(current_end + timedelta(days=1)).strftime(date_format)}'
+        and {partition_column} <= '{current_end .strftime(date_format)}'
     """
 
 
