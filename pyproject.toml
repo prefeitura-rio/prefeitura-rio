@@ -10,7 +10,7 @@ repository = "https://github.com/prefeitura-rio/prefeitura-rio"
 keywords = ["python", "utilities", "government"]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.11"
+python = ">=3.10,<3.11"
 aiohttp = { version = "^3.8.5", optional = true }
 # basedosdados = { git = "https://github.com/basedosdados/mais", rev = "7a91bc3ab9b6d846c2e809129b31994a1a81fc11", subdirectory = "python-package", extras = [
 #     "upload",
