@@ -10,7 +10,7 @@ repository = "https://github.com/prefeitura-rio/prefeitura-rio"
 keywords = ["python", "utilities", "government"]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.11"
+python = ">=3.10,<3.11"
 aiohttp = { version = "^3.8.5", optional = true }
 # basedosdados = { git = "https://github.com/basedosdados/mais", rev = "7a91bc3ab9b6d846c2e809129b31994a1a81fc11", subdirectory = "python-package", extras = [
 #     "upload",
@@ -25,7 +25,7 @@ geopandas = { version = "^0.14.1", optional = true }
 geopy = { version = "^2.4.1", optional = true }
 google-cloud-storage = { version = "^2.10.0", optional = true }
 hvac = "0.11.2"
-infisical = { version = "^1.4.2, <1.6", optional = true }
+infisical = { git = "https://github.com/philipk19238/infisical-python.git", rev = "14a721d98ac1e82586a6831c109759c00484340e", branch = "main" }
 loguru = "^0.7.0"
 numpy = { version = "^1.23.3", optional = true }
 pandas = { version = "^2.0.3", optional = true }
