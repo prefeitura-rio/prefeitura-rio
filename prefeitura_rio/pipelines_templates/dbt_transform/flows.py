@@ -66,7 +66,7 @@ with Flow(
 
     print(f"current_flow_project_name: {current_flow_project_name}")
 
-    download_repository_task = download_repository(GITHUB_REPO)
+    download_repository_task = download_repository(git_repository_path=GITHUB_REPO)
     download_repository_task.set_upstream(current_flow_project_name)
 
     install_dbt_packages = execute_dbt(
