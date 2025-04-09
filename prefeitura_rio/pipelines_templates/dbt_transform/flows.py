@@ -58,14 +58,6 @@ with Flow(
     with case(RENAME_FLOW, True):
         rename_flow_task = rename_current_flow_run_dbt(command=COMMAND, select=SELECT, exclude=EXCLUDE, target=target)
 
-    print(f"GITHUB_REPO: {GITHUB_REPO}")
-
-    print(f"ENVIRONMENT: {ENVIRONMENT}")
-
-    print(f"GCS_BUCKETS: {GCS_BUCKETS}")
-
-    print(f"current_flow_project_name: {current_flow_project_name}")
-
     download_repository_task = download_repository(git_repository_path=GITHUB_REPO)
     download_repository_task.set_upstream(current_flow_project_name)
 
@@ -97,7 +89,9 @@ with Flow(
 
     with case(SEND_DISCORD_REPORT, True):
         create_dbt_report_task = create_dbt_report(
-            running_results=running_results, repository_path=download_repository_task
+            running_results=running_results, 
+            repository_path=download_repository_task,
+            project_name=current_flow_project_name,
         )
 
     ####################################

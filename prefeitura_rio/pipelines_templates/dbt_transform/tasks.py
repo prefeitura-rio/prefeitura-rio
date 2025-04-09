@@ -132,7 +132,7 @@ def execute_dbt(
 
 
 @task
-def create_dbt_report(running_results: dbtRunnerResult, repository_path: str) -> None:
+def create_dbt_report(running_results: dbtRunnerResult, repository_path: str, project_name: str) -> None:
     """
     Creates a report based on the results of running dbt commands.
 
@@ -171,12 +171,24 @@ def create_dbt_report(running_results: dbtRunnerResult, repository_path: str) ->
     log(general_report)
 
     # Get Parameters
-    param_report = ["**Parametros**:"]
-    for key, value in prefect.context.get("parameters").items():
-        if key == "rename_flow":
-            continue
-        if value:
-            param_report.append(f"- {key}: `{value}`")
+    param_report = ["**Parametros**:"]    
+
+    parameters = prefect.context.get("parameters")
+
+    param_report.append(f"- Projeto: `{project_name}`")
+    param_report.append(f"- Environment: `{parameters.get('environment')}`")
+    param_report.append(f"- Command: `{parameters.get('command')}`")
+
+    if parameters.get("select"):
+        param_report.append(f"- Select: `{parameters.get('select')}`")
+    if parameters.get("exclude"):
+        param_report.append(f"- Exclude: `{parameters.get('exclude')}`")
+    if parameters.get("flag"):
+        param_report.append(f"- Flag: `{parameters.get('flag')}`")
+
+
+    param_report.append(f"- GitHub Repo: `{parameters.get('github_repo').rsplit('/', 1)[-1].removesuffix('.git')}`")
+
     param_report = "\n".join(param_report)
     param_report += " \n"
 
@@ -190,7 +202,7 @@ def create_dbt_report(running_results: dbtRunnerResult, repository_path: str) ->
     message = f"{param_report}\n{general_report}" if include_report else param_report
 
     send_message(
-        title=f"{emoji} Execução `dbt {command}` finalizada {complement}",
+        title=f"{emoji} [{project_name}] - Execução `dbt {command}` finalizada {complement}",
         message=message,
         file_path=log_path,
         monitor_slug="dbt-runs",

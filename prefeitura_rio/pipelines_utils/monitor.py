@@ -72,7 +72,6 @@ def send_message(title, message, monitor_slug, file_path=None, username=None):
 ## {title}
 > Environment: {environment}
 > Flow Run: [{flow_name}](https://pipelines.dados.rio/flow-run/{flow_run_id})
-> Task Run: [{task_name}](https://pipelines.dados.rio/task-run/{task_run_id})
     """
     # Calculate max char count for message
     message_max_char_count = 2000 - len(header_content)
