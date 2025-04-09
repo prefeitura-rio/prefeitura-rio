@@ -53,7 +53,7 @@ with Flow(
     target = get_target_from_environment(environment=ENVIRONMENT)
 
     current_flow_project_name = get_current_flow_project_name()
-    current_flow_project_name.set_upstream(get_target_from_environment)
+    current_flow_project_name.set_upstream(target)
 
     with case(RENAME_FLOW, True):
         rename_flow_task = rename_current_flow_run_dbt(command=COMMAND, select=SELECT, exclude=EXCLUDE, target=target)
