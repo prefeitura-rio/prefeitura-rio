@@ -104,6 +104,10 @@ class Settings:
         return "[TEMPLATE] Ingerir tabela de URL"
 
     @property
+    def FLOW_NAME_DBT_TRANSFORM(self) -> str:
+        return "[TEMPLATE] Transformar tabelas com DBT"
+
+    @property
     def GCS_DUMP_MAX_BYTES_PROCESSED_PER_TABLE(self) -> int:
         return 5 * 1024 * 1024 * 1024  # 5GB
 

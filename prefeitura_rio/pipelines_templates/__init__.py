@@ -18,3 +18,6 @@ from prefeitura_rio.pipelines_templates.geolocate.flows import (  # noqa
 from prefeitura_rio.pipelines_templates.run_dbt_model.flows import (  # noqa
     templates__run_dbt_model__flow as run_dbt_model,
 )
+from prefeitura_rio.pipelines_templates.dbt_transform.flows import (  # noqa
+    templates__dbt_transform__flow as dbt_transform,
+)
