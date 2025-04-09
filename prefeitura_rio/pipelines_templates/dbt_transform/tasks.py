@@ -243,12 +243,12 @@ def get_target_from_environment(environment: str):
 
 
 @task
-def download_dbt_artifacts_from_gcs(dbt_path: str, environment: str, gcs_bucket: GcsBucket):
+def download_dbt_artifacts_from_gcs(dbt_path: str, environment: str, gcs_buckets: GcsBucket):
     """
     Retrieves the dbt artifacts from Google Cloud Storage.
     """
 
-    gcs_bucket = gcs_bucket.value[environment]
+    gcs_bucket = gcs_buckets.value[environment]
 
     target_base_path = os.path.join(dbt_path, "target_base")
 
