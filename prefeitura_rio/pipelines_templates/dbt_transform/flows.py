@@ -41,6 +41,7 @@ with Flow(
     EXCLUDE = Parameter("exclude", default=None, required=False)
     FLAG = Parameter("flag", default=None, required=False)
     GITHUB_REPO = Parameter("github_repo", default=None, required=True)
+    BIGQUERY_PROJECT = Parameter("bigquery_project", default=None, required=True)
 
     # GCP
     ENVIRONMENT = Parameter("environment", default="dev")
@@ -52,14 +53,11 @@ with Flow(
     ####################################
     target = get_target_from_environment(environment=ENVIRONMENT)
 
-    current_flow_project_name = get_current_flow_project_name()
-    current_flow_project_name.set_upstream(target)
-
     with case(RENAME_FLOW, True):
         rename_flow_task = rename_current_flow_run_dbt(command=COMMAND, select=SELECT, exclude=EXCLUDE, target=target)
 
     download_repository_task = download_repository(git_repository_path=GITHUB_REPO)
-    download_repository_task.set_upstream(current_flow_project_name)
+    download_repository_task.set_upstream(target)
 
     install_dbt_packages = execute_dbt(
         repository_path=download_repository_task,
@@ -91,7 +89,7 @@ with Flow(
         create_dbt_report_task = create_dbt_report(
             running_results=running_results, 
             repository_path=download_repository_task,
-            project_name=current_flow_project_name,
+            project_name=BIGQUERY_PROJECT,
         )
 
     ####################################
