@@ -248,7 +248,7 @@ def download_dbt_artifacts_from_gcs(dbt_path: str, environment: str, gcs_buckets
     Retrieves the dbt artifacts from Google Cloud Storage.
     """
 
-    gcs_bucket = gcs_buckets.value[environment]
+    gcs_bucket = gcs_buckets[environment]
 
     target_base_path = os.path.join(dbt_path, "target_base")
 
@@ -267,14 +267,14 @@ def download_dbt_artifacts_from_gcs(dbt_path: str, environment: str, gcs_buckets
 
 
 @task
-def upload_dbt_artifacts_to_gcs(dbt_path: str, environment: str, gcs_bucket: GcsBucket):
+def upload_dbt_artifacts_to_gcs(dbt_path: str, environment: str, gcs_buckets: GcsBucket):
     """
     Sends the dbt artifacts to Google Cloud Storage.
     """
 
     dbt_artifacts_path = os.path.join(dbt_path, "target_base")
 
-    gcs_bucket = gcs_bucket.value[environment]
+    gcs_bucket = gcs_buckets[environment]
 
     upload_to_cloud_storage(dbt_artifacts_path, gcs_bucket)
     log(f"DBT artifacts sent to GCS bucket: {gcs_bucket}", level="info")
