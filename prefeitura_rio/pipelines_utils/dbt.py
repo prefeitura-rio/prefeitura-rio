@@ -3,6 +3,7 @@ from os import getenv
 from pathlib import Path
 from sys import executable
 from typing import Dict, List, Union
+import re
 
 try:
     from prefect.tasks.dbt.dbt import DbtShellTask
