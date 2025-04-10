@@ -260,3 +260,28 @@ def generate_dump_url_schedules(  # pylint: disable=too-many-arguments,too-many-
             )
         )
     return clocks
+
+
+def generate_dbt_transform_schedules(  # pylint: disable=too-many-arguments,too-many-locals
+    interval: timedelta,
+    start_date: datetime,
+    labels: List[str],
+    flow_run_parameters: List[dict],
+    runs_interval_minutes: int = 2,
+) -> List[IntervalClock]:
+    """
+    Generates multiple schedules for dbt transform.
+    """
+    clocks = []
+    for count, parameters in enumerate(flow_run_parameters):
+        new_interval = parameters["interval"] if "interval" in parameters else interval
+
+        clocks.append(
+            IntervalClock(
+                interval=new_interval,
+                start_date=start_date + timedelta(minutes=runs_interval_minutes * count),
+                labels=labels,
+                parameter_defaults=parameters,
+            )
+        )
+    return clocks
