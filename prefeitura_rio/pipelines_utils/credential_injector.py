@@ -37,7 +37,7 @@ def authenticated_task(
             logger = prefect.context.get("logger")
             env = prefect.context.get("parameters")["environment"]
             logger.debug(f"[Injected] Set BD credentials for environment {env}")
-            inject_bd_credentials(environment=env)
+            inject_bd_credentials()
 
             logger.debug("[Injected] Now executing function normally...")
             return function(**kwargs)
