@@ -53,7 +53,7 @@ async def send_discord_webhook(
             raise ValueError(f"Error sending message to Discord webhook: {webhook_url}")
 
 
-def send_message(title, message, monitor_slug, file_path=None, username=None):
+def send_message(title, message, monitor_slug, file_path=None, username=None, prefect_environment: str):
     """
     Sends a message with the given title and content to a webhook.
 
@@ -62,15 +62,12 @@ def send_message(title, message, monitor_slug, file_path=None, username=None):
         message (str): The content of the message.
         username (str, optional): The username to be used for the webhook. Defaults to None.
     """
-    environment = prefect.context.get("parameters").get("environment")
     flow_name = prefect.context.get("flow_name")
     flow_run_id = prefect.context.get("flow_run_id")
-    task_name = prefect.context.get("task_full_name")
-    task_run_id = prefect.context.get("task_run_id")
 
     header_content = f"""
 ## {title}
-> Environment: {environment}
+> Prefect Environment: {prefect_environment}
 > Flow Run: [{flow_name}](https://pipelines.dados.rio/flow-run/{flow_run_id})
     """
     # Calculate max char count for message

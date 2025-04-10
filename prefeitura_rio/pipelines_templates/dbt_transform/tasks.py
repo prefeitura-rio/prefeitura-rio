@@ -9,6 +9,7 @@ import os
 import shutil
 
 from typing import TypedDict
+from typing import Optional
 
 
 import git
@@ -68,6 +69,7 @@ def download_repository(git_repository_path: str):
 
 @task
 def execute_dbt(
+    prefect_environment: str,
     repository_path: str,
     command: str = "run",
     target: str = "dev",
@@ -125,6 +127,7 @@ def execute_dbt(
             title="❌ Erro ao executar DBT",
             message="Não foi possível encontrar o arquivo de logs.",
             monitor_slug="dbt-runs",
+            prefect_environment=prefect_environment,
         )
         raise FAIL("DBT Run seems not successful. No logs found.")
 
@@ -132,7 +135,11 @@ def execute_dbt(
 
 
 @task
-def create_dbt_report(running_results: dbtRunnerResult, repository_path: str, project_name: str) -> None:
+def create_dbt_report(running_results: dbtRunnerResult, 
+                      repository_path: str, 
+                      bigquery_project: str,
+                      prefect_environment: str 
+                      ) -> None:
     """
     Creates a report based on the results of running dbt commands.
 
@@ -175,7 +182,7 @@ def create_dbt_report(running_results: dbtRunnerResult, repository_path: str, pr
 
     parameters = prefect.context.get("parameters")
 
-    param_report.append(f"- Projeto: `{project_name}`")
+    param_report.append(f"- Projeto: `{bigquery_project}`")
     param_report.append(f"- Environment: `{parameters.get('environment')}`")
     param_report.append(f"- Command: `{parameters.get('command')}`")
 
@@ -202,10 +209,12 @@ def create_dbt_report(running_results: dbtRunnerResult, repository_path: str, pr
     message = f"{param_report}\n{general_report}" if include_report else param_report
 
     send_message(
-        title=f"{emoji} [{project_name}] - Execução `dbt {command}` finalizada {complement}",
+        title=f"{emoji} [{bigquery_project}] - Execução `dbt {command}` finalizada {complement}",
         message=message,
         file_path=log_path,
         monitor_slug="dbt-runs",
+        prefect_environment=prefect_environment,
+
     )
 
     if not fully_successful:
