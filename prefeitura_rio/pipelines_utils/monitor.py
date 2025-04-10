@@ -53,7 +53,7 @@ async def send_discord_webhook(
             raise ValueError(f"Error sending message to Discord webhook: {webhook_url}")
 
 
-def send_message(title, message, monitor_slug, file_path=None, username=None, prefect_environment: str):
+def send_message(title, message, monitor_slug, prefect_environment: str, file_path=None, username=None):
     """
     Sends a message with the given title and content to a webhook.
 
