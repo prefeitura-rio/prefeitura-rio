@@ -4,8 +4,6 @@ from prefect.run_configs import KubernetesRun
 from prefect.storage import GCS
 
 from prefeitura_rio.core import settings
-from prefeitura_rio.pipelines_utils.custom import Flow
-
 from prefeitura_rio.pipelines_templates.dbt_transform.tasks import (
     check_if_dbt_artifacts_upload_is_needed,
     create_dbt_report,
@@ -16,10 +14,8 @@ from prefeitura_rio.pipelines_templates.dbt_transform.tasks import (
     rename_current_flow_run_dbt,
     upload_dbt_artifacts_to_gcs,
 )
-
-from prefeitura_rio.pipelines_utils.tasks import (
-    get_current_flow_project_name,
-)
+from prefeitura_rio.pipelines_utils.custom import Flow
+from prefeitura_rio.pipelines_utils.tasks import get_current_flow_project_name
 
 with Flow(
     name=settings.FLOW_NAME_DBT_TRANSFORM,
@@ -45,7 +41,6 @@ with Flow(
     ENVIRONMENT = Parameter("environment", default="dev")
     GCS_BUCKETS = Parameter("gcs_buckets", default=None, required=True)
 
-
     #####################################
     # Set environment
     ####################################
@@ -55,7 +50,9 @@ with Flow(
     current_flow_project_name.set_upstream(target)
 
     with case(RENAME_FLOW, True):
-        rename_flow_task = rename_current_flow_run_dbt(command=COMMAND, select=SELECT, exclude=EXCLUDE, target=target)
+        rename_flow_task = rename_current_flow_run_dbt(
+            command=COMMAND, select=SELECT, exclude=EXCLUDE, target=target
+        )
 
     download_repository_task = download_repository(git_repository_path=GITHUB_REPO)
     download_repository_task.set_upstream(current_flow_project_name)
@@ -89,7 +86,7 @@ with Flow(
 
     with case(SEND_DISCORD_REPORT, True):
         create_dbt_report_task = create_dbt_report(
-            running_results=running_results, 
+            running_results=running_results,
             repository_path=download_repository_task,
             bigquery_project=BIGQUERY_PROJECT,
             prefect_environment=current_flow_project_name,

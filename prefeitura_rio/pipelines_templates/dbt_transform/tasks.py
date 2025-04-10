@@ -7,7 +7,6 @@ Tasks for execute_dbt
 
 import os
 import shutil
-
 from typing import TypedDict
 
 import git
@@ -15,15 +14,18 @@ import prefect
 from dbt.cli.main import dbtRunner, dbtRunnerResult
 from prefect.client import Client
 from prefect.engine.signals import FAIL
-from prefeitura_rio.pipelines_utils.logging import log
 
-from prefeitura_rio.pipelines_utils.credential_injector import authenticated_task as task
+from prefeitura_rio.pipelines_utils.credential_injector import (
+    authenticated_task as task,
+)
 from prefeitura_rio.pipelines_utils.dbt import Summarizer, log_to_file, process_dbt_logs
 from prefeitura_rio.pipelines_utils.googleutils import (
     download_from_cloud_storage,
     upload_to_cloud_storage,
 )
+from prefeitura_rio.pipelines_utils.logging import log
 from prefeitura_rio.pipelines_utils.monitor import send_message
+
 
 class GcsBucket(TypedDict):
     prod: str
@@ -67,7 +69,7 @@ def download_repository(git_repository_path: str):
     if os.path.isdir(queries_path):
         log(f"'queries' folder found at: {queries_path}")
         return queries_path
-    
+
     return repository_path
 
 
@@ -80,7 +82,7 @@ def execute_dbt(
     exclude="",
     state="",
     flag="",
-    prefect_environment=""
+    prefect_environment="",
 ):
     """
     Executes a dbt command with the specified parameters.
@@ -139,11 +141,12 @@ def execute_dbt(
 
 
 @task
-def create_dbt_report(running_results: dbtRunnerResult, 
-                      repository_path: str, 
-                      bigquery_project: str,
-                      prefect_environment: str 
-                      ) -> None:
+def create_dbt_report(
+    running_results: dbtRunnerResult,
+    repository_path: str,
+    bigquery_project: str,
+    prefect_environment: str,
+) -> None:
     """
     Creates a report based on the results of running dbt commands.
 
@@ -182,7 +185,7 @@ def create_dbt_report(running_results: dbtRunnerResult,
     log(general_report)
 
     # Get Parameters
-    param_report = ["**Parametros**:"]    
+    param_report = ["**Parametros**:"]
 
     parameters = prefect.context.get("parameters")
 
@@ -197,8 +200,9 @@ def create_dbt_report(running_results: dbtRunnerResult,
     if parameters.get("flag"):
         param_report.append(f"- Flag: `{parameters.get('flag')}`")
 
-
-    param_report.append(f"- GitHub Repo: `{parameters.get('github_repo').rsplit('/', 1)[-1].removesuffix('.git')}`")
+    param_report.append(
+        f"- GitHub Repo: `{parameters.get('github_repo').rsplit('/', 1)[-1].removesuffix('.git')}`"
+    )
 
     param_report = "\n".join(param_report)
     param_report += " \n"
@@ -218,7 +222,6 @@ def create_dbt_report(running_results: dbtRunnerResult,
         file_path=log_path,
         monitor_slug="dbt-runs",
         prefect_environment=prefect_environment,
-
     )
 
     if not fully_successful:
@@ -264,7 +267,6 @@ def get_target_from_environment(environment: str):
         "dev": "dev",
     }
     return converter.get(environment, "dev")
-
 
 
 @task

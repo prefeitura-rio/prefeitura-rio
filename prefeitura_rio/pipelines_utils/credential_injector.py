@@ -32,7 +32,9 @@ def authenticated_task(
         """
 
         def new_function(**kwargs):
-            assert "environment" in prefect.context.get("parameters"), "Environment not found in flow parameters"
+            assert "environment" in prefect.context.get(
+                "parameters"
+            ), "Environment not found in flow parameters"
 
             logger = prefect.context.get("logger")
             env = prefect.context.get("parameters")["environment"]

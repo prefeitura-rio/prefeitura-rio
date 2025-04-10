@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
+import re
 from os import getenv
 from pathlib import Path
 from sys import executable
 from typing import Dict, List, Union
-import re
 
 try:
     from prefect.tasks.dbt.dbt import DbtShellTask
@@ -12,11 +12,11 @@ except ImportError:
 
     base_assert_dependencies(["prefect"], extras=["pipelines"])
 
-from prefeitura_rio.pipelines_utils.io import get_root_path
-from prefeitura_rio.pipelines_utils.logging import log
-
 import pandas as pd
 from dbt.contracts.results import RunResult, SourceFreshnessResult
+
+from prefeitura_rio.pipelines_utils.io import get_root_path
+from prefeitura_rio.pipelines_utils.logging import log
 
 
 def run_dbt_model(
@@ -175,6 +175,7 @@ def generate_basic_treated_queries(dataframe, save=False):
         if save:
             with open(f"./{table_id}.sql", "w") as f:
                 f.write(query)
+
 
 def process_dbt_logs(log_path: str = "dbt_repository/logs/dbt.log") -> pd.DataFrame:
     """
