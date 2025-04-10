@@ -4,7 +4,7 @@ from typing import Any, Callable, Union
 import prefect
 from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
 
-from pipelines.utils_dbt.infisical import inject_bd_credentials
+from prefeitura_rio.pipelines_utils.infisical import inject_bd_credentials
 
 
 def authenticated_task(
