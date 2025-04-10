@@ -21,8 +21,6 @@ from prefeitura_rio.pipelines_utils.tasks import (
     get_current_flow_project_name,
 )
 
-
-
 with Flow(
     name=settings.FLOW_NAME_DBT_TRANSFORM,
 ) as templates__dbt_transform__flow:
