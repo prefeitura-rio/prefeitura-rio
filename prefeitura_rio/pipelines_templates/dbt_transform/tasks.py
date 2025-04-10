@@ -69,7 +69,7 @@ def download_repository(git_repository_path: str):
 
 @task
 def execute_dbt(
-    prefect_environment: str,
+    prefect_environment: Optional[str],
     repository_path: str,
     command: str = "run",
     target: str = "dev",
@@ -77,6 +77,7 @@ def execute_dbt(
     exclude="",
     state="",
     flag="",
+
 ):
     """
     Executes a dbt command with the specified parameters.

@@ -85,6 +85,7 @@ with Flow(
         select=SELECT,
         exclude=EXCLUDE,
         flag=FLAG,
+        prefect_environment=current_flow_project_name,
     )
     running_results.set_upstream([install_dbt_packages, download_dbt_artifacts_task])
 
