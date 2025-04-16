@@ -189,10 +189,10 @@ def create_dbt_report(
 
     parameters = prefect.context.get("parameters")
 
-    if parameters.get('environment') == "dev":
-        bigquery_project = 'rj-' + bigquery_project + '-dev'
-    elif parameters.get('environment') == "prod":
-        bigquery_project = 'rj-' + bigquery_project
+    if parameters.get("environment") == "dev":
+        bigquery_project = "rj-" + bigquery_project + "-dev"
+    elif parameters.get("environment") == "prod":
+        bigquery_project = "rj-" + bigquery_project
 
     param_report.append(f"- Projeto BigQuery: `{bigquery_project}`")
     param_report.append(f"- Target dbt: `{parameters.get('environment')}`")
