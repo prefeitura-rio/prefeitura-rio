@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
-from typing import Union
+from typing import List, Union
+
+from google.cloud import storage
 
 try:
     import basedosdados as bd
-    from basedosdados.upload.base import Base
+    from basedosdados import Base
 except ImportError:
     from prefeitura_rio.utils import base_assert_dependencies
 
     base_assert_dependencies(["basedosdados"], extras=["pipelines"])
 
-from prefeitura_rio.pipelines_utils.io import dump_header_to_file
+from google.cloud.storage.blob import Blob
+
+from prefeitura_rio.pipelines_utils.env import get_bd_credentials_from_env
 from prefeitura_rio.pipelines_utils.logging import log
+from prefeitura_rio.pipelines_utils.pandas import dump_header_to_file
 from prefeitura_rio.pipelines_utils.prefect import get_flow_run_mode
 
 
@@ -21,6 +26,7 @@ def create_table_and_upload_to_gcs(
     table_id: str,
     dump_mode: str,
     biglake_table: bool = True,
+    source_format: str = "csv",
 ) -> None:
     """
     Create table using BD+ and upload to GCS.
@@ -53,7 +59,7 @@ def create_table_and_upload_to_gcs(
         else:
             # the header is needed to create a table when doesn't exist
             log("MODE APPEND: Table DOESN'T EXISTS\nStart to CREATE HEADER file")
-            header_path = dump_header_to_file(data_path=data_path)
+            header_path = dump_header_to_file(data_path=data_path, data_type=source_format)
             log("MODE APPEND: Created HEADER file:\n" f"{header_path}")
 
             tb.create(
@@ -62,6 +68,7 @@ def create_table_and_upload_to_gcs(
                 if_table_exists="replace",
                 biglake_table=biglake_table,
                 dataset_is_public=dataset_is_public,
+                source_format=source_format,
             )
 
             log(
@@ -99,7 +106,7 @@ def create_table_and_upload_to_gcs(
         # the header is needed to create a table when doesn't exist
         # in overwrite mode the header is always created
         log("MODE OVERWRITE: Table DOESN'T EXISTS\nStart to CREATE HEADER file")
-        header_path = dump_header_to_file(data_path=data_path)
+        header_path = dump_header_to_file(data_path=data_path, data_type=source_format)
         log("MODE OVERWRITE: Created HEADER file:\n" f"{header_path}")
 
         tb.create(
@@ -108,6 +115,7 @@ def create_table_and_upload_to_gcs(
             if_table_exists="replace",
             biglake_table=biglake_table,
             dataset_is_public=dataset_is_public,
+            source_format=source_format,
         )
 
         log(
@@ -159,3 +167,40 @@ def get_project_id(mode: str = None) -> str:
         raise ValueError("Mode must be 'prod' or 'staging'")
     base = Base()
     return base.config["gcloud-projects"][mode]["name"]
+
+
+def get_storage_blobs(dataset_id: str, table_id: str, mode: str = "staging") -> list:
+    """
+    Get all blobs from a table in a dataset.
+
+    Args:
+        dataset_id (str): dataset id
+        table_id (str): table id
+        mode (str, optional): mode to use. Defaults to "staging".
+
+    Returns:
+        list: list of blobs
+    """
+
+    bd_storage = bd.Storage(dataset_id=dataset_id, table_id=table_id)
+    return list(
+        bd_storage.client["storage_staging"]
+        .bucket(bd_storage.bucket_name)
+        .list_blobs(prefix=f"{mode}/{bd_storage.dataset_id}/{bd_storage.table_id}/")
+    )
+
+
+def list_blobs_with_prefix(bucket_name: str, prefix: str, mode: str = "prod") -> List[Blob]:
+    """
+    Lists all the blobs in the bucket that begin with the prefix.
+    This can be used to list all blobs in a "folder", e.g. "public/".
+    Mode needs to be "prod" or "staging"
+    """
+
+    credentials = get_bd_credentials_from_env(mode=mode)
+    storage_client = storage.Client(credentials=credentials)
+
+    # Note: Client.list_blobs requires at least package version 1.17.0.
+    blobs = storage_client.list_blobs(bucket_name, prefix=prefix)
+
+    return list(blobs)

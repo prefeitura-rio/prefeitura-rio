@@ -133,3 +133,5 @@ dmypy.json
 
 # Dummy test files
 /test*.py
+**/test*.*
+.direnv
