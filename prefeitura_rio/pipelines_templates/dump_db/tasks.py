@@ -610,6 +610,7 @@ def build_single_partition_query(
     date_format: str,
     database_type: str,
 ) -> str:
+
     last_date = get_last_date(
         lower_bound_date=lower_bound_date,
         date_format=date_format,
@@ -620,6 +621,7 @@ def build_single_partition_query(
     log(
         f"Partitioned DETECTED: {partition_column}, returning a NEW QUERY with partitioned columns and filters"  # noqa
     )
+
     if database_type == "oracle":
         oracle_date_format = "YYYY-MM-DD" if date_format == "%Y-%m-%d" else date_format
         return f"""
@@ -631,7 +633,7 @@ def build_single_partition_query(
     return f"""
     with {aux_name} as ({query})
     select * from {aux_name}
-    where {partition_column} >= '{last_date}'
+    where CONVERT(DATE, {partition_column}) >= '{last_date}'
     """
 
 
@@ -754,8 +756,8 @@ def build_chunk_query(
     return f"""
     with {aux_name} as ({query})
     select * from {aux_name}
-    where {partition_column} >= '{current_start.strftime(date_format)}'
-        and {partition_column} <= '{current_end .strftime(date_format)}'
+    where CONVERT(DATE, {partition_column}) >= '{current_start.strftime(date_format)}'
+        and CONVERT(DATE, {partition_column}) <= '{current_end .strftime(date_format)}'
     """
 
 
