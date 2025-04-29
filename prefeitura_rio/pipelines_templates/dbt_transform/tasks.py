@@ -25,12 +25,43 @@ from prefeitura_rio.pipelines_utils.googleutils import (
 )
 from prefeitura_rio.pipelines_utils.logging import log
 from prefeitura_rio.pipelines_utils.monitor import send_message
-
+from prefeitura_rio.pipelines_utils.infisical import get_secret
 
 class GcsBucket(TypedDict):
     prod: str
     dev: str
 
+
+@task
+def add_dbt_secrets_to_env():
+    """
+    Loads secrets from Infisical and sets them as environment variables.
+    
+    """
+
+    DBT_SECRETS = [
+        "DBT_BQ_MONITORING_GCP_BIGQUERY_AUDIT_LOGS_TABLE",
+        "DBT_BQ_MONITORING_GCP_BILLING_EXPORT_DATASET",
+        "DBT_BQ_MONITORING_GCP_BILLING_EXPORT_TABLE"
+    ]
+
+    secrets_dict = {}
+
+    for secret_name in DBT_SECRETS:
+        try:
+            secret = get_secret(secret_name=secret_name, path="/dbt")
+            value = secret[secret_name]
+            os.environ[secret_name] = value
+            secrets_dict[secret_name] = value
+            log(f"Environment variable {secret_name} set successfully.")
+        except KeyError:
+            log(f"Secret {secret_name} not found in Infisical.")
+            continue
+        except Exception as e:
+            log(f"Error setting environment variable {secret_name}: {e}")
+            continue
+
+    return secrets_dict
 
 @task
 def download_repository(git_repository_path: str):

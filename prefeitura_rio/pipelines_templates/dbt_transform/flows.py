@@ -13,6 +13,7 @@ from prefeitura_rio.pipelines_templates.dbt_transform.tasks import (
     get_target_from_environment,
     rename_current_flow_run_dbt,
     upload_dbt_artifacts_to_gcs,
+    add_dbt_secrets_to_env
 )
 from prefeitura_rio.pipelines_utils.custom import Flow
 from prefeitura_rio.pipelines_utils.tasks import get_current_flow_project_name
@@ -49,13 +50,16 @@ with Flow(
     current_flow_project_name = get_current_flow_project_name()
     current_flow_project_name.set_upstream(target)
 
+    secrets = add_dbt_secrets_to_env()
+    secrets.set_upstream(current_flow_project_name)
+
     with case(RENAME_FLOW, True):
         rename_flow_task = rename_current_flow_run_dbt(
             command=COMMAND, select=SELECT, exclude=EXCLUDE, target=target
         )
 
     download_repository_task = download_repository(git_repository_path=GITHUB_REPO)
-    download_repository_task.set_upstream(current_flow_project_name)
+    download_repository_task.set_upstream(secrets)
 
     install_dbt_packages = execute_dbt(
         repository_path=download_repository_task,
