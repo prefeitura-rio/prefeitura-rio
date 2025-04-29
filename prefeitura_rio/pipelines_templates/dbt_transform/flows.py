@@ -5,6 +5,7 @@ from prefect.storage import GCS
 
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_templates.dbt_transform.tasks import (
+    add_dbt_secrets_to_env,
     check_if_dbt_artifacts_upload_is_needed,
     create_dbt_report,
     download_dbt_artifacts_from_gcs,
@@ -13,7 +14,6 @@ from prefeitura_rio.pipelines_templates.dbt_transform.tasks import (
     get_target_from_environment,
     rename_current_flow_run_dbt,
     upload_dbt_artifacts_to_gcs,
-    add_dbt_secrets_to_env
 )
 from prefeitura_rio.pipelines_utils.custom import Flow
 from prefeitura_rio.pipelines_utils.tasks import get_current_flow_project_name

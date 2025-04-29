@@ -23,9 +23,10 @@ from prefeitura_rio.pipelines_utils.googleutils import (
     download_from_cloud_storage,
     upload_to_cloud_storage,
 )
+from prefeitura_rio.pipelines_utils.infisical import get_secret
 from prefeitura_rio.pipelines_utils.logging import log
 from prefeitura_rio.pipelines_utils.monitor import send_message
-from prefeitura_rio.pipelines_utils.infisical import get_secret
+
 
 class GcsBucket(TypedDict):
     prod: str
@@ -36,13 +37,13 @@ class GcsBucket(TypedDict):
 def add_dbt_secrets_to_env():
     """
     Loads secrets from Infisical and sets them as environment variables.
-    
+
     """
 
     DBT_SECRETS = [
         "DBT_BQ_MONITORING_GCP_BIGQUERY_AUDIT_LOGS_TABLE",
         "DBT_BQ_MONITORING_GCP_BILLING_EXPORT_DATASET",
-        "DBT_BQ_MONITORING_GCP_BILLING_EXPORT_TABLE"
+        "DBT_BQ_MONITORING_GCP_BILLING_EXPORT_TABLE",
     ]
 
     secrets_dict = {}
@@ -62,6 +63,7 @@ def add_dbt_secrets_to_env():
             continue
 
     return secrets_dict
+
 
 @task
 def download_repository(git_repository_path: str):
