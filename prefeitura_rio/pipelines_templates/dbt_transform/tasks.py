@@ -211,6 +211,9 @@ def create_dbt_report(
         elif command_result.status == "warn":
             has_warnings = True
             general_report.append(f"- ⚠️ WARN: {summarizer(command_result)}")
+        elif command_result.status == "runtime error": # Table which source freshness failed
+            is_successful = False
+            general_report.append(f"- ⏱️ STALE TABLE: {summarizer(command_result)}")
 
     # Sort and log the general report
     general_report = sorted(general_report, reverse=True)
