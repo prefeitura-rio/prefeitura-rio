@@ -633,7 +633,7 @@ def build_single_partition_query(
     return f"""
     with {aux_name} as ({query})
     select * from {aux_name}
-     where {partition_column} >= '{last_date}'  
+     where {partition_column} >= '{last_date}'
     """
 
 
