@@ -37,7 +37,7 @@ with Flow(
     FLAG = Parameter("flag", default=None, required=False)
     GITHUB_REPO = Parameter("github_repo", default=None, required=True)
     BIGQUERY_PROJECT = Parameter("bigquery_project", default=None, required=True)
-    INFISICAL_VARIABLES = Parameter("infisical_variables_path", default=None, required=False)
+    DBT_SECRETS = Parameter("dbt_secrets", default=None, required=False)
 
     # GCP
     ENVIRONMENT = Parameter("environment", default="dev")
@@ -51,7 +51,7 @@ with Flow(
     current_flow_project_name = get_current_flow_project_name()
     current_flow_project_name.set_upstream(target)
 
-    secrets = add_dbt_secrets_to_env(dbt_secrets=INFISICAL_VARIABLES)
+    secrets = add_dbt_secrets_to_env(dbt_secrets=DBT_SECRETS)
     secrets.set_upstream(current_flow_project_name)
 
     with case(RENAME_FLOW, True):
