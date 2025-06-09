@@ -27,6 +27,8 @@ from prefeitura_rio.pipelines_utils.infisical import get_secret
 from prefeitura_rio.pipelines_utils.logging import log
 from prefeitura_rio.pipelines_utils.monitor import send_message
 
+import datetime
+import requests
 
 class GcsBucket(TypedDict):
     prod: str
@@ -195,22 +197,28 @@ def create_dbt_report(
     """
 
     logs = process_dbt_logs(log_path=os.path.join(repository_path, "logs", "dbt.log"))
+
+    log(f"Processed logs: {logs}", level="info")
     log_path = log_to_file(logs)
     summarizer = Summarizer()
 
     is_successful, has_warnings = True, False
 
     general_report = []
+    failed_models = []
     for command_result in running_results.result:
         if command_result.status == "fail":
             is_successful = False
             general_report.append(f"- 🛑 FAIL: {summarizer(command_result)}")
+            failed_models.append(command_result.node.name)
         elif command_result.status == "error":
             is_successful = False
             general_report.append(f"- ❌ ERROR: {summarizer(command_result)}")
+            failed_models.append(command_result.node.name)
         elif command_result.status == "warn":
             has_warnings = True
             general_report.append(f"- ⚠️ WARN: {summarizer(command_result)}")
+            failed_models.append(command_result.node.name)
         elif command_result.status == "runtime error": # Table which source freshness failed
             is_successful = False
             general_report.append(f"- ⏱️ STALE TABLE: {summarizer(command_result)}")
@@ -266,6 +274,43 @@ def create_dbt_report(
     )
 
     if not fully_successful:
+
+        if failed_models: # If there are failed models, warn the journalist
+            log(f"Warning the journalist about failed models: {failed_models}")
+
+            # Raw content with failed models list
+            data = {
+                    "source_system": "dbt",
+                    "timestamp": datetime.datetime.now(),
+                    "metadata": {
+                        "failed_models_dbt": failed_models,
+                        "log_message_original": logs
+                    }
+            }
+            
+            headers = {
+                'Content-Type': 'application/json'
+            }
+
+            # Send the data to the journalist's endpoint
+            try:
+
+                api_url = get_secret(secret_name="API_CLICKUP_JOURNALIST")["API_CLICKUP_JOURNALIST"] 
+                
+                response = requests.post(
+                    api_url,
+                    json=data,
+                    headers=headers,
+                    timeout=30
+                )   
+                response.raise_for_status()
+                log(f"✅ DBT log sent successfully")
+                log(f"Response status: {response.status_code}")
+                log(f"Response content: {response.text}")
+                
+            except requests.exceptions.RequestException as e:
+                log(f"❌ Failed to send DBT log to API: {e}")
+            
         raise FAIL(general_report)
 
 
