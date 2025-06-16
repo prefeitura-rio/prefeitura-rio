@@ -289,13 +289,14 @@ def create_dbt_report(
             }
             
             headers = {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-Proxy-Api-Token': get_secret(secret_name="PROXY_TOKEN")["PROXY_TOKEN"]
             }
 
             # Send the data to the journalist's endpoint
             try:
 
-                api_url = get_secret(secret_name="API_CLICKUP_JOURNALIST")["API_CLICKUP_JOURNALIST"] 
+                api_url = get_secret(secret_name="PROXY_CLICKUP_JOURNALIST")["PROXY_CLICKUP_JOURNALIST"] 
                 
                 response = requests.post(
                     api_url,
