@@ -222,6 +222,7 @@ def create_dbt_report(
         elif command_result.status == "runtime error": # Table which source freshness failed
             is_successful = False
             general_report.append(f"- ⏱️ STALE TABLE: {summarizer(command_result)}")
+            failed_models.append(command_result.node.name)
 
     # Sort and log the general report
     general_report = sorted(general_report, reverse=True)
@@ -275,44 +276,43 @@ def create_dbt_report(
 
     if not fully_successful:
 
-        if failed_models: # If there are failed models, warn the journalist
-            log(f"Warning the journalist about failed models: {failed_models}")
+        log(f"Warning the journalist about failed models: {failed_models}")
 
-            # Raw content with failed models list
-            data = {
-                    "source_system": "dbt",
-                    "timestamp": datetime.datetime.now(),
-                    "metadata": {
-                        "failed_models_dbt": failed_models,
-                        "log_message_original": logs
-                    }
-            }
+        # Raw content with failed models list
+        data = {
+                "source_system": "dbt",
+                "timestamp": datetime.datetime.now(),
+                "metadata": {
+                    "failed_models_dbt": failed_models,
+                    "log_message_original": logs
+                }
+        }
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'X-Proxy-Api-Token': get_secret(secret_name="PROXY_TOKEN")["PROXY_TOKEN"]
+        }
+
+        # Send the data to the journalist's endpoint
+        try:
+
+            api_url = get_secret(secret_name="PROXY_CLICKUP_JOURNALIST")["PROXY_CLICKUP_JOURNALIST"] 
             
-            headers = {
-                'Content-Type': 'application/json',
-                'X-Proxy-Api-Token': get_secret(secret_name="PROXY_TOKEN")["PROXY_TOKEN"]
-            }
-
-            # Send the data to the journalist's endpoint
-            try:
-
-                api_url = get_secret(secret_name="PROXY_CLICKUP_JOURNALIST")["PROXY_CLICKUP_JOURNALIST"] 
-                
-                response = requests.post(
-                    api_url,
-                    json=data,
-                    headers=headers,
-                    timeout=30
-                )   
-                response.raise_for_status()
-                log(f"✅ DBT log sent successfully")
-                log(f"Response status: {response.status_code}")
-                log(f"Response content: {response.text}")
-                
-            except requests.exceptions.RequestException as e:
-                log(f"❌ Failed to send DBT log to API: {e}")
+            response = requests.post(
+                api_url,
+                json=data,
+                headers=headers,
+                timeout=30
+            )   
+            response.raise_for_status()
+            log(f"✅ DBT log sent successfully")
+            log(f"Response status: {response.status_code}")
+            log(f"Response content: {response.text}")
             
-        raise FAIL(general_report)
+        except requests.exceptions.RequestException as e:
+            log(f"❌ Failed to send DBT log to API: {e}")
+        
+    raise FAIL(general_report)
 
 
 @task
