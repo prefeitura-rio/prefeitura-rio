@@ -281,7 +281,7 @@ def create_dbt_report(
         # Raw content with failed models list
         data = {
                 "source_system": "dbt",
-                "timestamp": datetime.datetime.now(),
+                "timestamp": datetime.datetime.now().isoformat(),
                 "metadata": {
                     "failed_models_dbt": failed_models,
                     "log_message_original": logs
