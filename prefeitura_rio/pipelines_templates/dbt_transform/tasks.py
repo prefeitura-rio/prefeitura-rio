@@ -284,7 +284,7 @@ def create_dbt_report(
                 "timestamp": datetime.datetime.now().isoformat(),
                 "metadata": {
                     "failed_models_dbt": failed_models,
-                    "log_message_original": logs
+                    "log_message_original": logs.to_dict(),
                 }
         }
         
