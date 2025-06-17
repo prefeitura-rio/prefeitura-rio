@@ -278,10 +278,12 @@ def create_dbt_report(
 
         log(f"Warning the journalist about failed models: {failed_models}")
 
+        br_timezone = datetime.timezone(datetime.timedelta(hours=-3))
+
         # Raw content with failed models list
         data = {
                 "source_system": "dbt",
-                "timestamp": datetime.datetime.now().isoformat(),
+                "timestamp": datetime.datetime.now(br_timezone).isoformat(),
                 "metadata": {
                     "failed_models_dbt": failed_models,
                     "log_message_original": logs.to_dict(),
@@ -308,6 +310,52 @@ def create_dbt_report(
             log(f"✅ DBT log sent successfully")
             log(f"Response status: {response.status_code}")
             log(f"Response content: {response.text}")
+
+            # If the response is successful, send a Discord webhook
+            if response.status_code == 200:
+                log(f"Sending message to Incidentes Discord webhook")
+                incidentes_webhook_discord = get_secret(secret_name="DISCORD_WEBHOOK_URL_INCIDENTES")["DISCORD_WEBHOOK_URL_INCIDENTES"]
+                
+                # Create Discord message payload
+                discord_message = {
+                    "content": "🎫 **Ticket Aberto no ClickUp** 🎫",
+                    "embeds": [
+                        {
+                            "title": "Novo Ticket de Incidente Criado",
+                            "description": "Um ticket foi automaticamente aberto no ClickUp devido a falhas detectadas no DBT.",
+                            "color": 3447003,  # Blue color
+                            "fields": [
+                                {
+                                    "name": "Resposta da API",
+                                    "value": f"```{response.text.split(':')[1]}```",
+                                    "inline": False
+                                }
+                            ],
+                            "footer": {
+                                "text": "Agente X9 🤫",
+                            },
+                            "timestamp": datetime.datetime.now(br_timezone).isoformat()
+                        }
+                    ]
+                }
+                
+                # Send Discord webhook
+                try:
+                    discord_response = requests.post(
+                        incidentes_webhook_discord,
+                        json=discord_message,
+                        headers={'Content-Type': 'application/json'},
+                        timeout=30
+                    )
+                    discord_response.raise_for_status()
+                    log(f"✅ Discord webhook sent successfully")
+                    log(f"Discord response status: {discord_response.status_code}")
+                    
+                except requests.exceptions.RequestException as e:
+                    log(f"❌ Failed to send Discord webhook: {e}")
+                    
+            else:
+                log(f"❌ API response was not successful, skipping Discord webhook")
             
         except requests.exceptions.RequestException as e:
             log(f"❌ Failed to send DBT log to API: {e}")
