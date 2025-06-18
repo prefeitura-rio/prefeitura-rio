@@ -297,102 +297,103 @@ def create_dbt_report(
         }
 
         # Send the data to the journalist's endpoint
-        try:
 
-            api_url = get_secret(secret_name="PROXY_CLICKUP_JOURNALIST")["PROXY_CLICKUP_JOURNALIST"] 
-            
+        api_url = get_secret(secret_name="PROXY_CLICKUP_JOURNALIST")["PROXY_CLICKUP_JOURNALIST"] 
+        
+        try:
             response = requests.post(
                 api_url,
                 json=data,
                 headers=headers,
-                timeout=30
+                timeout=90
             )   
-            response.raise_for_status()
-            log(f"✅ DBT log sent successfully")
-            log(f"Response status: {response.status_code}")
-            log(f"Response content: {response.text}")
-
-            # Parse the response to extract the message
-            try:
-                response_text = json.loads(response.text)
-            except json.JSONDecodeError:
-                log(f"❌ Failed to decode JSON response: {response.text}")
-                return 
-
-            incidentes_webhook_discord = get_secret(secret_name="DISCORD_WEBHOOK_URL_INCIDENTES")["DISCORD_WEBHOOK_URL_INCIDENTES"]
-
-            discord_message = None
-            
-            # Create Discord message based on response status
-            if response.status_code == 200:
-                log(f"Sending message to Incidentes Discord webhook about the ticket creation")
-                discord_message = {
-                    "content": "🎫 **Ticket Aberto no ClickUp** 🎫",
-                    "embeds": [
-                        {
-                            "title": "Novo Ticket de Incidente Criado",
-                            "description": "Um ticket foi automaticamente aberto no ClickUp devido a falhas detectadas no DBT.",
-                            "color": 3447003,  # Blue color
-                            "fields": [
-                                {
-                                    "name": "Detalhes",
-                                    "value": f"```{response_text['message'].split(':')[1]}```",
-                                    "inline": False
-                                }
-                            ],
-                            "footer": {
-                                "text": "Agente X9 🤫",
-                            },
-                            "timestamp": datetime.datetime.now(br_timezone).isoformat()
-                        }
-                    ]
-                }
-                    
-            elif response.status_code == 409: # Card already exists
-                log(f"⚠️ Card already exists: {response_text.get('message', 'No message provided')}")
-                discord_message = {
-                    "content": "🔄 **Erro Recorrente Detectado** 🔄",
-                    "embeds": [
-                        {
-                            "title": "Incidente Já Mapeado",
-                            "description": "Foi detectado um erro repetido que já possui um incidente mapeado no ClickUp.",
-                            "color": 16776960,  # Yellow/Orange color for warning
-                            "fields": [
-                                {
-                                    "name": "Detalhes",
-                                    "value": f"```{response_text['details']}```",
-                                    "inline": False
-                                }
-                            ],
-                            "footer": {
-                                "text": "Agente X9 🤫",
-                            },
-                            "timestamp": datetime.datetime.now(br_timezone).isoformat()
-                        }
-                    ]
-                }
-            
-            else:
-                log(f"❌ API response was not successful, status code: {response.status_code}")
-
-            # Send Discord webhook if message was created
-            if discord_message:
-                try:
-                    discord_response = requests.post(
-                        incidentes_webhook_discord,
-                        json=discord_message,
-                        headers={'Content-Type': 'application/json'},
-                        timeout=90
-                    )
-                    discord_response.raise_for_status()
-                    log(f"✅ Discord webhook sent successfully")
-                    log(f"Discord response status: {discord_response.status_code}")
-                    
-                except requests.exceptions.RequestException as e:
-                    log(f"❌ Failed to send Discord webhook: {e}")
-            
         except requests.exceptions.RequestException as e:
-            log(f"❌ Failed to send DBT log to API: {e}")
+            log(f"❌ Failed to send DBT log to journalist: {e}")
+            return
+        
+        response.raise_for_status()
+        log(f"✅ DBT log sent successfully")
+        log(f"Response status: {response.status_code}")
+        log(f"Response content: {response.text}")
+
+        # Parse the response to extract the message
+        try:
+            response_text = json.loads(response.text)
+        except json.JSONDecodeError:
+            log(f"❌ Failed to decode JSON response: {response.text}")
+            return 
+
+        incidentes_webhook_discord = get_secret(secret_name="DISCORD_WEBHOOK_URL_INCIDENTES")["DISCORD_WEBHOOK_URL_INCIDENTES"]
+
+        discord_message = None
+        
+        # Create Discord message based on response status
+        if response.status_code == 200:
+            log(f"Sending message to Incidentes Discord webhook about the ticket creation")
+            discord_message = {
+                "content": "🎫 **Ticket Aberto no ClickUp** 🎫",
+                "embeds": [
+                    {
+                        "title": "Novo Ticket de Incidente Criado",
+                        "description": "Um ticket foi automaticamente aberto no ClickUp devido a falhas detectadas no DBT.",
+                        "color": 3447003,  # Blue color
+                        "fields": [
+                            {
+                                "name": "Detalhes",
+                                "value": f"```{response_text['message'].split(':')[1]}```",
+                                "inline": False
+                            }
+                        ],
+                        "footer": {
+                            "text": "Agente X9 🤫",
+                        },
+                        "timestamp": datetime.datetime.now(br_timezone).isoformat()
+                    }
+                ]
+            }
+                
+        elif response.status_code == 409: # Card already exists
+            log(f"⚠️ Card already exists: {response_text.get('message', 'No message provided')}")
+            discord_message = {
+                "content": "🔄 **Erro Recorrente Detectado** 🔄",
+                "embeds": [
+                    {
+                        "title": "Incidente Já Mapeado",
+                        "description": "Foi detectado um erro repetido que já possui um incidente mapeado no ClickUp.",
+                        "color": 16776960,  # Yellow/Orange color for warning
+                        "fields": [
+                            {
+                                "name": "Detalhes",
+                                "value": f"```{response_text['details']}```",
+                                "inline": False
+                            }
+                        ],
+                        "footer": {
+                            "text": "Agente X9 🤫",
+                        },
+                        "timestamp": datetime.datetime.now(br_timezone).isoformat()
+                    }
+                ]
+            }
+        
+        else:
+            log(f"❌ API response was not successful, status code: {response.status_code}")
+
+        # Send Discord webhook if message was created
+        if discord_message:
+            try:
+                discord_response = requests.post(
+                    incidentes_webhook_discord,
+                    json=discord_message,
+                    headers={'Content-Type': 'application/json'},
+                    timeout=90
+                )
+                discord_response.raise_for_status()
+                log(f"✅ Discord webhook sent successfully")
+                log(f"Discord response status: {discord_response.status_code}")
+                
+            except requests.exceptions.RequestException as e:
+                log(f"❌ Failed to send Discord webhook: {e}")
         
     raise FAIL(general_report)
 
