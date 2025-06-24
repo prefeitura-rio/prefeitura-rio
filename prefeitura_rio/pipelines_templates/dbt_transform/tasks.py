@@ -277,7 +277,7 @@ def create_dbt_report(
 
     if not fully_successful:
 
-        log(f"Warning the journalist about failed models: {failed_models}")
+        log(f"Warning the X9 Agent about failed models: {failed_models}")
 
         br_timezone = datetime.timezone(datetime.timedelta(hours=-3))
 
@@ -291,15 +291,15 @@ def create_dbt_report(
                 }
         }
         
+        # Get the proxy url from Infisical
         headers = {
             'Content-Type': 'application/json',
             'X-Proxy-Api-Token': get_secret(secret_name="PROXY_TOKEN")["PROXY_TOKEN"]
         }
 
-        # Send the data to the journalist's endpoint
-
         api_url = get_secret(secret_name="PROXY_CLICKUP_JOURNALIST")["PROXY_CLICKUP_JOURNALIST"] 
         
+        # Send the data to the x9 agent
         try:
             response = requests.post(
                 api_url,
@@ -308,10 +308,9 @@ def create_dbt_report(
                 timeout=90
             )   
         except requests.exceptions.RequestException as e:
-            log(f"❌ Failed to send DBT log to journalist: {e}")
+            log(f"❌ Failed to send DBT log to X9 Agent: {e}")
             return
         
-        response.raise_for_status()
         log(f"✅ DBT log sent successfully")
         log(f"Response status: {response.status_code}")
         log(f"Response content: {response.text}")
@@ -323,24 +322,45 @@ def create_dbt_report(
             log(f"❌ Failed to decode JSON response: {response.text}")
             return 
 
+        # Extract task details from response
+        task_details = response_text.get("task_details", {})
+        details = task_details.get("name", "Detalhes não disponíveis")
+        ticket_link = task_details.get("url", "Link não disponível")
+
+        # Get the Discord webhook URL for Incidentes from Infisical
         incidentes_webhook_discord = get_secret(secret_name="DISCORD_WEBHOOK_URL_INCIDENTES")["DISCORD_WEBHOOK_URL_INCIDENTES"]
 
         discord_message = None
         
-        # Create Discord message based on response status
+        # If the response is successful, prepare the Discord message
         if response.status_code == 200:
             log(f"Sending message to Incidentes Discord webhook about the ticket creation")
             discord_message = {
-                "content": "🎫 **Ticket Aberto no ClickUp** 🎫",
+                "content": "🚨 **Novo Incidente** 🚨",
                 "embeds": [
                     {
-                        "title": "Novo Ticket de Incidente Criado",
-                        "description": "Um ticket foi automaticamente aberto no ClickUp devido a falhas detectadas no DBT.",
-                        "color": 3447003,  # Blue color
+                        "title": "Novo Incidente",
+                        "description": "Incidente detectado no fluxo do DBT",
+                        "color": 15158332,  # Red color for incident
                         "fields": [
                             {
-                                "name": "Detalhes",
-                                "value": f"```{response_text['message'].split(':')[1]}```",
+                                "name": "📊 FLUXO",
+                                "value": "DBT",
+                                "inline": True
+                            },
+                            {
+                                "name": "📁 Projeto",
+                                "value": bigquery_project,
+                                "inline": True
+                            },
+                            {
+                                "name": "📝 DETALHES",
+                                "value": details,
+                                "inline": False
+                            },
+                            {
+                                "name": "🔗 LINK DO TICKET",
+                                "value": ticket_link,
                                 "inline": False
                             }
                         ],
@@ -353,29 +373,8 @@ def create_dbt_report(
             }
                 
         elif response.status_code == 409: # Card already exists
-            log(f"⚠️ Card already exists: {response_text.get('message', 'No message provided')}")
-            discord_message = {
-                "content": "🔄 **Erro Recorrente Detectado** 🔄",
-                "embeds": [
-                    {
-                        "title": "Incidente Já Mapeado",
-                        "description": "Foi detectado um erro repetido que já possui um incidente mapeado no ClickUp.",
-                        "color": 16776960,  # Yellow/Orange color for warning
-                        "fields": [
-                            {
-                                "name": "Detalhes",
-                                "value": f"```{response_text['details']}```",
-                                "inline": False
-                            }
-                        ],
-                        "footer": {
-                            "text": "Agente X9 🤫",
-                        },
-                        "timestamp": datetime.datetime.now(br_timezone).isoformat()
-                    }
-                ]
-            }
-        
+            log(f"⚠️ Card already exists: {response_text.get('details', 'No message provided')}")
+
         else:
             log(f"❌ API response was not successful, status code: {response.status_code}")
 
