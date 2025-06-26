@@ -281,6 +281,8 @@ def create_dbt_report(
 
         br_timezone = datetime.timezone(datetime.timedelta(hours=-3))
 
+        github_issue_repo = repository_path.split("/")[-1].replace(".git", "")
+
         # Raw content with failed models list
         data = {
                 "source_system": "dbt",
@@ -288,6 +290,7 @@ def create_dbt_report(
                 "metadata": {
                     "failed_models_dbt": failed_models,
                     "log_message_original": logs.to_dict(),
+                    "github_issue_repo": github_issue_repo
                 }
         }
         
