@@ -283,6 +283,8 @@ def create_dbt_report(
 
         github_issue_repo = repository_path.split("/")[-1].replace(".git", "")
 
+        log(f"Github issue repo: {github_issue_repo}")
+
         # Raw content with failed models list
         data = {
                 "source_system": "dbt",
