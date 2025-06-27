@@ -182,6 +182,7 @@ def create_dbt_report(
     repository_path: str,
     bigquery_project: str,
     prefect_environment: str,
+    github_issue_repository: str,
 ) -> None:
     """
     Creates a report based on the results of running dbt commands.
@@ -281,7 +282,7 @@ def create_dbt_report(
 
         br_timezone = datetime.timezone(datetime.timedelta(hours=-3))
 
-        github_issue_repo = repository_path.split("/")[-1].replace(".git", "")
+        github_issue_repo = github_issue_repository.split("/")[-1].replace(".git", "")
 
         log(f"Github issue repo: {github_issue_repo}")
 
