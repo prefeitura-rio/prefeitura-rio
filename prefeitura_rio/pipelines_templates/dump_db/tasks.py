@@ -633,7 +633,7 @@ def build_single_partition_query(
     return f"""
     with {aux_name} as ({query})
     select * from {aux_name}
-    where CONVERT(DATE, {partition_column}) >= '{last_date}'
+     where {partition_column} >= '{last_date}'
     """
 
 
@@ -756,8 +756,8 @@ def build_chunk_query(
     return f"""
     with {aux_name} as ({query})
     select * from {aux_name}
-    where CONVERT(DATE, {partition_column}) >= '{current_start.strftime(date_format)}'
-        and CONVERT(DATE, {partition_column}) <= '{current_end .strftime(date_format)}'
+    where {partition_column} >= '{current_start.strftime(date_format)}'
+        and {partition_column} <= '{current_end .strftime(date_format)}'
     """
 
 

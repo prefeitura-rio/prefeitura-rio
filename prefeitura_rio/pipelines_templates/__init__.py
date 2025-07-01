@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from prefeitura_rio.pipelines_templates.dbt_transform.flows import (  # noqa
+    templates__dbt_transform__flow as dbt_transform,
+)
 from prefeitura_rio.pipelines_templates.dump_datario.flows import (  # noqa
     flow as dump_datario,
 )
