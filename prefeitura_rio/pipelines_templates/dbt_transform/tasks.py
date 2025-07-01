@@ -38,23 +38,21 @@ class GcsBucket(TypedDict):
 
 
 @task
-def add_dbt_secrets_to_env():
+def add_dbt_secrets_to_env(dbt_secrets: list[str]) -> dict[str, str]:
     """
     Loads secrets from Infisical and sets them as environment variables.
 
     """
 
-    DBT_SECRETS = [
-        "DBT_BQ_MONITORING_GCP_BIGQUERY_AUDIT_LOGS_TABLE",
-        "DBT_BQ_MONITORING_GCP_BILLING_EXPORT_DATASET",
-        "DBT_BQ_MONITORING_GCP_BILLING_EXPORT_TABLE",
-    ]
+    if not dbt_secrets:
+        log("No dbt secrets provided. Skipping environment variable setup.")
+        return {}
 
     secrets_dict = {}
 
-    for secret_name in DBT_SECRETS:
+    for secret_name in dbt_secrets:
         try:
-            secret = get_secret(secret_name=secret_name, path="/dbt")
+            secret = get_secret(secret_name=secret_name, path="/dbt-vars")
             value = secret[secret_name]
             os.environ[secret_name] = value
             secrets_dict[secret_name] = value
