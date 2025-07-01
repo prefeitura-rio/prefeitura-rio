@@ -95,6 +95,7 @@ with Flow(
             repository_path=download_repository_task,
             bigquery_project=BIGQUERY_PROJECT,
             prefect_environment=current_flow_project_name,
+            github_issue_repository=GITHUB_REPO,
         )
 
     ####################################
