@@ -345,7 +345,7 @@ def create_dbt_report(
                 "timestamp": datetime.datetime.now(br_timezone).isoformat(),
                 "metadata": {
                     "failed_models_dbt": failed_models,
-                    "log_summary": log_summary,
+                    "log_summary": logs.to_dict(),
                     "github_issue_repo": github_issue_repo,
                     "log_error": "Logs could not be serialized due to encoding issues"
                 }
@@ -437,7 +437,7 @@ def create_dbt_report(
                     incidentes_webhook_discord,
                     json=discord_message,
                     headers={'Content-Type': 'application/json'},
-                    timeout=90
+                    timeout=300
                 )
                 discord_response.raise_for_status()
                 log(f"✅ Discord webhook sent successfully")
