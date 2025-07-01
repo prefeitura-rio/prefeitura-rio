@@ -277,7 +277,7 @@ def create_dbt_report(
         prefect_environment=prefect_environment,
     )
 
-    if not fully_successful:
+    if not fully_successful and parameters.get("environment") == "prod":
 
         log(f"Warning the X9 Agent about failed models: {failed_models}")
 
