@@ -8,6 +8,7 @@ Tasks for execute_dbt
 import os
 import shutil
 from typing import TypedDict
+import re
 
 import git
 import prefect
@@ -287,12 +288,39 @@ def create_dbt_report(
         log(f"Github issue repo: {github_issue_repo}")
 
         # Raw content with failed models list
+        # Clean and format logs for AI processing
+        cleaned_logs = []
+        for _, row in logs.iterrows():
+            # Clean the text by removing special characters and normalizing
+            clean_text = row['text']
+            
+            # Remove ANSI color codes and escape sequences
+            clean_text = re.sub(r'\x1b\[[0-9;]*m', '', clean_text)
+            clean_text = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', clean_text)
+            
+            # Remove or replace problematic characters for JSON
+            clean_text = clean_text.replace('`', '').replace('"', "'")
+            clean_text = clean_text.replace('\\', '/')  # Replace backslashes
+            clean_text = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', clean_text)  # Remove control characters
+            
+            # Normalize whitespace and remove excessive spaces
+            clean_text = ' '.join(clean_text.split())
+            
+            # Skip empty messages after cleaning
+            if clean_text.strip():
+                cleaned_logs.append({
+                    "timestamp": row['time'],
+                    "level": row['level'],
+                    "message": clean_text
+                })
+        
+        
         data = {
                 "source_system": "dbt",
                 "timestamp": datetime.datetime.now(br_timezone).isoformat(),
                 "metadata": {
                     "failed_models_dbt": failed_models,
-                    "log_message_original": logs.to_dict(),
+                    "log_message_original": cleaned_logs,
                     "github_issue_repo": github_issue_repo
                 }
         }
@@ -304,6 +332,24 @@ def create_dbt_report(
         }
 
         api_url = get_secret(secret_name="PROXY_CLICKUP_JOURNALIST")["PROXY_CLICKUP_JOURNALIST"] 
+        
+        # Validate JSON before sending
+        try:
+            json.dumps(data, ensure_ascii=False, default=str)
+            log(f"✅ JSON validation successful - {len(cleaned_logs)} logs processed")
+        except Exception as json_error:
+            log(f"❌ JSON validation failed: {json_error}")
+            # Fallback: send only essential data without logs
+            data = {
+                "source_system": "dbt",
+                "timestamp": datetime.datetime.now(br_timezone).isoformat(),
+                "metadata": {
+                    "failed_models_dbt": failed_models,
+                    "log_summary": log_summary,
+                    "github_issue_repo": github_issue_repo,
+                    "log_error": "Logs could not be serialized due to encoding issues"
+                }
+            }
         
         # Send the data to the x9 agent
         try:
