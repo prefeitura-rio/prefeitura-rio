@@ -350,7 +350,7 @@ def create_dbt_report(
 
         # Send the data to the x9 agent
         try:
-            response = requests.post(api_url, json=data, headers=headers, timeout=90)
+            response = requests.post(api_url, json=data, headers=headers, timeout=300)
         except requests.exceptions.RequestException as e:
             log(f"❌ Failed to send DBT log to X9 Agent: {e}")
             return
