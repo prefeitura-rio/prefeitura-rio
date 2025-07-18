@@ -264,7 +264,7 @@ class RunResultSummarizer:
         return f"`{result.node.name}`\n   {result.message}: ``` select * from {result.node.relation_name.replace('`','')}``` \n"  # noqa
 
     def warn(self, result):
-        return f"`{result.node.name}`\n   {result.message}: ``` select * from {result.node.relation_name.replace('`','')}``` \n"  # noqa
+        return f"`{result.node.name}`\n  {result.message.replace('__', '_')} \n"
 
 
 class FreshnessResultSummarizer:
