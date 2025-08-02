@@ -6,6 +6,7 @@ from prefect.storage import GCS
 from prefeitura_rio.core import settings
 from prefeitura_rio.pipelines_templates.dbt_transform.tasks import (
     add_dbt_secrets_to_env,
+    add_token_github_repo,
     check_if_dbt_artifacts_upload_is_needed,
     create_dbt_report,
     download_dbt_artifacts_from_gcs,
@@ -36,6 +37,7 @@ with Flow(
     EXCLUDE = Parameter("exclude", default=None, required=False)
     FLAG = Parameter("flag", default=None, required=False)
     GITHUB_REPO = Parameter("github_repo", default=None, required=True)
+    GITHUB_PUBLIC = Parameter("github_public", default=True, required=False)
     BIGQUERY_PROJECT = Parameter("bigquery_project", default=None, required=True)
     DBT_SECRETS = Parameter("dbt_secrets", default=None, required=False)
 
@@ -59,7 +61,8 @@ with Flow(
             command=COMMAND, select=SELECT, exclude=EXCLUDE, target=target
         )
 
-    download_repository_task = download_repository(git_repository_path=GITHUB_REPO)
+    github_repo_ = add_token_github_repo(GITHUB_REPO, GITHUB_PUBLIC)
+    download_repository_task = download_repository(git_repository_path=github_repo_)
     download_repository_task.set_upstream(secrets)
 
     install_dbt_packages = execute_dbt(

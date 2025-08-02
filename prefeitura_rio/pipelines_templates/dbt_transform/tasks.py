@@ -514,3 +514,22 @@ def check_if_dbt_artifacts_upload_is_needed(command: str):
 
     if command in ["build", "source freshness"]:
         return True
+
+
+@task()
+def add_token_github_repo(repository_url: str, github_public: bool) -> str:
+    """
+    Add the GitHub token to the repository URL.Getting it from infisical variable GITHUB_TOKEN
+
+    repository_url: str: The URL of the GitHub repository. This variable must be
+        somethintg like https://GITHUB_TOKEN@github.com/prefeitura-rio/queries-rj-crm-registry.git
+    github_public: bool: Whether the repository is public or private.
+
+    Returns:
+        str: The repository URL with the GitHub token added if it's a private repository.
+    """
+    if not github_public:
+        log("Adding GitHub token to the repository URL from infisical variable GITHUB_TOKEN")
+        token = get_secret("GITHUB_TOKEN")["GITHUB_TOKEN"]
+        repository_url = repository_url.replace("GITHUB_TOKEN", token)
+    return repository_url
