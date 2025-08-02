@@ -37,7 +37,7 @@ with Flow(
     EXCLUDE = Parameter("exclude", default=None, required=False)
     FLAG = Parameter("flag", default=None, required=False)
     GITHUB_REPO = Parameter("github_repo", default=None, required=True)
-    GITHUB_PUBLIC = Parameter("github_public", default=True, required=False)
+    GITHUB_PUBLIC = Parameter("github_public", default=True, required=True)
     BIGQUERY_PROJECT = Parameter("bigquery_project", default=None, required=True)
     DBT_SECRETS = Parameter("dbt_secrets", default=None, required=False)
 
@@ -61,7 +61,7 @@ with Flow(
             command=COMMAND, select=SELECT, exclude=EXCLUDE, target=target
         )
 
-    github_repo_ = add_token_github_repo(GITHUB_REPO, GITHUB_PUBLIC)
+    github_repo_ = add_token_github_repo(repository_url=GITHUB_REPO, github_public=GITHUB_PUBLIC)
     download_repository_task = download_repository(git_repository_path=github_repo_)
     download_repository_task.set_upstream(secrets)
 
