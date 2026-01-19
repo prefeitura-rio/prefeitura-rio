@@ -9,6 +9,7 @@ the true and predicted values as input and return a single value.
 In the `agnostic` module, we define metrics that are agnostic to any
 framework.
 """
+
 from typing import Callable, Dict
 
 from prefeitura_rio.utils import assert_dependencies
